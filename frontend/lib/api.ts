@@ -2,6 +2,8 @@ import type {
   AuthRequestDetail,
   AuthRequestRecord,
   CoverageRule,
+  ParsedDocumentResult,
+  PriceQueryResult,
   SubmitResult,
 } from "./types";
 
@@ -71,4 +73,57 @@ export function submitAuthRequest(body: {
 
 export function listRules(): Promise<CoverageRule[]> {
   return request<CoverageRule[]>("/api/rules");
+}
+
+/** Multipart upload. The browser sets its own Content-Type with the boundary,
+ *  so this path must not set one. */
+async function upload<T>(path: string, body: FormData): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    body,
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    let detail = `Upload failed with status ${response.status}`;
+    try {
+      const parsed = await response.json();
+      if (typeof parsed?.detail === "string") {
+        detail = parsed.detail;
+      } else if (Array.isArray(parsed?.detail) && parsed.detail.length > 0) {
+        detail = parsed.detail
+          .map((item: { msg?: string }) => item.msg ?? "Invalid input")
+          .join("; ");
+      }
+    } catch {
+      // Body was not JSON; keep the status-based message.
+    }
+    throw new ApiError(response.status, detail);
+  }
+
+  return (await response.json()) as T;
+}
+
+export function parseInsuranceDocuments(input: {
+  cardImage: File;
+  eocPdf: File;
+  memberId?: string;
+}): Promise<ParsedDocumentResult> {
+  const body = new FormData();
+  body.append("card_image", input.cardImage);
+  body.append("eoc_pdf", input.eocPdf);
+  if (input.memberId) {
+    body.append("member_id", input.memberId);
+  }
+  return upload<ParsedDocumentResult>("/api/insure/parse", body);
+}
+
+export function submitPriceQuery(body: {
+  procedure_name: string;
+  document_id: string;
+}): Promise<PriceQueryResult> {
+  return request<PriceQueryResult>("/api/insure/query", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

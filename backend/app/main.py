@@ -13,7 +13,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .db import get_repository
-from .routers import aria, audit, auth
+from .storage import get_file_store
+from .routers import aria, audit, auth, insure
 from .rules import COVERAGE_RULES
 
 settings = get_settings()
@@ -47,6 +48,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(aria.router)
 app.include_router(audit.router)
+app.include_router(insure.router)
 
 
 @app.get("/health", tags=["meta"])
@@ -57,6 +59,8 @@ def health() -> dict[str, Any]:
         "status": "ok",
         "aria_version": settings.aria_version,
         "storage_backend": repository.backend_name,
+        "file_store_backend": get_file_store().backend_name,
+        "claude_configured": bool(settings.anthropic_api_key),
     }
 
 
