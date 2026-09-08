@@ -2,7 +2,7 @@
 
 Pavo Cloud eliminates prior authorization delays by enabling AI agents to handle the entire approval process autonomously. Provider and payer agents communicate directly via FHIR, resolving clear cases in under 5 minutes — cutting the 3-14 day wait and $35B in annual admin waste.
 
-**Phase 1 (the core loop) is implemented and runnable.** The full product specification lives in [`docs/pavo_cloud_build.md`](docs/pavo_cloud_build.md).
+**Phases 1 and 2 are implemented and runnable.** The full product specification lives in [`docs/pavo_cloud_build.md`](docs/pavo_cloud_build.md).
 
 ---
 
@@ -17,6 +17,18 @@ An order placed in an EHR fires a webhook. From there no human touches the reque
 5. An `AUTH_RESPONSE` returns the outcome.
 
 Clear cases resolve automatically. Ambiguous ones are marked `escalated` for a human reviewer with the whole record already assembled.
+
+## What Phase 2 does (Insure)
+
+Insure is the consumer-facing price transparency layer, at `/insure`:
+
+1. A member uploads their **insurance card** (JPG/PNG) and **Evidence of Coverage** (PDF).
+2. Claude reads the card with vision and the EOC as a document, and the two results merge into one `insurance_plan`.
+3. The member types the procedure they need in plain language.
+4. Claude maps that to a **CPT code**, and Insure prices it at five facilities.
+5. Results are ranked by **what the member actually pays**, with a badge showing whether insurance or cash is cheaper and a toggle revealing the arithmetic.
+
+Uploads land in the `insure-documents` bucket. Every query writes to `audit_log` with `entity_type='price_query'`.
 
 ## Repository layout
 
@@ -88,11 +100,15 @@ Five deterministic rules ship in Phase 1. They are evaluated in order and the fi
 | `POST` | `/api/aria/verify` | Verify an envelope signature without acting on it. |
 | `GET` | `/api/audit/{entity_id}` | Full audit trail for any entity. |
 | `GET` | `/api/rules` | The active coverage rules. |
-| `GET` | `/health` | Liveness, plus which storage backend is active. |
+| `POST` | `/api/insure/parse` | Upload a card and EOC; returns the merged plan. |
+| `POST` | `/api/insure/query` | Price a procedure and rank facilities. |
+| `GET` | `/api/insure/results/{id}` | Retrieve a stored price query. |
+| `GET` | `/api/insure/queries` | List price queries, newest first. |
+| `GET` | `/health` | Liveness, plus which backends are active. |
 
 ## Database
 
-Apply the schema in `supabase/migrations/0001_init.sql`, then optionally seed the demo provider and payer with `supabase/seed.sql`. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env` and the service switches from the in-memory store to Supabase with no other changes.
+Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, then `0002_insure.sql`), create the storage bucket with `supabase/storage.sql`, then optionally seed the demo provider and payer with `supabase/seed.sql`. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env` and the service switches from the in-memory store to Supabase with no other changes.
 
 ## Tests
 
@@ -100,7 +116,7 @@ Apply the schema in `supabase/migrations/0001_init.sql`, then optionally seed th
 cd backend && .venv/bin/python -m pytest
 ```
 
-29 tests cover all five rules, rule precedence, code normalization, patient-ID hashing, the end-to-end webhook flow, ARIA signing and tamper detection, and the audit trail.
+57 tests cover both phases: all five coverage rules and their precedence, code normalization, identifier hashing, the end-to-end webhook flow, ARIA signing and tamper detection, the audit trail, document upload and validation, CPT mapping, the cash-vs-insurance price bands, and every branch of the ranking algorithm.
 
 ## Configuration
 
@@ -112,7 +128,7 @@ Copy `.env.example` to `.env`. `backend/.env.example` and `frontend/.env.local.e
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | frontend | Reserved for direct browser reads |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | frontend | Omit to leave routes public |
 | `NEXT_PUBLIC_API_BASE_URL` | frontend | Defaults to `http://localhost:8000` |
-| `ANTHROPIC_API_KEY` | backend | Unused in Phase 1; reserved for appeals |
+| `ANTHROPIC_API_KEY` | backend | Insure parsing and CPT mapping; unset yields labelled sample data |
 | `ARIA_VERSION` | backend | Defaults to `1.0` |
 
 ## Operating constraints
@@ -122,7 +138,20 @@ These hold in code, not just on paper:
 - **Raw PHI is never stored.** Patient identifiers are SHA-256 hashed before they reach the database.
 - **Every decision carries a `rule_id`.** The rule engine cannot return an outcome without one, and it is written to `audit_log` on every decision.
 - **Ambiguity escalates.** Anything without a definitive rule match becomes `escalated` rather than being guessed at.
+- **Member identifiers are hashed too**, including the member ID read off an insurance card, and the hash — never the raw value — is what appears in storage paths.
+- **Sample data is always labelled.** When `ANTHROPIC_API_KEY` is unset the parsers return obvious placeholder values, and the API response and the UI both say so. Nothing silently invents a member's plan.
 
 ## What is not built yet
 
-Phases 2 through 4 of the specification remain open: the Insure price-transparency product, autonomous appeals, federated learning, and zero-knowledge proofs. ARIA signing currently uses a shared demo HMAC secret; per-organization key pairs and live NPI verification against the CMS registry are Phase 3.
+Phases 3 and 4 remain open: autonomous appeals, federated learning, and zero-knowledge proofs. Two Phase 2 pieces are also still mocked — facility pricing is generated locally rather than gathered by the Vapi voice agent, and ARIA signing uses a shared demo HMAC secret. Per-organization key pairs and live NPI verification against the CMS registry are Phase 3.
+
+### A note on the pricing formulas
+
+The ranking rules are implemented exactly as the Phase 2 specification defines them:
+
+```
+deductible not met -> min(cash_price, coinsurance x negotiated_rate)
+deductible met     -> coinsurance x negotiated_rate
+```
+
+Both apply coinsurance regardless of deductible status, which is not how a real plan works — before the deductible is met a member normally owes the full negotiated rate, and coinsurance begins afterwards. One consequence is visible in the demo: at a typical 20% coinsurance the insurance path always beats the cash price, so the cash-is-cheaper case only appears at higher coinsurance. Changing this is a product decision; `estimate_member_cost` in `backend/app/insure/ranking.py` is the single place to make it.

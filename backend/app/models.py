@@ -137,3 +137,22 @@ class VerifyResponse(BaseModel):
     verified: bool
     message_id: Optional[str] = None
     reason: Optional[str] = None
+
+
+class PriceQueryCreate(BaseModel):
+    """Body of POST /api/insure/query."""
+
+    procedure_name: str = Field(
+        ..., min_length=1, description='Free text, e.g. "MRI of my knee"'
+    )
+    insurance_plan: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Parsed plan. Omit to load it from document_id instead.",
+    )
+    document_id: Optional[str] = Field(
+        default=None,
+        description="Insurance document to read the plan from when insurance_plan is omitted.",
+    )
+    member_id: Optional[str] = Field(
+        default=None, description="Hashed before storage; raw values are never kept."
+    )

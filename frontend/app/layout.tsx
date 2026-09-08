@@ -27,6 +27,9 @@ function Shell({ children }: { children: React.ReactNode }) {
               <Link href="/dashboard" className="text-slate-600 hover:text-slate-900">
                 Dashboard
               </Link>
+              <Link href="/insure" className="text-slate-600 hover:text-slate-900">
+                Insure
+              </Link>
               {clerkConfigured ? (
                 <>
                   <SignedOut>

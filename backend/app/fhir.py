@@ -6,10 +6,11 @@ so the rule engine and downstream agents work against a realistic structure.
 """
 from __future__ import annotations
 
-import hashlib
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
+
+from .hashing import hash_identifier
 
 # Human-readable labels for the codes Phase 1 knows about. Unknown codes still
 # produce a valid bundle, just without a display string.
@@ -32,15 +33,8 @@ ICD10_SYSTEM = "http://hl7.org/fhir/sid/icd-10-cm"
 
 
 def hash_patient_id(patient_id: Optional[str]) -> str:
-    """Hash a patient identifier.
-
-    Raw PHI is never stored. A missing identifier still yields a stable
-    synthetic reference so a bundle is always well-formed.
-    """
-    raw = (patient_id or "").strip()
-    if not raw:
-        raw = f"anonymous:{uuid.uuid4()}"
-    return "pat_" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:32]
+    """Hash a patient identifier. Raw PHI is never stored."""
+    return hash_identifier(patient_id, "pat")
 
 
 def _now_iso() -> str:

@@ -88,6 +88,23 @@ class Repository(ABC):
     @abstractmethod
     def list_audit_log(self, entity_id: str) -> list[dict[str, Any]]: ...
 
+    @abstractmethod
+    def insert_insurance_document(self, data: dict[str, Any]) -> dict[str, Any]: ...
+
+    @abstractmethod
+    def get_insurance_document(
+        self, document_id: str
+    ) -> Optional[dict[str, Any]]: ...
+
+    @abstractmethod
+    def insert_price_query(self, data: dict[str, Any]) -> dict[str, Any]: ...
+
+    @abstractmethod
+    def get_price_query(self, query_id: str) -> Optional[dict[str, Any]]: ...
+
+    @abstractmethod
+    def list_price_queries(self, limit: int = 100) -> list[dict[str, Any]]: ...
+
     @property
     @abstractmethod
     def backend_name(self) -> str: ...
@@ -102,6 +119,8 @@ class InMemoryRepository(Repository):
         self._auth_requests: dict[str, dict[str, Any]] = {}
         self._aria_messages: list[dict[str, Any]] = []
         self._audit_log: list[dict[str, Any]] = []
+        self._insurance_documents: dict[str, dict[str, Any]] = {}
+        self._price_queries: dict[str, dict[str, Any]] = {}
 
     @property
     def backend_name(self) -> str:
@@ -181,6 +200,38 @@ class InMemoryRepository(Repository):
             rows = [r for r in self._audit_log if r.get("entity_id") == entity_id]
         rows.sort(key=lambda r: str(r.get("created_at") or ""))
         return copy.deepcopy(rows)
+
+    def insert_insurance_document(self, data: dict[str, Any]) -> dict[str, Any]:
+        row = dict(data)
+        row.setdefault("id", _new_id())
+        row.setdefault("created_at", _now_iso())
+        with self._lock:
+            self._insurance_documents[row["id"]] = row
+        return copy.deepcopy(row)
+
+    def get_insurance_document(self, document_id: str) -> Optional[dict[str, Any]]:
+        with self._lock:
+            row = self._insurance_documents.get(document_id)
+            return copy.deepcopy(row) if row else None
+
+    def insert_price_query(self, data: dict[str, Any]) -> dict[str, Any]:
+        row = dict(data)
+        row.setdefault("id", _new_id())
+        row.setdefault("created_at", _now_iso())
+        with self._lock:
+            self._price_queries[row["id"]] = row
+        return copy.deepcopy(row)
+
+    def get_price_query(self, query_id: str) -> Optional[dict[str, Any]]:
+        with self._lock:
+            row = self._price_queries.get(query_id)
+            return copy.deepcopy(row) if row else None
+
+    def list_price_queries(self, limit: int = 100) -> list[dict[str, Any]]:
+        with self._lock:
+            rows = list(self._price_queries.values())
+        rows.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+        return copy.deepcopy(rows[:limit])
 
 
 class SupabaseRepository(Repository):
@@ -270,6 +321,44 @@ class SupabaseRepository(Repository):
             .select("*")
             .eq("entity_id", entity_id)
             .order("created_at")
+            .execute()
+        )
+        return result.data or []
+
+    def insert_insurance_document(self, data: dict[str, Any]) -> dict[str, Any]:
+        result = self._client.table("insurance_documents").insert(data).execute()
+        return result.data[0]
+
+    def get_insurance_document(self, document_id: str) -> Optional[dict[str, Any]]:
+        result = (
+            self._client.table("insurance_documents")
+            .select("*")
+            .eq("id", document_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
+    def insert_price_query(self, data: dict[str, Any]) -> dict[str, Any]:
+        result = self._client.table("price_queries").insert(data).execute()
+        return result.data[0]
+
+    def get_price_query(self, query_id: str) -> Optional[dict[str, Any]]:
+        result = (
+            self._client.table("price_queries")
+            .select("*")
+            .eq("id", query_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
+    def list_price_queries(self, limit: int = 100) -> list[dict[str, Any]]:
+        result = (
+            self._client.table("price_queries")
+            .select("*")
+            .order("created_at", desc=True)
+            .limit(limit)
             .execute()
         )
         return result.data or []

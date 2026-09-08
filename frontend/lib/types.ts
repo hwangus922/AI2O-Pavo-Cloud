@@ -74,3 +74,78 @@ export interface CoverageRule {
   diagnosis_code: string;
   outcome: string;
 }
+
+// ----------------------------------------------------------------- Insure
+
+export interface InsurancePlan {
+  plan_name: string | null;
+  insurance_company: string | null;
+  group_number: string | null;
+  member_id: string | null;
+  network_name: string | null;
+  deductible_individual: number | string | null;
+  deductible_family: number | string | null;
+  deductible_met: number | string | null;
+  out_of_pocket_max_individual: number | string | null;
+  out_of_pocket_max_family: number | string | null;
+  primary_care_copay: number | string | null;
+  specialist_copay: number | string | null;
+  er_copay: number | string | null;
+  coinsurance_percentage: number | string | null;
+  covered_services: string[] | null;
+  prior_auth_required_for: string[] | null;
+}
+
+/** Which parser produced each half of the plan: Claude, or labelled samples. */
+export interface ParserSources {
+  card: "claude" | "sample";
+  eoc: "claude" | "sample";
+}
+
+export interface ParsedDocumentResult {
+  document_id: string;
+  member_id: string;
+  insurance_plan: InsurancePlan;
+  sources: ParserSources;
+  card_image_url: string;
+  eoc_url: string;
+}
+
+export interface CostBreakdown {
+  rule: "deductible_met" | "deductible_not_met";
+  formula: string;
+  calculation: string;
+  insurance_cost: number;
+  cash_cost: number;
+  coinsurance_rate: number;
+  deductible_met: boolean;
+  negotiated_rate: number;
+}
+
+export interface RankedFacility {
+  facility_id: string;
+  name: string;
+  type: string;
+  city: string;
+  negotiated_rate: number;
+  cash_price: number;
+  cash_discount_percentage: number;
+  quality_score: number;
+  distance_miles: number;
+  you_pay: number;
+  payment_method: "cash" | "insurance";
+  cheaper_option: "cash" | "insurance";
+  savings_vs_alternative: number;
+  breakdown: CostBreakdown;
+  rank: number;
+}
+
+export interface PriceQueryResult {
+  query_id: string;
+  cpt_code: string;
+  procedure_name: string;
+  requested_procedure: string;
+  cpt_source: "claude" | "sample";
+  deductible_met: boolean | null;
+  results: RankedFacility[];
+}
