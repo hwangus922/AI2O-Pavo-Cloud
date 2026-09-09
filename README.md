@@ -2,7 +2,7 @@
 
 Pavo Cloud eliminates prior authorization delays by enabling AI agents to handle the entire approval process autonomously. Provider and payer agents communicate directly via FHIR, resolving clear cases in under 5 minutes — cutting the 3-14 day wait and $35B in annual admin waste.
 
-**Phases 1 and 2 are implemented and runnable.** The full product specification lives in [`docs/pavo_cloud_build.md`](docs/pavo_cloud_build.md).
+**Phases 1, 2 and 3 are implemented and runnable.** The full product specification lives in [`docs/pavo_cloud_build.md`](docs/pavo_cloud_build.md).
 
 ---
 
@@ -29,6 +29,18 @@ Insure is the consumer-facing price transparency layer, at `/insure`:
 5. Results are ranked by **what the member actually pays**, with a badge showing whether insurance or cash is cheaper and a toggle revealing the arithmetic.
 
 Uploads land in the `insure-documents` bucket. Every query writes to `audit_log` with `entity_type='price_query'`.
+
+## What Phase 3 does (appeals and identity)
+
+**Cryptographic identity.** Every organization gets an RSA-2048 key pair. The public key is stored in `org_keys` and on the organization record; the private key is returned once at creation and never persisted — only a SHA-256 digest of it is kept. Every ARIA message is signed over the SHA-256 digest of its contents (RSASSA-PSS) and verified against the sender's registered public key. A message that fails verification is rejected with a 401 and the rejection is written to the audit log.
+
+**Autonomous appeals.** When an authorization is denied:
+
+1. The denial reason is classified as `medical_necessity`, `not_covered`, `missing_info`, or `other`.
+2. A `not_covered` denial is never appealed automatically — coverage is a contract question, so it escalates to a human with no letter drafted.
+3. Otherwise the agent searches PubMed for supporting evidence, fetches the top three abstracts, and asks Claude to draft an appeal letter with PMID citations.
+4. At or above 0.70 confidence the appeal is submitted to the payer over a signed ARIA `APPEAL` message. Below it, the appeal is stored as `escalated` with pre-populated reviewer notes.
+5. The payer agent verifies the signature and decides. A rejected appeal escalates to a human — it never becomes an automated final denial.
 
 ## Repository layout
 
@@ -94,12 +106,16 @@ Five deterministic rules ship in Phase 1. They are evaluated in order and the fi
 | Method | Route | Purpose |
 |---|---|---|
 | `POST` | `/api/auth/request` | Mock EHR webhook. Submits an order and returns the decision. |
-| `GET` | `/api/auth` | List authorization requests, newest first. |
+| `GET` | `/api/auth` | List authorization requests, newest first. Filter with `?status=`. |
 | `GET` | `/api/auth/{id}` | One request with its ARIA thread and audit trail. |
 | `POST` | `/api/aria/receive` | Payer endpoint for inbound ARIA messages. |
 | `POST` | `/api/aria/verify` | Verify an envelope signature without acting on it. |
 | `GET` | `/api/audit/{entity_id}` | Full audit trail for any entity. |
 | `GET` | `/api/rules` | The active coverage rules. |
+| `POST` | `/api/auth/{id}/appeal` | Generate an appeal for a denied request. |
+| `GET` | `/api/appeals` | List appeals, newest first. |
+| `GET` | `/api/appeals/stats` | Appeal counts and win rate. |
+| `GET` | `/api/appeals/{id}` | Retrieve one appeal. |
 | `POST` | `/api/insure/parse` | Upload a card and EOC; returns the merged plan. |
 | `POST` | `/api/insure/query` | Price a procedure and rank facilities. |
 | `GET` | `/api/insure/results/{id}` | Retrieve a stored price query. |
@@ -108,7 +124,7 @@ Five deterministic rules ship in Phase 1. They are evaluated in order and the fi
 
 ## Database
 
-Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, then `0002_insure.sql`), create the storage bucket with `supabase/storage.sql`, then optionally seed the demo provider and payer with `supabase/seed.sql`. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env` and the service switches from the in-memory store to Supabase with no other changes.
+Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, `0002_insure.sql`, `0003_appeals_identity.sql`), create the storage bucket with `supabase/storage.sql`, then optionally seed the demo provider and payer with `supabase/seed.sql`. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env` and the service switches from the in-memory store to Supabase with no other changes.
 
 ## Tests
 
@@ -116,7 +132,7 @@ Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, then `
 cd backend && .venv/bin/python -m pytest
 ```
 
-57 tests cover both phases: all five coverage rules and their precedence, code normalization, identifier hashing, the end-to-end webhook flow, ARIA signing and tamper detection, the audit trail, document upload and validation, CPT mapping, the cash-vs-insurance price bands, and every branch of the ranking algorithm.
+105 tests cover all three phases: the five coverage rules and their precedence, identifier hashing, the end-to-end webhook flow, RSA signing and tamper rejection, the audit trail, document upload and validation, CPT mapping, the cash-vs-insurance price bands, every branch of the ranking algorithm, denial classification, PubMed parsing against recorded fixtures, and each appeal outcome path.
 
 ## Configuration
 
@@ -140,10 +156,17 @@ These hold in code, not just on paper:
 - **Ambiguity escalates.** Anything without a definitive rule match becomes `escalated` rather than being guessed at.
 - **Member identifiers are hashed too**, including the member ID read off an insurance card, and the hash — never the raw value — is what appears in storage paths.
 - **Sample data is always labelled.** When `ANTHROPIC_API_KEY` is unset the parsers return obvious placeholder values, and the API response and the UI both say so. Nothing silently invents a member's plan.
+- **No automated final denial.** A denial is either appealed or escalated to a human. The payer agent answers a rejected appeal with `ESCALATED`, never `DENIED`.
+- **Private keys never reach the database.** `org_keys` stores the public key and a digest of the private key, nothing more.
+- **Unverified messages do not act.** A signature that fails verification is rejected with a 401 before its payload is read, and the rejection is audited.
 
 ## What is not built yet
 
-Phases 3 and 4 remain open: autonomous appeals, federated learning, and zero-knowledge proofs. Two Phase 2 pieces are also still mocked — facility pricing is generated locally rather than gathered by the Vapi voice agent, and ARIA signing uses a shared demo HMAC secret. Per-organization key pairs and live NPI verification against the CMS registry are Phase 3.
+Phase 4 remains open: federated learning and zero-knowledge proofs. Facility pricing is still generated locally rather than gathered by the Vapi voice agent, and NPI verification against the live CMS registry is still a trust-on-first-use flag rather than a lookup.
+
+### Where the demo agents keep their keys
+
+In production an organization holds its own private key and signs before a message reaches Pavo. Here Pavo also *runs* the provider and payer agents, so those agents need a key to sign with. `backend/app/keyring.py` holds them in process memory only — never in the database, never on disk — and they are regenerated on every restart. That is a prototype accommodation, not a deployment pattern.
 
 ### A note on the pricing formulas
 

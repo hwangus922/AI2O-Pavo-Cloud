@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AppealDetail, GenerateAppealForm } from "@/components/AppealPanel";
 import { JsonBlock } from "@/components/JsonBlock";
+import { RequestTimeline } from "@/components/RequestTimeline";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ApiError, getAuthRequest } from "@/lib/api";
 import type { AriaMessageRecord, AuditLogRecord } from "@/lib/types";
@@ -117,7 +119,16 @@ export default async function RequestDetailPage({
     );
   }
 
-  const { request, aria_messages: ariaMessages, audit_log: auditLog } = detail;
+  const {
+    request,
+    aria_messages: ariaMessages,
+    audit_log: auditLog,
+    appeals,
+  } = detail;
+
+  // Appeals apply to a request a payer turned down.
+  const isAppealable =
+    request.status === "denied" || request.status === "escalated";
 
   return (
     <div className="space-y-8">
@@ -159,6 +170,40 @@ export default async function RequestDetailPage({
           <dd className="mt-1 text-sm">{formatTimestamp(request.resolved_at)}</dd>
         </div>
       </dl>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Timeline
+        </h2>
+        <div className="rounded-lg border border-slate-200 bg-white p-5">
+          <RequestTimeline
+            request={request}
+            auditLog={auditLog}
+            appeals={appeals}
+          />
+        </div>
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Appeals
+        </h2>
+        <div className="space-y-4">
+          {appeals.map((appeal) => (
+            <AppealDetail key={appeal.id} appeal={appeal} />
+          ))}
+
+          {appeals.length === 0 && isAppealable ? (
+            <GenerateAppealForm requestId={request.id} />
+          ) : null}
+
+          {appeals.length === 0 && !isAppealable ? (
+            <p className="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-600">
+              Appeals apply to denied requests. This one is {request.status}.
+            </p>
+          ) : null}
+        </div>
+      </section>
 
       <section>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">

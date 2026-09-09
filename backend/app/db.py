@@ -105,6 +105,34 @@ class Repository(ABC):
     @abstractmethod
     def list_price_queries(self, limit: int = 100) -> list[dict[str, Any]]: ...
 
+    @abstractmethod
+    def insert_org_key(self, data: dict[str, Any]) -> dict[str, Any]: ...
+
+    @abstractmethod
+    def get_active_public_key(self, org_id: str) -> Optional[str]: ...
+
+    @abstractmethod
+    def set_organization_public_key(self, org_id: str, public_key: str) -> None: ...
+
+    @abstractmethod
+    def insert_appeal(self, data: dict[str, Any]) -> dict[str, Any]: ...
+
+    @abstractmethod
+    def update_appeal(
+        self, appeal_id: str, changes: dict[str, Any]
+    ) -> Optional[dict[str, Any]]: ...
+
+    @abstractmethod
+    def get_appeal(self, appeal_id: str) -> Optional[dict[str, Any]]: ...
+
+    @abstractmethod
+    def list_appeals_for_request(
+        self, auth_request_id: str
+    ) -> list[dict[str, Any]]: ...
+
+    @abstractmethod
+    def list_appeals(self, limit: int = 200) -> list[dict[str, Any]]: ...
+
     @property
     @abstractmethod
     def backend_name(self) -> str: ...
@@ -121,6 +149,8 @@ class InMemoryRepository(Repository):
         self._audit_log: list[dict[str, Any]] = []
         self._insurance_documents: dict[str, dict[str, Any]] = {}
         self._price_queries: dict[str, dict[str, Any]] = {}
+        self._org_keys: list[dict[str, Any]] = []
+        self._appeals: dict[str, dict[str, Any]] = {}
 
     @property
     def backend_name(self) -> str:
@@ -230,6 +260,68 @@ class InMemoryRepository(Repository):
     def list_price_queries(self, limit: int = 100) -> list[dict[str, Any]]:
         with self._lock:
             rows = list(self._price_queries.values())
+        rows.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+        return copy.deepcopy(rows[:limit])
+
+    def insert_org_key(self, data: dict[str, Any]) -> dict[str, Any]:
+        row = dict(data)
+        row.setdefault("id", _new_id())
+        row.setdefault("created_at", _now_iso())
+        row.setdefault("revoked_at", None)
+        with self._lock:
+            self._org_keys.append(row)
+        return copy.deepcopy(row)
+
+    def get_active_public_key(self, org_id: str) -> Optional[str]:
+        with self._lock:
+            for row in reversed(self._org_keys):
+                if row.get("org_id") == org_id and row.get("revoked_at") is None:
+                    return row.get("public_key")
+        return None
+
+    def set_organization_public_key(self, org_id: str, public_key: str) -> None:
+        with self._lock:
+            org = self._organizations.get(org_id)
+            if org is not None:
+                org["public_key"] = public_key
+
+    def insert_appeal(self, data: dict[str, Any]) -> dict[str, Any]:
+        row = dict(data)
+        row.setdefault("id", _new_id())
+        row.setdefault("created_at", _now_iso())
+        row.setdefault("resolved_at", None)
+        with self._lock:
+            self._appeals[row["id"]] = row
+        return copy.deepcopy(row)
+
+    def update_appeal(
+        self, appeal_id: str, changes: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
+        with self._lock:
+            row = self._appeals.get(appeal_id)
+            if row is None:
+                return None
+            row.update(changes)
+            return copy.deepcopy(row)
+
+    def get_appeal(self, appeal_id: str) -> Optional[dict[str, Any]]:
+        with self._lock:
+            row = self._appeals.get(appeal_id)
+            return copy.deepcopy(row) if row else None
+
+    def list_appeals_for_request(self, auth_request_id: str) -> list[dict[str, Any]]:
+        with self._lock:
+            rows = [
+                r
+                for r in self._appeals.values()
+                if r.get("auth_request_id") == auth_request_id
+            ]
+        rows.sort(key=lambda r: str(r.get("created_at") or ""))
+        return copy.deepcopy(rows)
+
+    def list_appeals(self, limit: int = 200) -> list[dict[str, Any]]:
+        with self._lock:
+            rows = list(self._appeals.values())
         rows.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
         return copy.deepcopy(rows[:limit])
 
@@ -363,6 +455,82 @@ class SupabaseRepository(Repository):
         )
         return result.data or []
 
+    def insert_org_key(self, data: dict[str, Any]) -> dict[str, Any]:
+        result = self._client.table("org_keys").insert(data).execute()
+        return result.data[0]
+
+    def get_active_public_key(self, org_id: str) -> Optional[str]:
+        result = (
+            self._client.table("org_keys")
+            .select("public_key")
+            .eq("org_id", org_id)
+            .is_("revoked_at", "null")
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0]["public_key"] if result.data else None
+
+    def set_organization_public_key(self, org_id: str, public_key: str) -> None:
+        self._client.table("organizations").update(
+            {"public_key": public_key}
+        ).eq("id", org_id).execute()
+
+    def insert_appeal(self, data: dict[str, Any]) -> dict[str, Any]:
+        result = self._client.table("appeals").insert(data).execute()
+        return result.data[0]
+
+    def update_appeal(
+        self, appeal_id: str, changes: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
+        result = (
+            self._client.table("appeals").update(changes).eq("id", appeal_id).execute()
+        )
+        return result.data[0] if result.data else None
+
+    def get_appeal(self, appeal_id: str) -> Optional[dict[str, Any]]:
+        result = (
+            self._client.table("appeals")
+            .select("*")
+            .eq("id", appeal_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
+    def list_appeals_for_request(self, auth_request_id: str) -> list[dict[str, Any]]:
+        result = (
+            self._client.table("appeals")
+            .select("*")
+            .eq("auth_request_id", auth_request_id)
+            .order("created_at")
+            .execute()
+        )
+        return result.data or []
+
+    def list_appeals(self, limit: int = 200) -> list[dict[str, Any]]:
+        result = (
+            self._client.table("appeals")
+            .select("*")
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return result.data or []
+
+
+def _ensure_demo_keys(repository: Repository) -> None:
+    """Issue signing keys for the demo organizations.
+
+    Imported here rather than at module scope because identity depends on this
+    module.
+    """
+    from .identity import ensure_demo_org_keys
+
+    ensure_demo_org_keys(
+        repository, [org["id"] for org in DEMO_ORGANIZATIONS]
+    )
+
 
 _repository: Optional[Repository] = None
 _repository_lock = threading.Lock()
@@ -382,6 +550,7 @@ def get_repository() -> Repository:
             else:
                 _repository = InMemoryRepository()
             _repository.ensure_demo_organizations()
+            _ensure_demo_keys(_repository)
         return _repository
 
 
@@ -392,4 +561,5 @@ def reset_repository(repository: Optional[Repository] = None) -> Repository:
     with _repository_lock:
         _repository = repository or InMemoryRepository()
         _repository.ensure_demo_organizations()
+        _ensure_demo_keys(_repository)
         return _repository

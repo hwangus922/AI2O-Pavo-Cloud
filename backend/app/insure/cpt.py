@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .claude import complete_json, is_configured
+from ..claude_client import complete_json, is_configured
 from .prompts import CPT_PROMPT_TEMPLATE
 
 # Fallback table used when Claude is not configured. Keys are matched as

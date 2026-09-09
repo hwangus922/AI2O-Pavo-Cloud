@@ -4,17 +4,22 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-from app.aria import build_message, verify_message
-from app.db import reset_repository
+from app.aria import build_message, verify_envelope, verify_with_repository
+from app.config import DEMO_PAYER_ORG_ID, DEMO_PROVIDER_ORG_ID
+from app.crypto import generate_key_pair
+from app.db import get_repository, reset_repository
+from app.keyring import reset_keyring
 from app.main import app
 
 
 @pytest.fixture(autouse=True)
 def clean_repository():
-    """Give every test a fresh in-memory store."""
+    """Give every test a fresh store and a fresh set of signing keys."""
+    reset_keyring()
     reset_repository()
     yield
     reset_repository()
+    reset_keyring()
 
 
 @pytest.fixture
@@ -150,24 +155,69 @@ def test_validation_rejects_empty_codes(client):
 
 
 def test_aria_signature_round_trip():
+    """A message signed with an org's private key verifies with its public key."""
+    private_key, public_key = generate_key_pair()
+
     envelope = build_message(
         payload_type="AUTH_REQUEST",
         payload={"procedure_code": "70553"},
         sender={"agent_id": "a", "org_id": "o"},
         receiver={"agent_id": "b", "org_id": "p"},
+        private_key_pem=private_key,
     )
 
-    verified, reason = verify_message(envelope)
+    verified, reason = verify_envelope(envelope, public_key)
     assert verified is True
     assert reason is None
 
 
-def test_tampered_envelope_fails_verification(client):
+def test_a_different_orgs_key_cannot_verify():
+    """Signatures are bound to the key that produced them."""
+    private_key, _ = generate_key_pair()
+    _, other_public_key = generate_key_pair()
+
     envelope = build_message(
         payload_type="AUTH_REQUEST",
         payload={"procedure_code": "70553"},
         sender={"agent_id": "a", "org_id": "o"},
         receiver={"agent_id": "b", "org_id": "p"},
+        private_key_pem=private_key,
+    )
+
+    verified, _ = verify_envelope(envelope, other_public_key)
+    assert verified is False
+
+
+def test_demo_orgs_are_issued_keys_at_startup():
+    repository = get_repository()
+
+    for org_id in [DEMO_PROVIDER_ORG_ID, DEMO_PAYER_ORG_ID]:
+        public_key = repository.get_active_public_key(org_id)
+        assert public_key
+        assert public_key.startswith("-----BEGIN PUBLIC KEY-----")
+        # The organization record carries the same key.
+        assert repository.get_organization(org_id)["public_key"] == public_key
+
+
+def test_private_keys_are_never_stored():
+    """Only a digest of the private key reaches storage."""
+    repository = get_repository()
+    key_rows = repository._org_keys  # in-memory backend, inspected directly
+
+    assert key_rows
+    for row in key_rows:
+        assert row["private_key_hash"].startswith("sha256:")
+        assert "PRIVATE KEY" not in row["public_key"]
+        assert "private_key" not in row
+
+
+def test_tampered_envelope_fails_verification(client):
+    """Editing a signed payload invalidates the signature."""
+    envelope = build_message(
+        payload_type="AUTH_REQUEST",
+        payload={"procedure_code": "70553"},
+        sender={"agent_id": "a", "org_id": DEMO_PROVIDER_ORG_ID},
+        receiver={"agent_id": "b", "org_id": DEMO_PAYER_ORG_ID},
     )
     envelope["payload"]["procedure_code"] = "27447"
 
@@ -176,6 +226,47 @@ def test_tampered_envelope_fails_verification(client):
 
     receive = client.post("/api/aria/receive", json=envelope)
     assert receive.status_code == 401
+
+
+def test_unknown_sender_org_is_rejected(client):
+    """A message from an org with no registered key cannot be verified."""
+    private_key, _ = generate_key_pair()
+    envelope = build_message(
+        payload_type="AUTH_REQUEST",
+        payload={"procedure_code": "70553"},
+        sender={"agent_id": "a", "org_id": "99999999-9999-4999-8999-999999999999"},
+        receiver={"agent_id": "b", "org_id": DEMO_PAYER_ORG_ID},
+        private_key_pem=private_key,
+    )
+
+    response = client.post("/api/aria/verify", json={"message": envelope})
+    body = response.json()
+    assert body["verified"] is False
+    assert "no active signing key" in body["reason"].lower()
+
+    assert client.post("/api/aria/receive", json=envelope).status_code == 401
+
+
+def test_failed_verification_is_audited(client):
+    """A rejected message leaves an audit entry."""
+    created = client.post(
+        "/api/auth/request",
+        json={"procedure_code": "70553", "diagnosis_code": "R51.9"},
+    ).json()
+    request_id = created["request"]["id"]
+
+    envelope = build_message(
+        payload_type="AUTH_REQUEST",
+        payload={"auth_request_id": request_id, "fhir_bundle": {}},
+        sender={"agent_id": "a", "org_id": DEMO_PROVIDER_ORG_ID},
+        receiver={"agent_id": "b", "org_id": DEMO_PAYER_ORG_ID},
+    )
+    envelope["payload"]["fhir_bundle"] = {"tampered": True}
+
+    assert client.post("/api/aria/receive", json=envelope).status_code == 401
+
+    actions = [e["action"] for e in client.get(f"/api/audit/{request_id}").json()]
+    assert "aria.verification.failed" in actions
 
 
 def test_aria_receive_handles_a_signed_auth_request(client):
@@ -190,8 +281,8 @@ def test_aria_receive_handles_a_signed_auth_request(client):
             "auth_request_id": created["request"]["id"],
             "fhir_bundle": created["request"]["fhir_bundle"],
         },
-        sender={"agent_id": "a", "org_id": "o"},
-        receiver={"agent_id": "b", "org_id": "p"},
+        sender={"agent_id": "a", "org_id": DEMO_PROVIDER_ORG_ID},
+        receiver={"agent_id": "b", "org_id": DEMO_PAYER_ORG_ID},
     )
 
     response = client.post("/api/aria/receive", json=envelope)

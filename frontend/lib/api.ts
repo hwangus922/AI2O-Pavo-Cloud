@@ -1,4 +1,6 @@
 import type {
+  AppealResult,
+  AppealStats,
   AuthRequestDetail,
   AuthRequestRecord,
   CoverageRule,
@@ -52,8 +54,23 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
-export function listAuthRequests(): Promise<AuthRequestRecord[]> {
-  return request<AuthRequestRecord[]>("/api/auth");
+export function listAuthRequests(status?: string): Promise<AuthRequestRecord[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return request<AuthRequestRecord[]>(`/api/auth${query}`);
+}
+
+export function generateAppeal(
+  requestId: string,
+  denialReasonCode: string
+): Promise<AppealResult> {
+  return request<AppealResult>(`/api/auth/${requestId}/appeal`, {
+    method: "POST",
+    body: JSON.stringify({ denial_reason_code: denialReasonCode }),
+  });
+}
+
+export function getAppealStats(): Promise<AppealStats> {
+  return request<AppealStats>("/api/appeals/stats");
 }
 
 export function getAuthRequest(id: string): Promise<AuthRequestDetail> {
