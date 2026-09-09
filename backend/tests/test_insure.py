@@ -346,3 +346,32 @@ def test_health_reports_the_insure_dependencies(client):
     body = client.get("/health").json()
     assert body["file_store_backend"] == "in-memory"
     assert body["claude_configured"] is False
+
+
+def test_query_uses_a_supplied_cpt_code_verbatim(client):
+    """A caller holding the code should not have one guessed from prose."""
+    document = upload_documents(client).json()
+
+    body = client.post(
+        "/api/insure/query",
+        json={
+            "procedure_name": "CPT 27447",
+            "cpt_code": "27447",
+            "document_id": document["document_id"],
+        },
+    ).json()
+
+    assert body["cpt_code"] == "27447"
+    assert body["cpt_source"] == "provided"
+    assert "knee" in body["procedure_name"].lower()
+
+
+def test_free_text_without_a_code_still_maps(client):
+    document = upload_documents(client).json()
+    body = client.post(
+        "/api/insure/query",
+        json={"procedure_name": "MRI of my knee", "document_id": document["document_id"]},
+    ).json()
+
+    assert body["cpt_source"] == "sample"
+    assert body["cpt_code"] == "73721"

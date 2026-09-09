@@ -6,6 +6,7 @@ import { JsonBlock } from "@/components/JsonBlock";
 import { RequestTimeline } from "@/components/RequestTimeline";
 import { StatusBadge } from "@/components/StatusBadge";
 import { ApiError, getAuthRequest } from "@/lib/api";
+import { shortId } from "@/lib/display";
 import type { AriaMessageRecord, AuditLogRecord } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ function AriaMessage({ message }: { message: AriaMessageRecord }) {
   const outbound = message.payload_type === "AUTH_REQUEST";
 
   return (
-    <li className="rounded-lg border border-slate-200 bg-white p-4">
+    <li className="pavo-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span
@@ -32,17 +33,17 @@ function AriaMessage({ message }: { message: AriaMessageRecord }) {
           >
             {message.payload_type}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-navy-400">
             {message.sender_agent_id} → {message.receiver_agent_id}
           </span>
         </div>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-navy-400">
           {message.verified ? "Signature verified" : "Unverified"} ·{" "}
           {formatTimestamp(message.created_at)}
         </span>
       </div>
 
-      <p className="mt-2 break-all font-mono text-xs text-slate-500">
+      <p className="mt-2 break-all font-mono text-xs text-navy-400">
         {message.signature}
       </p>
 
@@ -67,29 +68,29 @@ function AuditEntry({ entry }: { entry: AuditLogRecord }) {
     <li className="border-l-2 border-slate-200 py-3 pl-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="font-mono text-xs font-medium">{entry.action}</span>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-navy-400">
           {formatTimestamp(entry.created_at)}
         </span>
       </div>
-      <p className="mt-1 text-xs text-slate-600">by {entry.actor_agent_id}</p>
+      <p className="mt-1 text-xs text-navy-600">by {entry.actor_agent_id}</p>
       {ruleId ? (
         <p className="mt-1 text-xs">
-          <span className="text-slate-500">rule</span>{" "}
+          <span className="text-navy-400">rule</span>{" "}
           <span className="font-mono font-medium">{ruleId}</span>
         </p>
       ) : null}
       {entry.after_state ? (
         <details className="mt-2">
-          <summary className="cursor-pointer text-xs text-slate-600">
+          <summary className="cursor-pointer text-xs text-navy-600">
             State change
           </summary>
           <div className="mt-2 grid gap-2 lg:grid-cols-2">
             <div>
-              <p className="mb-1 text-xs text-slate-500">before</p>
+              <p className="mb-1 text-xs text-navy-400">before</p>
               <JsonBlock value={entry.before_state} />
             </div>
             <div>
-              <p className="mb-1 text-xs text-slate-500">after</p>
+              <p className="mb-1 text-xs text-navy-400">after</p>
               <JsonBlock value={entry.after_state} />
             </div>
           </div>
@@ -135,7 +136,7 @@ export default async function RequestDetailPage({
       <div>
         <Link
           href="/dashboard"
-          className="text-sm text-slate-600 underline underline-offset-2 hover:text-slate-900"
+          className="text-sm text-navy-600 underline underline-offset-2 hover:text-slate-900"
         >
           ← All requests
         </Link>
@@ -145,16 +146,16 @@ export default async function RequestDetailPage({
           </h1>
           <StatusBadge status={request.status} />
         </div>
-        <p className="mt-1 font-mono text-xs text-slate-500">{request.id}</p>
+        <p className="pavo-id mt-1">{shortId(request.id)}</p>
       </div>
 
       <dl className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 sm:grid-cols-4">
         <div>
-          <dt className="text-xs text-slate-500">Deciding rule</dt>
+          <dt className="text-xs text-navy-400">Deciding rule</dt>
           <dd className="mt-1 font-mono text-sm">{request.decision_rule_id ?? "—"}</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Confidence</dt>
+          <dt className="text-xs text-navy-400">Confidence</dt>
           <dd className="mt-1 text-sm">
             {request.confidence === null
               ? "—"
@@ -162,20 +163,20 @@ export default async function RequestDetailPage({
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Submitted</dt>
+          <dt className="text-xs text-navy-400">Submitted</dt>
           <dd className="mt-1 text-sm">{formatTimestamp(request.created_at)}</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Resolved</dt>
+          <dt className="text-xs text-navy-400">Resolved</dt>
           <dd className="mt-1 text-sm">{formatTimestamp(request.resolved_at)}</dd>
         </div>
       </dl>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-navy-400">
           Timeline
         </h2>
-        <div className="rounded-lg border border-slate-200 bg-white p-5">
+        <div className="pavo-card p-5">
           <RequestTimeline
             request={request}
             auditLog={auditLog}
@@ -185,7 +186,7 @@ export default async function RequestDetailPage({
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-navy-400">
           Appeals
         </h2>
         <div className="space-y-4">
@@ -198,7 +199,7 @@ export default async function RequestDetailPage({
           ) : null}
 
           {appeals.length === 0 && !isAppealable ? (
-            <p className="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-600">
+            <p className="rounded-lg border border-dashed border-slate-300 bg-white p-5 text-sm text-navy-600">
               Appeals apply to denied requests. This one is {request.status}.
             </p>
           ) : null}
@@ -206,7 +207,7 @@ export default async function RequestDetailPage({
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-navy-400">
           ARIA message thread
         </h2>
         <ul className="space-y-3">
@@ -217,7 +218,7 @@ export default async function RequestDetailPage({
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-navy-400">
           Audit trail
         </h2>
         <ul className="rounded-lg border border-slate-200 bg-white px-4 py-2">
@@ -228,7 +229,7 @@ export default async function RequestDetailPage({
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-navy-400">
           FHIR R4 bundle
         </h2>
         <JsonBlock value={request.fhir_bundle} />

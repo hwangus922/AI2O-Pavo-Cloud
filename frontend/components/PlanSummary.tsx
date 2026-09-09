@@ -10,7 +10,7 @@ function Field({
 }) {
   return (
     <div>
-      <dt className="text-xs text-slate-500">{label}</dt>
+      <dt className="text-xs text-navy-400">{label}</dt>
       <dd className="mt-0.5 text-sm font-medium">{value ?? "—"}</dd>
     </div>
   );
@@ -30,7 +30,7 @@ export function PlanSummary({
     deductible !== null && met !== null ? Math.max(deductible - met, 0) : null;
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-5">
+    <section className="pavo-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold">Your plan</h2>
         {usedSamples ? (
@@ -77,7 +77,7 @@ export function PlanSummary({
 
       {plan.prior_auth_required_for?.length ? (
         <div className="mt-4 border-t border-slate-100 pt-4">
-          <p className="text-xs text-slate-500">Prior authorization required for</p>
+          <p className="text-xs text-navy-400">Prior authorization required for</p>
           <ul className="mt-1 flex flex-wrap gap-1.5">
             {plan.prior_auth_required_for.map((service) => (
               <li

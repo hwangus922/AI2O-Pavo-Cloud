@@ -7,5 +7,41 @@
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-slate-50 text-navy-900 antialiased;
+}
+
+/* Respect a reduced-motion preference: the demo still advances, it just
+   stops sliding things around. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+  .pavo-card {
+    @apply rounded-lg border border-slate-200 bg-white;
+  }
+
+  .pavo-btn {
+    @apply inline-flex items-center justify-center rounded-md bg-electric-600 px-4 py-2
+           text-sm font-medium text-white transition hover:bg-electric-500
+           focus:outline-none focus:ring-2 focus:ring-electric-400 focus:ring-offset-2
+           disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .pavo-btn-quiet {
+    @apply inline-flex items-center justify-center rounded-md border border-slate-300
+           bg-white px-3 py-1.5 text-sm font-medium text-navy-800 transition
+           hover:border-navy-600 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Truncated identifiers are displayed monospace so they read as codes. */
+  .pavo-id {
+    @apply font-mono text-xs text-navy-400;
+  }
 }

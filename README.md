@@ -2,7 +2,7 @@
 
 Pavo Cloud eliminates prior authorization delays by enabling AI agents to handle the entire approval process autonomously. Provider and payer agents communicate directly via FHIR, resolving clear cases in under 5 minutes — cutting the 3-14 day wait and $35B in annual admin waste.
 
-**Phases 1, 2 and 3 are implemented and runnable.** The full product specification lives in [`docs/pavo_cloud_build.md`](docs/pavo_cloud_build.md).
+**All four phases are implemented and runnable.** The full product specification lives in [`docs/pavo_cloud_build.md`](docs/pavo_cloud_build.md).
 
 ---
 
@@ -42,6 +42,44 @@ Uploads land in the `insure-documents` bucket. Every query writes to `audit_log`
 4. At or above 0.70 confidence the appeal is submitted to the payer over a signed ARIA `APPEAL` message. Below it, the appeal is stored as `escalated` with pre-populated reviewer notes.
 5. The payer agent verifies the signature and decides. A rejected appeal escalates to a human — it never becomes an automated final denial.
 
+## The 30-second demo
+
+`/demo` walks the entire product in one page, driven by live data. Press
+**Run Full Demo** and it advances through six steps with no further input:
+
+| Step | What it shows |
+|---|---|
+| 1. EHR trigger | The order, the FHIR bundle, and the ARIA envelope being built |
+| 2. Identity | Both signatures verified against registered public keys |
+| 3. Zero-knowledge | Three patient criteria proven without revealing the data |
+| 4. Rule engine | The deterministic rule that fired, with its ID |
+| 5. Decision | The outcome and the full audit trail behind it |
+| 6. Insure | The same procedure priced across five facilities |
+
+A measured run completes in about **11 seconds**. Each step also has a
+**Next** button for a manual walkthrough, and a failed step shows a retry
+rather than a broken page.
+
+### Presenting it
+
+```bash
+# 1. Backend
+cd backend && .venv/bin/uvicorn app.main:app --port 8000
+
+# 2. Seed a populated demo (optional but recommended)
+python scripts/seed_demo.py
+
+# 3. Frontend
+cd frontend && npm run dev
+```
+
+Then open `http://localhost:3000/demo`. `/audit` shows every event across the
+system with filters and CSV export; `/dashboard` shows live counters and an
+ARIA message feed.
+
+If you serve the frontend on a port other than 3000, set `FRONTEND_ORIGIN`
+on the backend to that origin or the browser will block the calls.
+
 ## Repository layout
 
 | Path | What lives there |
@@ -50,6 +88,9 @@ Uploads land in the `insure-documents` bucket. Every query writes to `audit_log`
 | `frontend/` | Next.js 14 App Router dashboard with Clerk authentication |
 | `supabase/` | Schema migration and demo seed data |
 | `docs/` | Full build specification |
+| `circuits/` | The `patient_criteria` circom circuit |
+| `zk/` | snarkjs workspace, build script, and compiled artifacts |
+| `scripts/` | `seed_demo.py`, which populates a demo dataset |
 
 ## Quick start
 
@@ -87,6 +128,25 @@ curl -X POST http://localhost:8000/api/auth/request \
   -d '{"procedure_code":"27447","diagnosis_code":"M17.11"}'
 ```
 
+## Zero-knowledge proofs
+
+`circuits/patient_criteria.circom` proves three things to a payer without
+disclosing the data behind them:
+
+- the patient meets the age floor — the age is never sent
+- the diagnosis matches the covered condition — the code is never sent
+- the deductible requirement is satisfied — no amount is ever sent
+
+The artifacts are committed, so proving works out of the box. To rebuild:
+
+```bash
+# circom is a Rust binary and is not on npm
+git clone https://github.com/iden3/circom && cd circom && cargo build --release
+export CIRCOM=$PWD/target/release/circom
+
+cd /path/to/AI2O-Pavo-Cloud/zk && npm install && bash build.sh
+```
+
 ## Coverage rules
 
 Five deterministic rules ship in Phase 1. They are evaluated in order and the first match wins, so the specific knee rule is checked before the general one.
@@ -120,11 +180,17 @@ Five deterministic rules ship in Phase 1. They are evaluated in order and the fi
 | `POST` | `/api/insure/query` | Price a procedure and rank facilities. |
 | `GET` | `/api/insure/results/{id}` | Retrieve a stored price query. |
 | `GET` | `/api/insure/queries` | List price queries, newest first. |
+| `POST` | `/api/zk/generate` | Prove the patient criteria; returns proof and public signals. |
+| `POST` | `/api/zk/verify` | Verify a proof against the circuit's verification key. |
+| `GET` | `/api/zk/status` | Whether the circuit artifacts are built. |
+| `GET` | `/api/system/stats` | Live counters for the dashboard. |
+| `GET` | `/api/system/activity` | The most recent ARIA messages. |
+| `GET` | `/api/system/audit` | The whole audit trail, filterable. |
 | `GET` | `/health` | Liveness, plus which backends are active. |
 
 ## Database
 
-Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, `0002_insure.sql`, `0003_appeals_identity.sql`), create the storage bucket with `supabase/storage.sql`, then optionally seed the demo provider and payer with `supabase/seed.sql`. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env` and the service switches from the in-memory store to Supabase with no other changes.
+Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, `0002_insure.sql`, `0003_appeals_identity.sql`, `0004_zk_proofs.sql`), create the storage bucket with `supabase/storage.sql`, then optionally seed the demo provider and payer with `supabase/seed.sql`. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env` and the service switches from the in-memory store to Supabase with no other changes.
 
 ## Tests
 
@@ -132,7 +198,7 @@ Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, `0002_
 cd backend && .venv/bin/python -m pytest
 ```
 
-105 tests cover all three phases: the five coverage rules and their precedence, identifier hashing, the end-to-end webhook flow, RSA signing and tamper rejection, the audit trail, document upload and validation, CPT mapping, the cash-vs-insurance price bands, every branch of the ranking algorithm, denial classification, PubMed parsing against recorded fixtures, and each appeal outcome path.
+129 tests cover all four phases: the five coverage rules and their precedence, identifier hashing, the end-to-end webhook flow, RSA signing and tamper rejection, the audit trail, document upload and validation, CPT mapping, the cash-vs-insurance price bands, every branch of the ranking algorithm, denial classification, PubMed parsing against recorded fixtures, each appeal outcome path, the ZK circuit end to end (real proofs, every criterion branch, tamper rejection, and the guarantee that private inputs never reach the response), and the system statistics.
 
 ## Configuration
 
@@ -143,7 +209,8 @@ Copy `.env.example` to `.env`. `backend/.env.example` and `frontend/.env.local.e
 | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | backend | Omit both to run in memory |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | frontend | Reserved for direct browser reads |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | frontend | Omit to leave routes public |
-| `NEXT_PUBLIC_API_BASE_URL` | frontend | Defaults to `http://localhost:8000` |
+| `NEXT_PUBLIC_API_BASE_URL` | frontend | Defaults to `http://localhost:8000`; inlined at build time |
+| `FRONTEND_ORIGIN` | backend | Comma-separated CORS allowlist; add your origin if not on port 3000 |
 | `ANTHROPIC_API_KEY` | backend | Insure parsing and CPT mapping; unset yields labelled sample data |
 | `ARIA_VERSION` | backend | Defaults to `1.0` |
 
@@ -160,9 +227,31 @@ These hold in code, not just on paper:
 - **Private keys never reach the database.** `org_keys` stores the public key and a digest of the private key, nothing more.
 - **Unverified messages do not act.** A signature that fails verification is rejected with a 401 before its payload is read, and the rejection is audited.
 
-## What is not built yet
+## Known limitations
 
-Phase 4 remains open: federated learning and zero-knowledge proofs. Facility pricing is still generated locally rather than gathered by the Vapi voice agent, and NPI verification against the live CMS registry is still a trust-on-first-use flag rather than a lookup.
+Worth stating plainly before a demo:
+
+- **The ZK circuit is deliberately simplified.** The approved-diagnosis check
+  compares against a single hash, so a passing proof does tell the payer the
+  patient carries that one diagnosis. Proving membership in a set of many
+  codes without revealing which needs a Merkle circuit, which is out of scope
+  here. The age and deductible criteria leak nothing.
+- **The trusted setup is local.** `zk/build.sh` runs its own Powers of Tau
+  ceremony, so whoever runs it knows the toxic waste. Fine for a prototype;
+  never use these artifacts to secure anything real.
+- **PubMed is unreachable from restricted networks.** Environments that
+  block `eutils.ncbi.nlm.nih.gov` get zero citations; the appeal still
+  completes and reports the lookup failure rather than falling over.
+- **Facility pricing is mocked.** Prices are generated deterministically from
+  the CPT code rather than gathered by the Vapi voice agent.
+- **NPI verification is a flag, not a lookup** against the live CMS registry.
+- **Federated learning is not built.**
+- **Appeals need `ANTHROPIC_API_KEY`.** Without it the letter generator
+  returns a clearly labelled placeholder scored 0.0, which is below the 0.70
+  threshold — so every appeal escalates rather than being submitted. That is
+  the intended safe default, not a failure.
+- **The default backend stores everything in memory.** Data lives as long as
+  the process; point it at Supabase for persistence.
 
 ### Where the demo agents keep their keys
 

@@ -38,6 +38,29 @@ class Settings:
         )
 
     @property
+    def cors_origins(self) -> list[str]:
+        """Origins the browser may call this API from.
+
+        FRONTEND_ORIGIN accepts a comma-separated list. The localhost and
+        127.0.0.1 forms of the default port are always included, because they
+        are not interchangeable to a browser and a demo served on the wrong
+        one fails with an opaque CORS error.
+        """
+        configured = [
+            origin.strip()
+            for origin in self.frontend_origin.split(",")
+            if origin.strip()
+        ]
+
+        defaults = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
+        seen: list[str] = []
+        for origin in configured + defaults:
+            if origin not in seen:
+                seen.append(origin)
+        return seen
+
+    @property
     def supabase_configured(self) -> bool:
         """True when both Supabase credentials are present."""
         return bool(self.supabase_url and self.supabase_service_role_key)
