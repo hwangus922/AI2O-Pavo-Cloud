@@ -9,6 +9,7 @@ from .. import audit
 from ..db import Repository, get_repository
 from ..hashing import hash_identifier
 from ..claude_client import ClaudeResponseError, ClaudeUnavailableError
+from ..fhir import CPT_DISPLAY
 from ..insure.cpt import map_procedure_to_cpt
 from ..insure.facilities import get_facility_pricing
 from ..insure.parser import normalize_media_type, parse_documents
@@ -159,12 +160,22 @@ def create_price_query(
             detail="Provide insurance_plan, or a document_id to load one from.",
         )
 
-    try:
-        mapping, cpt_source = map_procedure_to_cpt(payload.procedure_name)
-    except ClaudeResponseError as exc:
-        raise HTTPException(
-            status_code=502, detail=f"CPT mapping failed: {exc}"
-        ) from exc
+    if payload.cpt_code:
+        # The caller already knows the code, so use it rather than inferring
+        # one from the description.
+        code = payload.cpt_code.strip().upper()
+        mapping = {
+            "cpt_code": code,
+            "procedure_name": CPT_DISPLAY.get(code, payload.procedure_name),
+        }
+        cpt_source = "provided"
+    else:
+        try:
+            mapping, cpt_source = map_procedure_to_cpt(payload.procedure_name)
+        except ClaudeResponseError as exc:
+            raise HTTPException(
+                status_code=502, detail=f"CPT mapping failed: {exc}"
+            ) from exc
 
     cpt_code = mapping["cpt_code"]
     if not cpt_code:

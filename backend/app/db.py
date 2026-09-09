@@ -133,6 +133,26 @@ class Repository(ABC):
     @abstractmethod
     def list_appeals(self, limit: int = 200) -> list[dict[str, Any]]: ...
 
+    @abstractmethod
+    def insert_zk_proof(self, data: dict[str, Any]) -> dict[str, Any]: ...
+
+    @abstractmethod
+    def get_zk_proof(self, proof_id: str) -> Optional[dict[str, Any]]: ...
+
+    @abstractmethod
+    def update_zk_proof(
+        self, proof_id: str, changes: dict[str, Any]
+    ) -> Optional[dict[str, Any]]: ...
+
+    @abstractmethod
+    def list_zk_proofs(self, limit: int = 200) -> list[dict[str, Any]]: ...
+
+    @abstractmethod
+    def list_aria_messages_recent(self, limit: int = 10) -> list[dict[str, Any]]: ...
+
+    @abstractmethod
+    def list_audit_log_all(self, limit: int = 500) -> list[dict[str, Any]]: ...
+
     @property
     @abstractmethod
     def backend_name(self) -> str: ...
@@ -151,6 +171,7 @@ class InMemoryRepository(Repository):
         self._price_queries: dict[str, dict[str, Any]] = {}
         self._org_keys: list[dict[str, Any]] = []
         self._appeals: dict[str, dict[str, Any]] = {}
+        self._zk_proofs: dict[str, dict[str, Any]] = {}
 
     @property
     def backend_name(self) -> str:
@@ -322,6 +343,47 @@ class InMemoryRepository(Repository):
     def list_appeals(self, limit: int = 200) -> list[dict[str, Any]]:
         with self._lock:
             rows = list(self._appeals.values())
+        rows.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+        return copy.deepcopy(rows[:limit])
+
+    def insert_zk_proof(self, data: dict[str, Any]) -> dict[str, Any]:
+        row = dict(data)
+        row.setdefault("id", _new_id())
+        row.setdefault("generated_at", _now_iso())
+        with self._lock:
+            self._zk_proofs[row["id"]] = row
+        return copy.deepcopy(row)
+
+    def get_zk_proof(self, proof_id: str) -> Optional[dict[str, Any]]:
+        with self._lock:
+            row = self._zk_proofs.get(proof_id)
+            return copy.deepcopy(row) if row else None
+
+    def update_zk_proof(
+        self, proof_id: str, changes: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
+        with self._lock:
+            row = self._zk_proofs.get(proof_id)
+            if row is None:
+                return None
+            row.update(changes)
+            return copy.deepcopy(row)
+
+    def list_zk_proofs(self, limit: int = 200) -> list[dict[str, Any]]:
+        with self._lock:
+            rows = list(self._zk_proofs.values())
+        rows.sort(key=lambda r: str(r.get("generated_at") or ""), reverse=True)
+        return copy.deepcopy(rows[:limit])
+
+    def list_aria_messages_recent(self, limit: int = 10) -> list[dict[str, Any]]:
+        with self._lock:
+            rows = list(self._aria_messages)
+        rows.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+        return copy.deepcopy(rows[:limit])
+
+    def list_audit_log_all(self, limit: int = 500) -> list[dict[str, Any]]:
+        with self._lock:
+            rows = list(self._audit_log)
         rows.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
         return copy.deepcopy(rows[:limit])
 

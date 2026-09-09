@@ -202,3 +202,49 @@ export interface AppealStats {
   decided: number;
   win_rate: number | null;
 }
+
+// ------------------------------------------------- Zero-knowledge proofs
+
+export interface ZkClaims {
+  age_valid: boolean;
+  diagnosis_valid: boolean;
+  deductible_valid: boolean;
+  min_age: string | null;
+  deductible_required: boolean;
+}
+
+export interface ZkProofResult {
+  proof_id: string;
+  proof: Record<string, unknown>;
+  public_signals: string[];
+  proof_digest: string;
+  claims: ZkClaims;
+  criteria: Record<string, unknown>;
+}
+
+export interface ZkVerifyResult {
+  verified: boolean;
+  claims: ZkClaims;
+  proof_digest: string;
+}
+
+export interface ZkStatus {
+  available: boolean;
+  circuit: string;
+  protocol: string;
+  curve: string;
+}
+
+// ------------------------------------------------------------ System
+
+export interface SystemStats {
+  authorizations_processed: number;
+  requests_by_status: Record<string, number>;
+  average_resolution_seconds: number | null;
+  appeals_total: number;
+  appeals_decided: number;
+  appeals_win_rate: number | null;
+  zk_proofs_generated: number;
+  aria_messages_exchanged: number;
+  price_queries: number;
+}

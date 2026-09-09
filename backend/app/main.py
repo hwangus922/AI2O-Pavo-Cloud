@@ -14,7 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .db import get_repository
 from .storage import get_file_store
-from .routers import appeals, aria, audit, auth, insure
+from .zk.prover import artifacts_available
+from .routers import appeals, aria, audit, auth, insure, system, zk
 from .rules import COVERAGE_RULES
 
 settings = get_settings()
@@ -39,7 +40,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_origin],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,6 +51,8 @@ app.include_router(aria.router)
 app.include_router(audit.router)
 app.include_router(insure.router)
 app.include_router(appeals.router)
+app.include_router(zk.router)
+app.include_router(system.router)
 
 
 @app.get("/health", tags=["meta"])
@@ -62,6 +65,7 @@ def health() -> dict[str, Any]:
         "storage_backend": repository.backend_name,
         "file_store_backend": get_file_store().backend_name,
         "claude_configured": bool(settings.anthropic_api_key),
+        "zk_artifacts_available": artifacts_available(),
     }
 
 

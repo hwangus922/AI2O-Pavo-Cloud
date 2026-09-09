@@ -47,9 +47,9 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5">
+    <div className="pavo-card p-5">
       <h2 className="text-sm font-semibold">Submit an authorization request</h2>
-      <p className="mt-1 text-sm text-slate-600">
+      <p className="mt-1 text-sm text-navy-600">
         Stands in for the EHR webhook that fires when a physician places an order.
       </p>
 
@@ -63,7 +63,7 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
               value={procedureCode}
               onChange={(event) => setProcedureCode(event.target.value)}
               required
-              className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-slate-900 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-electric-500 focus:outline-none"
             />
           </label>
 
@@ -75,7 +75,7 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
               value={diagnosisCode}
               onChange={(event) => setDiagnosisCode(event.target.value)}
               required
-              className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-slate-900 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-electric-500 focus:outline-none"
             />
           </label>
 
@@ -87,13 +87,13 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
               value={patientId}
               onChange={(event) => setPatientId(event.target.value)}
               placeholder="mrn-12345"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-slate-900 focus:outline-none"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-electric-500 focus:outline-none"
             />
           </label>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-slate-500">Try:</span>
+          <span className="text-xs text-navy-400">Try:</span>
           {EXAMPLES.map((example) => (
             <button
               key={example.label}
@@ -102,7 +102,7 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
                 setProcedureCode(example.procedure);
                 setDiagnosisCode(example.diagnosis);
               }}
-              className="rounded-full border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:border-slate-900"
+              className="rounded-full border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:border-electric-500"
             >
               {example.label}
             </button>
@@ -112,7 +112,7 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+          className="pavo-btn"
         >
           {pending ? "Submitting…" : "Submit request"}
         </button>
@@ -129,7 +129,7 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
           <p className="font-medium">
             Decision: {result.decision.outcome} via {result.decision.rule_id}
           </p>
-          <p className="mt-1 text-slate-600">{result.decision.rule_description}</p>
+          <p className="mt-1 text-navy-600">{result.decision.rule_description}</p>
         </div>
       ) : null}
     </div>

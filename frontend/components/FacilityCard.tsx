@@ -24,7 +24,7 @@ export function FacilityCard({ facility }: { facility: RankedFacility }) {
   const cashIsCheaper = facility.cheaper_option === "cash";
 
   return (
-    <li className="rounded-lg border border-slate-200 bg-white p-5">
+    <li className="pavo-card p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -33,19 +33,19 @@ export function FacilityCard({ facility }: { facility: RankedFacility }) {
             </span>
             <h3 className="truncate text-base font-semibold">{facility.name}</h3>
           </div>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className="mt-0.5 text-xs text-navy-400">
             {facility.type} · {facility.city} · {facility.distance_miles} mi
           </p>
           <div className="mt-2 flex items-center gap-2">
             <QualityStars score={facility.quality_score} />
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-navy-400">
               {facility.quality_score}/5
             </span>
           </div>
         </div>
 
         <div className="text-right">
-          <p className="text-xs text-slate-500">You pay</p>
+          <p className="text-xs text-navy-400">You pay</p>
           <p className="text-3xl font-semibold tracking-tight">
             {formatCurrency(facility.you_pay)}
           </p>
@@ -63,19 +63,19 @@ export function FacilityCard({ facility }: { facility: RankedFacility }) {
 
       <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 sm:grid-cols-4">
         <div>
-          <dt className="text-xs text-slate-500">Negotiated rate</dt>
+          <dt className="text-xs text-navy-400">Negotiated rate</dt>
           <dd className="mt-0.5 text-sm">{formatCurrency(facility.negotiated_rate)}</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Cash price</dt>
+          <dt className="text-xs text-navy-400">Cash price</dt>
           <dd className="mt-0.5 text-sm">{formatCurrency(facility.cash_price)}</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Cash discount</dt>
+          <dt className="text-xs text-navy-400">Cash discount</dt>
           <dd className="mt-0.5 text-sm">{facility.cash_discount_percentage}%</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">
+          <dt className="text-xs text-navy-400">
             {cashIsCheaper ? "Saved vs insurance" : "Saved vs cash"}
           </dt>
           <dd className="mt-0.5 text-sm">
@@ -96,7 +96,7 @@ export function FacilityCard({ facility }: { facility: RankedFacility }) {
 
         {showBreakdown ? (
           <div className="mt-3 rounded-md bg-slate-50 p-4 text-xs">
-            <p className="text-slate-600">
+            <p className="text-navy-600">
               Deductible{" "}
               <span className="font-medium">
                 {breakdown.deductible_met ? "met" : "not met"}
@@ -107,23 +107,23 @@ export function FacilityCard({ facility }: { facility: RankedFacility }) {
 
             <dl className="mt-3 space-y-2">
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Formula</dt>
+                <dt className="text-navy-400">Formula</dt>
                 <dd className="font-mono">{breakdown.formula}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Coinsurance</dt>
+                <dt className="text-navy-400">Coinsurance</dt>
                 <dd>{Math.round(breakdown.coinsurance_rate * 100)}%</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Negotiated rate</dt>
+                <dt className="text-navy-400">Negotiated rate</dt>
                 <dd>{formatCurrencyPrecise(breakdown.negotiated_rate)}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Cost through insurance</dt>
+                <dt className="text-navy-400">Cost through insurance</dt>
                 <dd>{formatCurrencyPrecise(breakdown.insurance_cost)}</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Cost paying cash</dt>
+                <dt className="text-navy-400">Cost paying cash</dt>
                 <dd>{formatCurrencyPrecise(breakdown.cash_cost)}</dd>
               </div>
             </dl>

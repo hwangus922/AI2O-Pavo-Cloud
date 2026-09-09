@@ -179,6 +179,34 @@ class PriceQueryCreate(BaseModel):
         default=None,
         description="Insurance document to read the plan from when insurance_plan is omitted.",
     )
+    cpt_code: Optional[str] = Field(
+        default=None,
+        description=(
+            "Known CPT code. When given, the procedure text is not mapped — "
+            "a caller holding the code should not have it guessed from prose."
+        ),
+    )
     member_id: Optional[str] = Field(
         default=None, description="Hashed before storage; raw values are never kept."
     )
+
+
+class ZkGenerateRequest(BaseModel):
+    """Body of POST /api/zk/generate.
+
+    patient_age, diagnosis_code, and deductible_met are private witnesses:
+    they build the proof and are never stored or returned.
+    """
+
+    auth_request_id: Optional[str] = None
+    patient_age: int = Field(..., ge=0, le=130)
+    diagnosis_code: str = Field(..., min_length=1)
+    deductible_met: bool = False
+
+
+class ZkVerifyRequest(BaseModel):
+    """Body of POST /api/zk/verify."""
+
+    proof: dict[str, Any]
+    public_signals: list[str] = Field(..., min_length=1)
+    proof_id: Optional[str] = None

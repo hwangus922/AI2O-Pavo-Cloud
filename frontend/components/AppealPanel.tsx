@@ -44,7 +44,7 @@ function AppealStatusBadge({ status }: { status: string | null }) {
 function Citations({ citations }: { citations: PubMedCitation[] }) {
   if (citations.length === 0) {
     return (
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-navy-400">
         No supporting literature was retrieved for this appeal.
       </p>
     );
@@ -58,18 +58,18 @@ function Citations({ citations }: { citations: PubMedCitation[] }) {
             href={citation.url ?? "#"}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-slate-900 underline underline-offset-2 hover:text-slate-600"
+            className="font-medium text-slate-900 underline underline-offset-2 hover:text-navy-600"
           >
             {citation.title ?? "Untitled"}
           </a>
-          <p className="mt-0.5 text-slate-600">
+          <p className="mt-0.5 text-navy-600">
             {(citation.authors ?? []).join(", ") || "Unknown authors"} ·{" "}
             {citation.journal ?? "Unknown journal"} ({citation.year ?? "n.d."}) · PMID{" "}
             {citation.pmid}
           </p>
           {citation.abstract ? (
             <details className="mt-1">
-              <summary className="cursor-pointer text-slate-500">Abstract</summary>
+              <summary className="cursor-pointer text-navy-400">Abstract</summary>
               <p className="mt-1 whitespace-pre-wrap leading-relaxed text-slate-700">
                 {citation.abstract}
               </p>
@@ -92,13 +92,13 @@ export function AppealDetail({
   const needsReview = appeal.status === "escalated";
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5">
+    <div className="pavo-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold">Appeal</h3>
           <AppealStatusBadge status={appeal.status} />
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-navy-400">
           {CATEGORY_LABELS[appeal.denial_reason_category ?? "other"]} ·{" "}
           <span className="font-mono">{appeal.denial_reason_code}</span>
         </p>
@@ -123,17 +123,17 @@ export function AppealDetail({
 
       <dl className="mt-4 grid gap-4 border-t border-slate-100 pt-4 sm:grid-cols-3">
         <div>
-          <dt className="text-xs text-slate-500">Confidence</dt>
+          <dt className="text-xs text-navy-400">Confidence</dt>
           <dd className="mt-0.5 text-sm font-medium">
             {(confidence * 100).toFixed(0)}%
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Citations</dt>
+          <dt className="text-xs text-navy-400">Citations</dt>
           <dd className="mt-0.5 text-sm">{appeal.pubmed_citations?.length ?? 0}</dd>
         </div>
         <div>
-          <dt className="text-xs text-slate-500">Resolved</dt>
+          <dt className="text-xs text-navy-400">Resolved</dt>
           <dd className="mt-0.5 text-sm">
             {appeal.resolved_at
               ? new Date(appeal.resolved_at).toLocaleString()
@@ -213,10 +213,10 @@ export function GenerateAppealForm({ requestId }: { requestId: string }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-slate-200 bg-white p-5"
+      className="pavo-card p-5"
     >
       <h3 className="text-sm font-semibold">Generate an appeal</h3>
-      <p className="mt-1 text-sm text-slate-600">
+      <p className="mt-1 text-sm text-navy-600">
         The appeals agent classifies the denial, gathers clinical evidence, and
         drafts a letter. Coverage exclusions go straight to a human.
       </p>
@@ -230,7 +230,7 @@ export function GenerateAppealForm({ requestId }: { requestId: string }) {
             value={reasonCode}
             onChange={(event) => setReasonCode(event.target.value)}
             disabled={pending}
-            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
+            className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-electric-500 focus:outline-none"
           >
             {DENIAL_REASONS.map((reason) => (
               <option key={reason.code} value={reason.code}>
@@ -243,7 +243,7 @@ export function GenerateAppealForm({ requestId }: { requestId: string }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+          className="pavo-btn"
         >
           {pending ? "Drafting appeal…" : "Generate Appeal"}
         </button>

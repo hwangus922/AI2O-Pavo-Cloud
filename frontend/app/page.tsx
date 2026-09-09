@@ -23,42 +23,42 @@ export default function HomePage() {
   return (
     <div className="space-y-12">
       <section className="space-y-4">
-        <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
-          Phase 1 — Core loop
+        <p className="text-sm font-medium uppercase tracking-wide text-electric-600">
+          Autonomous healthcare authorization
         </p>
         <h1 className="max-w-3xl text-4xl font-semibold tracking-tight">
           Prior authorization that resolves in minutes, not weeks.
         </h1>
-        <p className="max-w-2xl text-base leading-relaxed text-slate-600">
+        <p className="max-w-2xl text-base leading-relaxed text-navy-600">
           Provider and payer agents negotiate authorization directly over ARIA.
           Clear cases resolve automatically. Ambiguous ones escalate to a human
           with the full record already assembled.
         </p>
-        <div className="pt-2">
-          <Link
-            href="/dashboard"
-            className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-          >
+        <div className="flex flex-wrap gap-3 pt-2">
+          <Link href="/demo" className="pavo-btn">
+            Run the demo
+          </Link>
+          <Link href="/dashboard" className="pavo-btn-quiet">
             Open the dashboard
           </Link>
         </div>
       </section>
 
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-navy-400">
           How a request flows
         </h2>
         <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, index) => (
             <li
               key={step.title}
-              className="rounded-lg border border-slate-200 bg-white p-4"
+              className="pavo-card p-4"
             >
-              <div className="mb-2 text-xs font-semibold text-slate-400">
+              <div className="mb-2 text-xs font-semibold text-electric-500">
                 {String(index + 1).padStart(2, "0")}
               </div>
               <h3 className="mb-1 text-sm font-semibold">{step.title}</h3>
-              <p className="text-sm leading-relaxed text-slate-600">{step.body}</p>
+              <p className="text-sm leading-relaxed text-navy-600">{step.body}</p>
             </li>
           ))}
         </ol>

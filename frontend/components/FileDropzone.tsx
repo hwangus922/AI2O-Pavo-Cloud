@@ -77,12 +77,12 @@ export function FileDropzone({
         } ${disabled ? "opacity-50" : ""}`}
       >
         <p className="text-sm font-medium">{label}</p>
-        <p className="mt-1 text-xs text-slate-500">{hint}</p>
+        <p className="mt-1 text-xs text-navy-400">{hint}</p>
 
         {file ? (
           <div className="mt-3 flex items-center justify-center gap-2 text-sm">
             <span className="font-medium text-emerald-700">{file.name}</span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-navy-400">
               ({formatBytes(file.size)})
             </span>
             <button
@@ -92,7 +92,7 @@ export function FileDropzone({
                 if (inputRef.current) inputRef.current.value = "";
               }}
               disabled={disabled}
-              className="text-xs text-slate-500 underline underline-offset-2 hover:text-slate-900"
+              className="text-xs text-navy-400 underline underline-offset-2 hover:text-slate-900"
             >
               remove
             </button>
@@ -101,7 +101,7 @@ export function FileDropzone({
           <label
             htmlFor={inputId}
             className={`mt-3 inline-block rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium ${
-              disabled ? "cursor-not-allowed" : "cursor-pointer hover:border-slate-900"
+              disabled ? "cursor-not-allowed" : "cursor-pointer hover:border-electric-500"
             }`}
           >
             Choose a file

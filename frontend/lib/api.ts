@@ -1,12 +1,18 @@
 import type {
   AppealResult,
   AppealStats,
+  AriaMessageRecord,
+  AuditLogRecord,
   AuthRequestDetail,
   AuthRequestRecord,
   CoverageRule,
   ParsedDocumentResult,
   PriceQueryResult,
   SubmitResult,
+  SystemStats,
+  ZkProofResult,
+  ZkStatus,
+  ZkVerifyResult,
 } from "./types";
 
 export const API_BASE_URL =
@@ -138,9 +144,64 @@ export function parseInsuranceDocuments(input: {
 export function submitPriceQuery(body: {
   procedure_name: string;
   document_id: string;
+  /** Supply when the code is already known, so it is not inferred from text. */
+  cpt_code?: string;
 }): Promise<PriceQueryResult> {
   return request<PriceQueryResult>("/api/insure/query", {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+// ------------------------------------------------- Zero-knowledge proofs
+
+export function getZkStatus(): Promise<ZkStatus> {
+  return request<ZkStatus>("/api/zk/status");
+}
+
+export function generateZkProof(body: {
+  auth_request_id?: string;
+  patient_age: number;
+  diagnosis_code: string;
+  deductible_met: boolean;
+}): Promise<ZkProofResult> {
+  return request<ZkProofResult>("/api/zk/generate", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function verifyZkProof(body: {
+  proof: Record<string, unknown>;
+  public_signals: string[];
+  proof_id?: string;
+}): Promise<ZkVerifyResult> {
+  return request<ZkVerifyResult>("/api/zk/verify", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+// ------------------------------------------------------------- System
+
+export function getSystemStats(): Promise<SystemStats> {
+  return request<SystemStats>("/api/system/stats");
+}
+
+export function getRecentActivity(limit = 10): Promise<AriaMessageRecord[]> {
+  return request<AriaMessageRecord[]>(`/api/system/activity?limit=${limit}`);
+}
+
+export function getFullAuditTrail(filters: {
+  entityType?: string;
+  since?: string;
+  until?: string;
+} = {}): Promise<AuditLogRecord[]> {
+  const params = new URLSearchParams();
+  if (filters.entityType) params.set("entity_type", filters.entityType);
+  if (filters.since) params.set("since", filters.since);
+  if (filters.until) params.set("until", filters.until);
+
+  const query = params.toString();
+  return request<AuditLogRecord[]>(`/api/system/audit${query ? `?${query}` : ""}`);
 }

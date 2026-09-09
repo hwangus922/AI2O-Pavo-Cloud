@@ -142,12 +142,12 @@ export function RequestTimeline({
           />
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-sm font-medium">{step.label}</p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-navy-400">
               {step.timestamp ? new Date(step.timestamp).toLocaleString() : "—"}
             </p>
           </div>
           {step.detail ? (
-            <p className="mt-0.5 text-xs text-slate-600">{step.detail}</p>
+            <p className="mt-0.5 text-xs text-navy-600">{step.detail}</p>
           ) : null}
         </li>
       ))}

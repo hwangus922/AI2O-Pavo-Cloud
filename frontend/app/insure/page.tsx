@@ -88,13 +88,13 @@ export default function InsurePage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
+        <p className="text-sm font-medium uppercase tracking-wide text-navy-400">
           Insure
         </p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">
           Know what a procedure actually costs you
         </h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-600">
+        <p className="mt-1 max-w-2xl text-sm text-navy-600">
           Upload your insurance card and Evidence of Coverage. Insure reads your
           plan, then compares what you would pay at nearby facilities — through
           insurance or in cash.
@@ -134,14 +134,14 @@ export default function InsurePage() {
               onChange={(event) => setMemberId(event.target.value)}
               placeholder="mbr-12345"
               disabled={parsing}
-              className="rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-slate-900 focus:outline-none"
+              className="rounded-md border border-slate-300 px-3 py-2 font-mono text-sm focus:border-electric-500 focus:outline-none"
             />
           </label>
 
           <button
             type="submit"
             disabled={!canUpload}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+            className="pavo-btn"
           >
             {parsing ? "Reading your documents…" : "Parse documents"}
           </button>
@@ -161,7 +161,7 @@ export default function InsurePage() {
 
           <form
             onSubmit={handleQuery}
-            className="rounded-lg border border-slate-200 bg-white p-5"
+            className="pavo-card p-5"
           >
             <label htmlFor="procedure" className="block text-sm font-semibold">
               What procedure do you need?
@@ -174,25 +174,25 @@ export default function InsurePage() {
                 placeholder="I need an MRI of my knee"
                 required
                 disabled={querying}
-                className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-900 focus:outline-none"
+                className="min-w-64 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-electric-500 focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={querying || !procedure.trim()}
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+                className="pavo-btn"
               >
                 {querying ? "Calling facilities…" : "Find prices"}
               </button>
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-xs text-slate-500">Try:</span>
+              <span className="text-xs text-navy-400">Try:</span>
               {EXAMPLE_PROCEDURES.map((example) => (
                 <button
                   key={example}
                   type="button"
                   onClick={() => setProcedure(example)}
-                  className="rounded-full border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:border-slate-900"
+                  className="rounded-full border border-slate-300 px-2.5 py-1 text-xs text-slate-700 hover:border-electric-500"
                 >
                   {example}
                 </button>
@@ -212,10 +212,10 @@ export default function InsurePage() {
       {priceQuery ? (
         <section>
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-navy-400">
               {priceQuery.results.length} facilities for {priceQuery.procedure_name}
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-navy-400">
               CPT <span className="font-mono">{priceQuery.cpt_code}</span> ·
               deductible {priceQuery.deductible_met ? "met" : "not met"}
             </p>
