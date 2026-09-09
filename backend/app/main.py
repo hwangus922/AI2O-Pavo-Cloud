@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .db import get_repository
 from .storage import get_file_store
-from .routers import aria, audit, auth, insure
+from .routers import appeals, aria, audit, auth, insure
 from .rules import COVERAGE_RULES
 
 settings = get_settings()
@@ -49,6 +49,7 @@ app.include_router(auth.router)
 app.include_router(aria.router)
 app.include_router(audit.router)
 app.include_router(insure.router)
+app.include_router(appeals.router)
 
 
 @app.get("/health", tags=["meta"])

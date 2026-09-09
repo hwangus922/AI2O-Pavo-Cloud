@@ -12,7 +12,7 @@ import json
 import re
 from typing import Any, Optional
 
-from ..config import get_settings
+from .config import get_settings
 
 # Fixed by the Phase 2 specification.
 MODEL = "claude-sonnet-4-6"

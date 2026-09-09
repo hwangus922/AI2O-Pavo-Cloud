@@ -119,12 +119,38 @@ class AuthRequestRecord(BaseModel):
     resolved_at: Optional[datetime] = None
 
 
+class AppealRecord(BaseModel):
+    """One appeal against a denied authorization."""
+
+    id: str
+    auth_request_id: Optional[str] = None
+    denial_reason_code: Optional[str] = None
+    denial_reason_category: Optional[str] = None
+    appeal_letter: Optional[str] = None
+    pubmed_citations: list[dict[str, Any]] = Field(default_factory=list)
+    confidence: Optional[float] = None
+    status: Optional[str] = None
+    created_at: Optional[datetime] = None
+    resolved_at: Optional[datetime] = None
+
+
+class AppealCreate(BaseModel):
+    """Body of POST /api/auth/{id}/appeal."""
+
+    denial_reason_code: str = Field(
+        ...,
+        min_length=1,
+        description="The payer's denial reason code, e.g. MN-001 or 'medical necessity'.",
+    )
+
+
 class AuthRequestDetail(BaseModel):
-    """A request plus its full ARIA thread and audit trail."""
+    """A request plus its full ARIA thread, audit trail, and appeals."""
 
     request: AuthRequestRecord
     aria_messages: list[AriaMessageRecord] = Field(default_factory=list)
     audit_log: list[AuditLogRecord] = Field(default_factory=list)
+    appeals: list[AppealRecord] = Field(default_factory=list)
 
 
 class VerifyRequest(BaseModel):

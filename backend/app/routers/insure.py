@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from .. import audit
 from ..db import Repository, get_repository
 from ..hashing import hash_identifier
-from ..insure.claude import ClaudeResponseError, ClaudeUnavailableError
+from ..claude_client import ClaudeResponseError, ClaudeUnavailableError
 from ..insure.cpt import map_procedure_to_cpt
 from ..insure.facilities import get_facility_pricing
 from ..insure.parser import normalize_media_type, parse_documents

@@ -12,7 +12,7 @@ from __future__ import annotations
 import base64
 from typing import Any, Optional
 
-from .claude import (
+from ..claude_client import (
     ClaudeResponseError,
     ClaudeUnavailableError,
     complete_json,

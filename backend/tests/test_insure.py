@@ -7,7 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.db import reset_repository
-from app.insure.claude import ClaudeResponseError, extract_json_object
+from app.claude_client import ClaudeResponseError, extract_json_object
 from app.insure.facilities import base_rate_for_cpt, get_facility_pricing
 from app.insure.ranking import (
     coinsurance_rate,

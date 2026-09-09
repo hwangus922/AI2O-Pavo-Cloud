@@ -48,6 +48,7 @@ export interface AuthRequestDetail {
   request: AuthRequestRecord;
   aria_messages: AriaMessageRecord[];
   audit_log: AuditLogRecord[];
+  appeals: AppealRecord[];
 }
 
 export interface Decision {
@@ -148,4 +149,56 @@ export interface PriceQueryResult {
   cpt_source: "claude" | "sample";
   deductible_met: boolean | null;
   results: RankedFacility[];
+}
+
+// ---------------------------------------------------------------- Appeals
+
+export type AppealStatus = "draft" | "submitted" | "won" | "lost" | "escalated";
+
+export type DenialCategory =
+  | "medical_necessity"
+  | "not_covered"
+  | "missing_info"
+  | "other";
+
+export interface PubMedCitation {
+  pmid: string | null;
+  title: string | null;
+  authors: string[];
+  journal: string | null;
+  year: string | null;
+  abstract: string | null;
+  url: string | null;
+}
+
+export interface AppealRecord {
+  id: string;
+  auth_request_id: string | null;
+  denial_reason_code: string | null;
+  denial_reason_category: DenialCategory | null;
+  appeal_letter: string | null;
+  pubmed_citations: PubMedCitation[];
+  confidence: number | null;
+  status: AppealStatus | null;
+  created_at: string | null;
+  resolved_at: string | null;
+}
+
+export interface AppealResult {
+  appeal: AppealRecord;
+  denial_reason_category: DenialCategory;
+  citations: PubMedCitation[];
+  letter_source: "claude" | "sample" | "skipped";
+  pubmed_error: string | null;
+  reviewer_notes: string | null;
+  decision?: Decision;
+  response_message_id?: string;
+  request: AuthRequestRecord;
+}
+
+export interface AppealStats {
+  total: number;
+  counts: Record<AppealStatus, number>;
+  decided: number;
+  win_rate: number | null;
 }

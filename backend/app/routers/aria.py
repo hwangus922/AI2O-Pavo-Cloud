@@ -5,8 +5,12 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..agents.payer import AriaVerificationError, handle_auth_request
-from ..aria import verify_message
+from ..agents.payer import (
+    AriaVerificationError,
+    handle_appeal,
+    handle_auth_request,
+)
+from ..aria import verify_with_repository
 from ..db import Repository, get_repository
 from ..models import VerifyRequest, VerifyResponse
 
@@ -25,14 +29,20 @@ def receive_aria_message(
     """
     payload_type = envelope.get("payload_type")
 
-    if payload_type != "AUTH_REQUEST":
+    handlers = {
+        "AUTH_REQUEST": handle_auth_request,
+        "APPEAL": handle_appeal,
+    }
+    handler = handlers.get(str(payload_type))
+
+    if handler is None:
         raise HTTPException(
             status_code=422,
-            detail=f"Payload type {payload_type!r} is not handled in Phase 1.",
+            detail=f"Payload type {payload_type!r} is not handled.",
         )
 
     try:
-        response_envelope, decision = handle_auth_request(
+        response_envelope, decision = handler(
             repository, envelope, persist_inbound=True
         )
     except AriaVerificationError as exc:
@@ -42,9 +52,12 @@ def receive_aria_message(
 
 
 @router.post("/verify", response_model=VerifyResponse)
-def verify_aria_message(body: VerifyRequest) -> dict[str, Any]:
-    """Verify an ARIA envelope's signature without acting on it."""
-    verified, reason = verify_message(body.message)
+def verify_aria_message(
+    body: VerifyRequest,
+    repository: Repository = Depends(get_repository),
+) -> dict[str, Any]:
+    """Verify an ARIA envelope against the sender's registered public key."""
+    verified, reason = verify_with_repository(repository, body.message)
     return {
         "verified": verified,
         "message_id": body.message.get("message_id"),
