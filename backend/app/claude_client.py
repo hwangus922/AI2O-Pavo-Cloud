@@ -89,13 +89,23 @@ def complete_json(
     system: str,
     content: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    """Send one message to Claude and parse its reply as a JSON object."""
-    message = _client().messages.create(
-        model=MODEL,
-        max_tokens=MAX_TOKENS,
-        system=system,
-        messages=[{"role": "user", "content": content}],
-    )
+    """Send one message to Claude and parse its reply as a JSON object.
+
+    API failures — an unreadable document, a bad key, an outage — surface as
+    ClaudeResponseError so the caller answers with a clear 502 instead of an
+    unhandled exception.
+    """
+    import anthropic
+
+    try:
+        message = _client().messages.create(
+            model=MODEL,
+            max_tokens=MAX_TOKENS,
+            system=system,
+            messages=[{"role": "user", "content": content}],
+        )
+    except anthropic.APIError as exc:
+        raise ClaudeResponseError(f"Claude API request failed: {exc}") from exc
 
     if message.stop_reason == "refusal":
         raise ClaudeResponseError("Claude declined to process this document.")

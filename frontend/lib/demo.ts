@@ -57,23 +57,20 @@ export const DEMO_STEPS = [
 
 export type DemoStepId = (typeof DEMO_STEPS)[number]["id"];
 
-/** A tiny one-pixel PNG and a minimal PDF, so Insure has something to parse. */
-const CARD_PNG_BASE64 =
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
-const EOC_PDF_TEXT =
-  "%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n";
+/** The sample documents Insure parses during the demo.
+ *
+ *  They are real files served from /public/demo — a rendered insurance card
+ *  and a one-page Evidence of Coverage — so the flow behaves the same whether
+ *  Claude reads them or the sample parser stands in. */
+const SAMPLE_CARD_URL = "/demo/sample-card.png";
+const SAMPLE_EOC_URL = "/demo/sample-eoc.pdf";
 
-function base64ToFile(base64: string, name: string, type: string): File {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
+async function fetchAsFile(url: string, name: string, type: string): Promise<File> {
+  const response = await fetch(url, { cache: "force-cache" });
+  if (!response.ok) {
+    throw new Error(`Could not load the sample document ${name} (${response.status}).`);
   }
-  return new File([bytes], name, { type });
-}
-
-function textToFile(text: string, name: string, type: string): File {
-  return new File([text], name, { type });
+  return new File([await response.blob()], name, { type });
 }
 
 /** Step 1: submit the order and capture the decision the agents reached. */
@@ -126,10 +123,11 @@ export async function runZkStep(
 export async function runInsureStep(
   state: DemoState
 ): Promise<Partial<DemoState>> {
-  const document = await parseInsuranceDocuments({
-    cardImage: base64ToFile(CARD_PNG_BASE64, "card.png", "image/png"),
-    eocPdf: textToFile(EOC_PDF_TEXT, "eoc.pdf", "application/pdf"),
-  });
+  const [cardImage, eocPdf] = await Promise.all([
+    fetchAsFile(SAMPLE_CARD_URL, "sample-card.png", "image/png"),
+    fetchAsFile(SAMPLE_EOC_URL, "sample-eoc.pdf", "application/pdf"),
+  ]);
+  const document = await parseInsuranceDocuments({ cardImage, eocPdf });
 
   // The authorization already carries the CPT code, so pass it through
   // rather than having the mapper infer one from a description.
