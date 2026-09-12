@@ -252,10 +252,16 @@ Worth stating plainly before a demo:
   the intended safe default, not a failure.
 - **The default backend stores everything in memory.** Data lives as long as
   the process; point it at Supabase for persistence.
+- **The Insure step of the demo parses sample documents.** `/demo` and
+  `scripts/seed_demo.py` upload the rendered insurance card and one-page
+  Evidence of Coverage in `frontend/public/demo/`. They are real files
+  describing a fictional plan, so Claude reads them when `ANTHROPIC_API_KEY`
+  is set and the labelled sample parser stands in when it is not — either way
+  the plan comes out as SAMPLE PPO 2000.
 
 ### Where the demo agents keep their keys
 
-In production an organization holds its own private key and signs before a message reaches Pavo. Here Pavo also *runs* the provider and payer agents, so those agents need a key to sign with. `backend/app/keyring.py` holds them in process memory only — never in the database, never on disk — and they are regenerated on every restart. That is a prototype accommodation, not a deployment pattern.
+In production an organization holds its own private key and signs before a message reaches Pavo. Here Pavo also *runs* the provider and payer agents, so those agents need a key to sign with. `backend/app/keyring.py` holds them in process memory only — never in the database, never on disk — and they are regenerated on every restart. Each restart is a key rotation: the previous public key is revoked in `org_keys` (which allows one active key per organization) before the new one is registered, so messages signed before a restart no longer verify against the active key. That is a prototype accommodation, not a deployment pattern.
 
 ### A note on the pricing formulas
 

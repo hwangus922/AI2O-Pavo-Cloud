@@ -112,6 +112,10 @@ class Repository(ABC):
     def get_active_public_key(self, org_id: str) -> Optional[str]: ...
 
     @abstractmethod
+    def revoke_active_org_keys(self, org_id: str) -> int:
+        """Revoke every active key for an organization; returns how many."""
+
+    @abstractmethod
     def set_organization_public_key(self, org_id: str, public_key: str) -> None: ...
 
     @abstractmethod
@@ -299,6 +303,15 @@ class InMemoryRepository(Repository):
                 if row.get("org_id") == org_id and row.get("revoked_at") is None:
                     return row.get("public_key")
         return None
+
+    def revoke_active_org_keys(self, org_id: str) -> int:
+        revoked = 0
+        with self._lock:
+            for row in self._org_keys:
+                if row.get("org_id") == org_id and row.get("revoked_at") is None:
+                    row["revoked_at"] = _now_iso()
+                    revoked += 1
+        return revoked
 
     def set_organization_public_key(self, org_id: str, public_key: str) -> None:
         with self._lock:
@@ -533,6 +546,16 @@ class SupabaseRepository(Repository):
         )
         return result.data[0]["public_key"] if result.data else None
 
+    def revoke_active_org_keys(self, org_id: str) -> int:
+        result = (
+            self._client.table("org_keys")
+            .update({"revoked_at": _now_iso()})
+            .eq("org_id", org_id)
+            .is_("revoked_at", "null")
+            .execute()
+        )
+        return len(result.data or [])
+
     def set_organization_public_key(self, org_id: str, public_key: str) -> None:
         self._client.table("organizations").update(
             {"public_key": public_key}
@@ -573,6 +596,61 @@ class SupabaseRepository(Repository):
     def list_appeals(self, limit: int = 200) -> list[dict[str, Any]]:
         result = (
             self._client.table("appeals")
+            .select("*")
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return result.data or []
+
+    def insert_zk_proof(self, data: dict[str, Any]) -> dict[str, Any]:
+        result = self._client.table("zk_proofs").insert(data).execute()
+        return result.data[0]
+
+    def get_zk_proof(self, proof_id: str) -> Optional[dict[str, Any]]:
+        result = (
+            self._client.table("zk_proofs")
+            .select("*")
+            .eq("id", proof_id)
+            .limit(1)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
+    def update_zk_proof(
+        self, proof_id: str, changes: dict[str, Any]
+    ) -> Optional[dict[str, Any]]:
+        result = (
+            self._client.table("zk_proofs")
+            .update(changes)
+            .eq("id", proof_id)
+            .execute()
+        )
+        return result.data[0] if result.data else None
+
+    def list_zk_proofs(self, limit: int = 200) -> list[dict[str, Any]]:
+        result = (
+            self._client.table("zk_proofs")
+            .select("*")
+            .order("generated_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return result.data or []
+
+    def list_aria_messages_recent(self, limit: int = 10) -> list[dict[str, Any]]:
+        result = (
+            self._client.table("aria_messages")
+            .select("*")
+            .order("created_at", desc=True)
+            .limit(limit)
+            .execute()
+        )
+        return result.data or []
+
+    def list_audit_log_all(self, limit: int = 500) -> list[dict[str, Any]]:
+        result = (
+            self._client.table("audit_log")
             .select("*")
             .order("created_at", desc=True)
             .limit(limit)

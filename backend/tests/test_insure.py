@@ -375,3 +375,46 @@ def test_free_text_without_a_code_still_maps(client):
 
     assert body["cpt_source"] == "sample"
     assert body["cpt_code"] == "73721"
+
+
+# ---------------------------------------------------- Claude API failures
+
+
+def test_claude_api_errors_surface_as_response_errors(monkeypatch):
+    """An SDK error — an unreadable PDF, a bad key — must become a
+    ClaudeResponseError so the router answers 502 rather than crashing."""
+    import anthropic
+    import httpx
+
+    from app import claude_client
+
+    class _Messages:
+        def create(self, **_: object):
+            raise anthropic.BadRequestError(
+                "Could not process PDF",
+                response=httpx.Response(400, request=httpx.Request("POST", "https://x")),
+                body=None,
+            )
+
+    class _Client:
+        messages = _Messages()
+
+    monkeypatch.setattr(claude_client, "_client", lambda: _Client())
+
+    with pytest.raises(ClaudeResponseError, match="Could not process PDF"):
+        claude_client.complete_json(system="s", content=[{"type": "text", "text": "t"}])
+
+
+def test_parse_reports_502_when_claude_rejects_the_document(client, monkeypatch):
+    from app.insure import parser
+
+    monkeypatch.setattr(parser, "is_configured", lambda: True)
+
+    def _reject(**_: object):
+        raise ClaudeResponseError("Claude API request failed: Could not process PDF")
+
+    monkeypatch.setattr(parser, "complete_json", _reject)
+
+    response = upload_documents(client)
+    assert response.status_code == 502
+    assert "Could not process PDF" in response.json()["detail"]

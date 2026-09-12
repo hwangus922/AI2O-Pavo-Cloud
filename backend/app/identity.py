@@ -30,6 +30,12 @@ def provision_org_key(
     """
     private_key_pem, public_key_pem = generate_key_pair()
 
+    # Issuing a key rotates the organization onto it: the previous key is
+    # revoked first, so exactly one key is ever active per organization. The
+    # demo agents rely on this — their keys live only in process memory, so
+    # every boot issues a fresh pair against the same stored organizations.
+    repository.revoke_active_org_keys(org_id)
+
     repository.insert_org_key(
         {
             "org_id": org_id,
@@ -49,7 +55,7 @@ def ensure_demo_org_keys(repository: Repository, org_ids: list[str]) -> None:
     """Give each demo organization a key the in-process agents can sign with.
 
     Called at startup. Keys live only in the runtime keyring, so each boot
-    issues a fresh pair.
+    issues a fresh pair and revokes the one the previous boot registered.
     """
     keyring = get_keyring()
 

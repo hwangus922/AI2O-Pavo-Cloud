@@ -19,9 +19,14 @@ import json
 import sys
 import urllib.error
 import urllib.request
+from pathlib import Path
 from typing import Any, Optional
 
 DEFAULT_API = "http://localhost:8000"
+
+# The same sample card and Evidence of Coverage the /demo page uploads. They
+# are real documents, so the seed works when Claude is doing the parsing.
+SAMPLE_DOCS = Path(__file__).resolve().parents[1] / "frontend" / "public" / "demo"
 
 # Ten requests spanning every branch of the rule engine.
 AUTH_REQUESTS: tuple[tuple[str, str, str], ...] = (
@@ -181,12 +186,8 @@ def seed_appeals(api: str) -> list[tuple[str, ...]]:
 def seed_price_queries(api: str) -> list[tuple[str, ...]]:
     """Parse a document once, then price five procedures against that plan."""
     boundary = "----pavoseed"
-    png = bytes.fromhex(
-        "89504e470d0a1a0a0000000d4948445200000001000000010806000000"
-        "1f15c4890000000a49444154789c63000100000500010d0a2db4000000"
-        "0049454e44ae426082"
-    )
-    pdf = b"%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n"
+    png = (SAMPLE_DOCS / "sample-card.png").read_bytes()
+    pdf = (SAMPLE_DOCS / "sample-eoc.pdf").read_bytes()
 
     parts: list[bytes] = []
     for name, filename, content_type, payload in (
