@@ -1,9 +1,22 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Pavo Cloud — Technical Execution Report</title>
-<style>
+"""Assemble the Technical Execution Report.
+
+The document flows like a Word file — content is not pinned to hand-cut pages,
+so breaks fall naturally and no page ends half-empty. The architecture diagram
+lives in _svg.html and the terminal output in captures/*.txt, both dropped in
+verbatim, so neither can drift from what was actually produced.
+
+    python build_report.py
+    chromium --headless --print-to-pdf=Pavo_Cloud_Technical_Execution_Report.pdf report.html
+"""
+from __future__ import annotations
+
+import html
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DIAGRAM = open(os.path.join(HERE, "_svg.html"), encoding="utf-8").read()
+
+CSS = """
   @page { size: Letter; margin: 1in; }
   * { box-sizing: border-box; }
 
@@ -53,10 +66,9 @@
 
   svg { display: block; width: 100%; page-break-inside: avoid; }
   .keep { page-break-inside: avoid; }
-</style>
-</head>
-<body>
+"""
 
+BODY = f"""
 <div class="doctitle">Pavo Cloud</div>
 <div class="docsub">Technical Execution Report | AI for Business Track</div>
 <div class="docline">Dhanvanth Lakshman, CFO &nbsp;·&nbsp; Viraj Gadeela, CTO &nbsp;·&nbsp; Harry Wang, CEO</div>
@@ -96,97 +108,7 @@
 <h3>2.1 How One Request Moves Through the System</h3>
 <p>A doctor places an order in the hospital's electronic health record &mdash; the software that holds a patient's chart. That order starts everything below. No person touches any of the seven steps.</p>
 
-<svg viewBox="0 0 620 302" role="img" aria-label="How a request flows through Pavo Cloud">
-    <style>
-      .bx { fill:#fff; stroke:#333; stroke-width:1.1; }
-      .tl { font:bold 10px "Times New Roman",Times,serif; fill:#000; }
-      .tx { font:9px "Times New Roman",Times,serif; fill:#333; }
-      .ar { stroke:#333; stroke-width:1.1; fill:none; marker-end:url(#h); }
-      .lb { font:italic 8.5px "Times New Roman",Times,serif; fill:#555; }
-      .hd { font:bold 8.5px "Times New Roman",Times,serif; fill:#000; letter-spacing:.06em; }
-    </style>
-    <defs>
-      <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
-      </marker>
-    </defs>
-
-    <text x="0"   y="9" class="hd">THE DOCTOR'S SIDE</text>
-    <text x="222" y="9" class="hd">THE INSURER'S SIDE</text>
-    <text x="452" y="9" class="hd">THE RECORD</text>
-    <line x1="0" y1="13" x2="200" y2="13" stroke="#333" stroke-width="1"/>
-    <line x1="222" y1="13" x2="422" y2="13" stroke="#333" stroke-width="1"/>
-    <line x1="452" y1="13" x2="620" y2="13" stroke="#333" stroke-width="1"/>
-
-    <rect x="0" y="24" width="200" height="44" class="bx"/>
-    <text x="8" y="38" class="tl">1. The order is placed</text>
-    <text x="8" y="51" class="tx">A doctor enters the procedure and</text>
-    <text x="8" y="62" class="tx">the diagnosis into the chart.</text>
-
-    <rect x="0" y="80" width="200" height="55" class="bx"/>
-    <text x="8" y="94" class="tl">2. The patient's name is removed</text>
-    <text x="8" y="107" class="tx">The identifier is replaced by a</text>
-    <text x="8" y="118" class="tx">scrambled code. The real one is</text>
-    <text x="8" y="129" class="tx">never stored or sent.</text>
-
-    <rect x="0" y="147" width="200" height="55" class="bx"/>
-    <text x="8" y="161" class="tl">3. The request is packaged</text>
-    <text x="8" y="174" class="tx">Medical details go into FHIR, the</text>
-    <text x="8" y="185" class="tx">standard format insurers are</text>
-    <text x="8" y="196" class="tx">already required to accept.</text>
-
-    <rect x="0" y="214" width="200" height="48" class="bx"/>
-    <text x="8" y="228" class="tl">4. It is signed</text>
-    <text x="8" y="241" class="tx">A digital signature proves who</text>
-    <text x="8" y="252" class="tx">sent it and that nothing changed.</text>
-
-    <rect x="222" y="24" width="200" height="55" class="bx" style="stroke-width:1.9"/>
-    <text x="230" y="38" class="tl">5. The signature is checked</text>
-    <text x="230" y="51" class="tx">If it fails, the request is refused</text>
-    <text x="230" y="62" class="tx">and the refusal is logged. Nothing</text>
-    <text x="230" y="73" class="tx">else happens.</text>
-
-    <rect x="222" y="92" width="200" height="66" class="bx"/>
-    <text x="230" y="106" class="tl">6. The rules are applied</text>
-    <text x="230" y="119" class="tx">The request is checked against the</text>
-    <text x="230" y="130" class="tx">insurer's own published coverage</text>
-    <text x="230" y="141" class="tx">rules. The first rule that matches</text>
-    <text x="230" y="152" class="tx">decides the outcome.</text>
-
-    <rect x="222" y="172" width="200" height="90" class="bx"/>
-    <text x="230" y="186" class="tl">7. A decision comes out</text>
-    <text x="230" y="200" class="tx"><tspan font-weight="bold">Approved</tspan> &#8594; written back to the</text>
-    <text x="230" y="211" class="tx">chart. No person involved.</text>
-    <text x="230" y="225" class="tx"><tspan font-weight="bold">Unclear</tspan> &#8594; sent to a human, with</text>
-    <text x="230" y="236" class="tx">the file already assembled.</text>
-    <text x="230" y="250" class="tx"><tspan font-weight="bold">Denied</tspan> &#8594; appealed automatically.</text>
-
-    <rect x="452" y="24" width="168" height="80" class="bx"/>
-    <text x="460" y="38" class="tl">The audit trail</text>
-    <text x="460" y="51" class="tx">Five time-stamped entries</text>
-    <text x="460" y="62" class="tx">are written for every</text>
-    <text x="460" y="73" class="tx">request. Each decision</text>
-    <text x="460" y="84" class="tx">records the exact rule</text>
-    <text x="460" y="95" class="tx">that produced it.</text>
-
-    <rect x="452" y="120" width="168" height="66" class="bx"/>
-    <text x="460" y="134" class="tl">Nothing can be edited</text>
-    <text x="460" y="147" class="tx">Entries can only be added,</text>
-    <text x="460" y="158" class="tx">never changed, so a</text>
-    <text x="460" y="169" class="tx">regulator can see exactly</text>
-    <text x="460" y="180" class="tx">what happened and why.</text>
-
-    <path class="ar" d="M100,68 L100,78"/>
-    <path class="ar" d="M100,135 L100,145"/>
-    <path class="ar" d="M100,202 L100,212"/>
-    <path class="ar" d="M200,238 L220,56"/>
-    <path class="ar" d="M322,79 L322,90"/>
-    <path class="ar" d="M322,158 L322,170"/>
-    <path class="ar" d="M422,116 L450,78"/>
-    <path class="ar" d="M422,205 L450,148"/>
-
-    <text x="0" y="290" class="lb">Typical time from step 1 to step 7: 88.6 milliseconds, measured over twenty consecutive runs.</text>
-  </svg>
+{DIAGRAM}
 <p class="fcap">Figure 1. One authorization request, end to end. The heavier box at step 5 is a gate: if the signature does not check out, the insurer's software never reads the request at all.</p>
 
 <h3>2.2 Why Step 5 Matters</h3>
@@ -387,6 +309,13 @@ $ git log --shortstat a13f6cb
 <p>After engineering, sales and admin, the company loses $2.37 million in 2026 and $3.21 million in 2027, then makes $11.23 million in 2028. The deepest point is $5.58 million of cumulative losses, in late 2027.</p>
 <p><strong>We are asking for $8.0 million</strong>, which covers that with roughly a year of cushion beyond breaking even. In order of how much risk each removes, it buys the clinical rule library ($1.7m), the security certification no insurer will sign without ($520k), insurer business development ($5.67m), and the engineering to close the gaps in Table 7 ($7.46m).</p>
 <p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p>
+"""
 
-</body>
-</html>
+doc = (
+    '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
+    "<title>Pavo Cloud — Technical Execution Report</title>\n"
+    f"<style>{CSS}</style>\n</head>\n<body>\n{BODY}\n</body>\n</html>\n"
+)
+out = os.path.join(HERE, "report.html")
+open(out, "w", encoding="utf-8").write(doc)
+print(f"wrote {out} ({len(doc)/1024:.0f} KB)")
