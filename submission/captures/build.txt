@@ -1,0 +1,20 @@
+$ npm run build
+
+   ✓ Compiled successfully
+   ✓ Generating static pages (8/8)
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    175 B          96.2 kB
+├ ○ /_not-found                          873 B          88.2 kB
+├ ○ /audit                               4.38 kB        91.7 kB
+├ ○ /dashboard                           5.3 kB          101 kB
+├ ○ /demo                                7.62 kB          95 kB
+├ ○ /insure                              5.67 kB          93 kB
+└ ƒ /requests/[id]                       4.14 kB         100 kB
++ First Load JS shared by all            87.4 kB
+  ├ chunks/117-a45d7ec72ba41ba6.js       31.7 kB
+  ├ chunks/fd9d1056-2084b62c680baf80.js  53.6 kB
+  └ other shared chunks (total)          1.98 kB
+ƒ Middleware                             78.6 kB
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

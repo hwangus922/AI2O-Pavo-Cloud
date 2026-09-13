@@ -1,0 +1,12 @@
+$ curl -s localhost:8000/api/audit/$ID
+
+  auth_request.created       provider/metro-valley
+  aria.auth_request.sent     provider/metro-valley
+  aria.auth_request.received payer/meridian
+  decision.rendered          payer/meridian
+  aria.auth_response.sent    payer/meridian
+
+  decision.rendered, before -> after:
+    status:      pending    -> approved
+    rule_id:     None       -> PAVO-R002
+    confidence:  None       -> 1.0

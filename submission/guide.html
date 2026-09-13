@@ -72,7 +72,7 @@
   <div class="sub">What to capture for the "Build" Log, and what each deck slide should say</div>
 
   <h2><span class="n">A</span>The "Build" Log — exactly what to submit</h2>
-  <p>The brief asks for "screenshots of code, GitHub commit history, or version iterations — show us you are actually building." The strongest version of that is <b>evidence a judge can verify without you in the room</b>. Capture these nine artifacts. Every one is reproducible from the repository today; the commands are given.</p>
+  <p>The brief asks for "screenshots of code, GitHub commit history, or version iterations." The strongest version of that is <b>evidence a judge can verify without you in the room</b>. These nine artifacts are all reproducible from the repository today; the commands are given.</p>
 
   <table>
     <tr><th style="width:4%">#</th><th style="width:26%">Artifact</th><th style="width:36%">How to capture it</th><th>Why a judge cares</th></tr>
@@ -124,8 +124,8 @@
   </table>
 
   <div class="note">
-    <span class="t">How to present these — two pages, not nine</span>
-    Do not submit nine loose screenshots. Build a <b>two-page appendix</b> to the Technical Execution Report: page one is the commit graph and the green test run at full width (these are the two that land); page two is a 2×3 grid of the rest, each with a one-line caption saying what it proves. A judge should be able to skim it in forty seconds and come away with "these people actually built it."
+    <span class="t">This appendix is already built — <code>Pavo_Cloud_BuildLog_Appendix.pdf</code></span>
+    All nine artifacts were captured from the running system on 13 September 2026: terminal output verbatim on pages 1–2, the demo and its identity and zero-knowledge panels on pages 3–4, the dashboard and audit trail on page 5. <b>Re-capture it on your own machine before submitting</b> — the commands are on this page, and a judge should see your terminal, not ours. Keep the layout: each artifact carries a one-line caption saying what it proves, so the whole thing skims in forty seconds.
   </div>
 
   <div class="warn">
@@ -327,7 +327,7 @@
       <h4>Files to submit</h4>
       <ul class="chk">
         <li><b>Pavo_Cloud_Technical_Execution_Report.pdf</b> — 8 pages, at the limit</li>
-        <li><b>Build Log appendix</b> — 2 pages, the nine artifacts from §A</li>
+        <li><b>Pavo_Cloud_BuildLog_Appendix.pdf</b> — 5 pages, the nine artifacts from §A</li>
         <li><b>Pavo_Cloud_3Yr_Financial_Model.xlsx</b> — 7 tabs, live formulas</li>
         <li><b>Updated pitch deck</b> — 14 slides per §B</li>
         <li><b>Demo recording</b> — 15 s, embedded in the deck, not a separate link</li>
@@ -337,6 +337,7 @@
       <h4>Before you submit</h4>
       <ul class="chk">
         <li>Run <code>cd zk &amp;&amp; npm install</code>, then <code>pytest</code> — confirm <b>138 passed</b></li>
+        <li>Re-capture the appendix artifacts on your own machine</li>
         <li>Fix the README: it says 129 tests, the suite is 138</li>
         <li>Re-run the demo end to end on the machine you will present from</li>
         <li>Open the workbook and change one driver — confirm every tab moves</li>

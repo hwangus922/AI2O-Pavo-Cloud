@@ -1,0 +1,13 @@
+$ # replay an envelope whose payload was
+$ # altered after it was signed
+$ curl -X POST localhost:8000/api/aria/receive \
+      -d @tampered.json
+
+{
+  "detail": "Signature does not match the envelope contents."
+}
+HTTP 401
+
+  The rule engine is never reached. The
+  rejection is written to audit_log as
+  aria.verification.failed with the reason.

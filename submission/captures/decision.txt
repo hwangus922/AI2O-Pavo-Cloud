@@ -1,0 +1,11 @@
+$ curl -s -w "  total: %{time_total}s" -X POST localhost:8000/api/auth/request \
+    -d '{"procedure_code":"27447","diagnosis_code":"M17.11","patient_id":"mrn-99001"}'
+
+{
+  "outcome":     "APPROVED",
+  "rule_id":     "PAVO-R002",
+  "confidence":  1.0,
+  "status":      "approved",
+  "patient_id":  "pat_293e86d31f97652092022a1076aee370"
+}
+  total: 0.090117s

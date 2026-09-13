@@ -1,0 +1,33 @@
+$ curl -s -X POST localhost:8000/api/zk/generate \
+    -d '{"patient_age":42,"diagnosis_code":"M17.11","deductible_met":true}'
+
+{
+  "proof_id": "e8e370b4-7dbc-45d3-8b79-abae8961799d",
+  "public_signals": [
+    "1",
+    "1",
+    "1",
+    "18",
+    "196730042053713158391225580434902024231",
+    "1"
+  ],
+  "proof_digest": "sha256:cd2df83a6fe4b231b44e9c223eb88f75747566288720570977ab893ef175eda6",
+  "claims": {
+    "age_valid": true,
+    "diagnosis_valid": true,
+    "deductible_valid": true,
+    "min_age": "18",
+    "deductible_required": true
+  },
+  "criteria": {
+    "min_age": "18",
+    "approved_diagnosis_hash": "196730042053713158391225580434902024231",
+    "deductible_required": "1",
+    "circuit": "patient_criteria",
+    "protocol": "groth16"
+  },
+  "proof": "<groth16 pi_a / pi_b / pi_c - 8 field elements, elided>"
+}
+
+  NOTE: patient_age, diagnosis_code and deductible_met appear
+        nowhere in this response. Only the three verdicts do.
