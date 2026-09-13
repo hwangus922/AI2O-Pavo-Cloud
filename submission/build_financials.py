@@ -111,8 +111,8 @@ ws = wb.active
 ws.title = "1 Drivers"
 title(ws, "Pavo Cloud — Model Drivers",
       "Every other tab reads from here. Change a cell and the whole model moves.")
-header(ws, 4, ["Driver", "2026", "2027", "2028", "Unit", "Basis / source"],
-       [40, 14, 14, 14, 12, 52])
+header(ws, 4, ["Driver", "2026", "2027", "2028", "Basis / source"],
+       [40, 14, 14, 14, 60])
 
 r = 5
 r = section(ws, r, "VOLUME")
@@ -209,8 +209,8 @@ def dref(key, col):
 # ========================================================  2 · REVENUE ======
 ws = wb.create_sheet("2 Revenue")
 title(ws, "Revenue Build", "Bottom-up from the driver tab. No figure here is typed in.")
-header(ws, 4, ["Line", "2026", "2027", "2028", "Price", "Note"],
-       [40, 16, 16, 16, 14, 44])
+header(ws, 4, ["Line", "2026", "2027", "2028", "Note"],
+       [40, 16, 16, 16, 52])
 
 r = 5
 r = section(ws, r, "AUTHORIZATION VOLUME")
@@ -384,8 +384,8 @@ note_block(ws, r,
 ws = wb.create_sheet("6 Server & API Cost")
 title(ws, "Server and API Cost — measured, not assumed",
       "Derived from timings taken against the committed code on 13 September 2026.")
-header(ws, 4, ["Component", "Measured", "Unit cost", "Cost per auth", "How it was measured"],
-       [36, 16, 18, 16, 50])
+header(ws, 4, ["Component", "Measured", "How it was measured", "", ""],
+       [36, 16, 44, 16, 24])
 
 r = 5
 r = section(ws, r, "MEASURED PERFORMANCE")

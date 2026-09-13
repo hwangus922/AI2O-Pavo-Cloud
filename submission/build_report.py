@@ -38,16 +38,18 @@ CSS = """
   p { margin: 0 0 7px; text-align: justify; }
 
   .cap { font-style: italic; margin: 8px 0 3px; page-break-after: avoid; }
-  table { width: 100%; border-collapse: collapse; margin: 0 0 9px; font-size: 10.5pt; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 0 0 9px;
+    font-size: 10.5pt; border-bottom: 1px solid #000;
+  }
   tr { page-break-inside: avoid; }
   th {
-    text-align: left; font-weight: bold; padding: 3px 8px 3px 0;
-    border-bottom: 1px solid #000; vertical-align: bottom;
+    text-align: left; font-weight: bold; color: #1274C4; padding: 3px 8px 3px 0;
+    border-bottom: 1px solid #555555; vertical-align: bottom;
   }
-  td { padding: 2.5px 8px 2.5px 0; vertical-align: top; border-bottom: 1px solid #d9d9d9; }
-  tr:last-child td { border-bottom: none; }
+  td { padding: 2.5px 8px 2.5px 0; vertical-align: top; }
   td.n, th.n { text-align: right; padding-right: 0; white-space: nowrap; }
-  .tot td { border-top: 1px solid #000; border-bottom: none; font-weight: bold; }
+  .tot td { border-top: 1px solid #555555; font-weight: bold; }
 
   figure { margin: 6px 0 3px; page-break-inside: avoid; }
   figure img { width: 74%; display: block; border: 1px solid #bbb; }

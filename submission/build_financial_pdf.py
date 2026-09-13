@@ -155,38 +155,37 @@ def render_sheet(name: str, cols: list[int], widths: list[str]) -> str:
 CSS = """
 @page { size: Letter; margin: 0.5in 0.55in 0.45in 0.55in; }
 :root{--ink:#10151f;--body:#2b3440;--muted:#5d6875;--line:#d6dbe2;--hair:#e8ecf1;
-      --navy:#16324f;--accent:#1f6f8b;--good:#1c6b4a;--bad:#9b2c2c;--wash:#f5f7fa;--band:#edf1f5}
+      --navy:#1274C4;--accent:#1274C4;--good:#1c6b4a;--bad:#9b2c2c;--wash:#f5f7fa;--band:#edf1f5}
 *{box-sizing:border-box}
-body{margin:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;font-size:8.1pt;
-     line-height:1.3;color:var(--body);-webkit-font-smoothing:antialiased}
+body{margin:0;font-family:"Times New Roman",Times,serif;font-size:9.6pt;
+     line-height:1.24;color:var(--body);-webkit-font-smoothing:antialiased}
 .page{page-break-after:always;display:flex;flex-direction:column;min-height:948px}
 .page:last-child{page-break-after:auto}
-h1{font-size:18pt;margin:0 0 3px;color:var(--ink);letter-spacing:-.4px;line-height:1.1}
-h2{font-size:10.4pt;margin:0 0 5px;color:var(--navy);padding-bottom:4px;
-   border-bottom:1.6px solid var(--navy);letter-spacing:-.15px}
-h2 .n{color:var(--accent);font-weight:700;margin-right:7px}
+h1{font-size:16pt;margin:0 0 3px;color:var(--ink);letter-spacing:-.4px;line-height:1.1}
+h2{font-size:11pt;font-weight:bold;margin:0 0 5px;color:#000;padding-bottom:0;border-bottom:none}
+h2 .n{color:#1274C4;font-weight:700;margin-right:7px}
 h3{font-size:9pt;margin:9px 0 2px;color:var(--ink)}
 .cover-rule{height:5px;background:var(--navy);margin-bottom:11px}
-.eyebrow{font-size:7.4pt;letter-spacing:.17em;text-transform:uppercase;color:var(--accent);
+.eyebrow{font-size:9pt;letter-spacing:.17em;text-transform:uppercase;color:var(--accent);
          font-weight:700;margin-bottom:6px}
-.sub{font-size:10pt;color:var(--muted);margin:2px 0 7px}
+.sub{font-size:11pt;color:#555;font-style:italic;margin:2px 0 9px}
 p{margin:0 0 5px}
 b{color:var(--ink);font-weight:600}
 code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:7.2pt;background:var(--wash);
      padding:.5px 3px;border-radius:2px;color:var(--navy)}
-table{width:100%;border-collapse:collapse;margin:3px 0 6px;font-size:7.7pt}
-td{padding:2.4px 6px;border-bottom:.8px solid var(--hair);vertical-align:top}
+table{width:100%;border-collapse:collapse;margin:3px 0 7px;font-size:8.6pt;border-bottom:1px solid #000}
+td{padding:2px 6px;vertical-align:top}
 td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.b{font-weight:700;color:var(--ink)}
 td.good{color:var(--good)} td.bad{color:var(--bad)}
 td.mut{color:var(--muted)} td.acc{color:var(--accent)}
-td.txt{color:var(--muted);font-size:7.3pt}
-tr.hd td,td.hd{font-weight:700;color:var(--navy);font-size:7pt;text-transform:uppercase;
-        letter-spacing:.05em;border-bottom:1.4px solid var(--navy);padding-bottom:3px}
-tr.sec td{font-weight:700;color:var(--accent);font-size:8.4pt;padding-top:8px;
+td.txt{color:#555;font-size:8.2pt}
+tr.hd td,td.hd{font-weight:700;color:#1274C4;font-size:8.2pt;
+        border-bottom:1px solid #555555;padding-bottom:3px}
+tr.sec td{font-weight:700;color:#1274C4;font-size:9pt;padding-top:8px;
           border-bottom:none;letter-spacing:.02em}
-tr.noteRow td{background:var(--wash);border-left:2.8px solid var(--accent);
-              font-style:italic;color:var(--navy);padding:5px 8px;font-size:7.2pt;
+tr.noteRow td{background:#F2F7FC;border-left:2.5px solid #1274C4;
+              font-style:italic;color:#000;padding:5px 8px;font-size:8.2pt;
               border-bottom:none}
 .footer{margin-top:auto;padding-top:4px;font-size:6.5pt;color:#9aa4b0;
         border-top:.8px solid var(--hair);display:flex;justify-content:space-between}
@@ -211,12 +210,12 @@ p1 = page(f"""
   <p>This is the only tab with typed-in numbers. Everything on pages 2–4 is a formula pointing back
   here, so changing one assumption moves the whole model. The three revenue targets carried over from
   the Round 1 narrative — $1.0M, $8.2M, $36.1M — are not typed anywhere; they fall out of these inputs.</p>
-  {render_sheet("1 Drivers", [1,2,3,4,6], ["31%","11%","11%","11%","36%"])}
+  {render_sheet("1 Drivers", [1,2,3,4,5], ["30%","11%","11%","11%","37%"])}
 """, 1, T)
 
 p2 = page(f"""
   <h2><span class="n">2</span>Revenue build</h2>
-  {render_sheet("2 Revenue", [1,2,3,4,6], ["32%","14%","14%","14%","26%"])}
+  {render_sheet("2 Revenue", [1,2,3,4,5], ["31%","14%","14%","14%","27%"])}
   <h2><span class="n">3</span>Cost of revenue and gross margin</h2>
   {render_sheet("3 Cost of Revenue", [1,2,3,4,5], ["32%","14%","14%","14%","26%"])}
 """, 2, T)
