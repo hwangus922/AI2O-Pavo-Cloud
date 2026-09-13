@@ -28,26 +28,30 @@ CSS = """
     color: #000;
   }
 
-  .doctitle { font-size: 16pt; font-weight: bold; margin: 0 0 2px; }
-  .docsub   { font-style: italic; margin: 0 0 2px; }
-  .docline  { margin: 0 0 16px; }
+  .doctitle { font-size: 16pt; font-weight: bold; margin: 0 0 3px; text-align: center; }
+  .docsub   { font-style: italic; margin: 0 0 3px; text-align: center; }
+  .docline  { margin: 0 0 20px; text-align: center; }
 
-  h2 { font-size: 12pt; font-weight: bold; margin: 15px 0 5px; page-break-after: avoid; }
-  h3 { font-size: 12pt; font-weight: bold; margin: 12px 0 4px; page-break-after: avoid; }
+  h2 { font-size: 12pt; font-weight: bold; margin: 17px 0 6px; page-break-after: avoid; }
+  h3 { font-size: 12pt; font-weight: bold; margin: 14px 0 5px; page-break-after: avoid; }
 
-  p { margin: 0 0 7px; text-align: justify; }
+  p { margin: 0 0 8px; text-align: justify; }
 
-  .cap { font-style: italic; margin: 8px 0 3px; page-break-after: avoid; }
+  .cap { font-style: italic; margin: 10px 0 4px; page-break-after: avoid; }
   table {
-    width: 100%; border-collapse: collapse; margin: 0 0 9px;
+    width: 100%; border-collapse: collapse; margin: 2px 0 11px;
     font-size: 10.5pt; border-bottom: 1px solid #000;
   }
   tr { page-break-inside: avoid; }
   th {
-    text-align: left; font-weight: bold; color: #1274C4; padding: 3px 8px 3px 0;
+    text-align: left; font-weight: bold; color: #1274C4; padding: 4px 10px 4px 0;
     border-bottom: 1px solid #555555; vertical-align: bottom;
   }
-  td { padding: 2.5px 8px 2.5px 0; vertical-align: top; }
+  td {
+    padding: 5px 10px 5px 0; vertical-align: top;
+    border-bottom: 1px solid #DCDCDC;
+  }
+  tr:last-child td { border-bottom: none; }
   td.n, th.n { text-align: right; padding-right: 0; white-space: nowrap; }
   .tot td { border-top: 1px solid #555555; font-weight: bold; }
 
