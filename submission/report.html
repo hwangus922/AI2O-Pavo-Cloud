@@ -129,6 +129,11 @@
   }
 
   svg { display: block; }
+  pre.term { background:#12181f; color:#dfe6ee; border:none; border-left:none;
+             border-radius:3px; padding:6px 8px; font-size:5.9pt; line-height:1.42; }
+  figure { margin:0; }
+  figure img { width:100%; display:block; border:1px solid var(--line); border-radius:3px; }
+  .two > * { min-width:0; }
   .cap { font-size: 6.9pt; color: var(--muted); margin-top: 2px; font-style: italic; }
 </style>
 </head>
@@ -487,76 +492,82 @@
 <!-- ============================ PAGE 4 ============================ -->
 <div class="page">
   <h2><span class="n">6</span>The Build Log — proof of progress</h2>
-  <p>Repository: <code>hwangus922/AI2O-Pavo-Cloud</code>. Twelve commits across five merged pull requests — one per build phase, plus a hardening pass. Every figure below was produced by the commands in §6.3, run against the committed code.</p>
+  <p>Repository <code>hwangus922/AI2O-Pavo-Cloud</code>: twelve commits across five merged pull requests — one per phase, plus a hardening pass. Everything below was captured from the running system on 13 September 2026.</p>
 
   <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
     <div class="kpi"><div class="v">5</div><div class="l">Merged PRs, 4 phases</div></div>
-    <div class="kpi"><div class="v">19,541</div><div class="l">Lines added</div></div>
-    <div class="kpi"><div class="v">138</div><div class="l">Tests, all passing</div></div>
+    <div class="kpi"><div class="v">19,541</div><div class="l">Lines of product code</div></div>
+    <div class="kpi"><div class="v">138</div><div class="l">Tests, 0 failing</div></div>
     <div class="kpi"><div class="v">23</div><div class="l">API endpoints</div></div>
     <div class="kpi"><div class="v">9</div><div class="l">Database tables</div></div>
   </div>
 
-  <h3>6.1 &nbsp;Commit history</h3>
-  <table class="tight">
-    <tr><th style="width:6%">PR</th><th style="width:11%">Date</th><th style="width:25%">Phase</th><th style="width:15%" class="num">Diff</th><th>What it delivered</th></tr>
-    <tr>
-      <td><b>#1</b></td><td>7 Sep</td><td>Phase 1 — core loop</td><td class="num">+9,429 / 46 files</td>
-      <td>Provider and payer agents, ARIA v1.0 envelope, FHIR R4 assembly, five&#8209;rule engine, audit log, Next.js dashboard, Supabase schema.</td>
-    </tr>
-    <tr>
-      <td><b>#2</b></td><td>8 Sep</td><td>Phase 2 — Insure</td><td class="num">+2,364 / 28 files</td>
-      <td>Document parsing, CPT mapping, facility quotes, the ranking algorithm and its cost breakdown, upload storage, consumer UI.</td>
-    </tr>
-    <tr>
-      <td><b>#3</b></td><td>9 Sep</td><td>Phase 3 — identity &amp; appeals</td><td class="num">+2,948 / 34 files</td>
-      <td>RSA&#8209;2048 provisioning and rotation, RSASSA&#8209;PSS signing and verification, denial classifier, PubMed retrieval, appeal drafting, the 0.70 threshold.</td>
-    </tr>
-    <tr>
-      <td><b>#4</b></td><td>9 Sep</td><td>Phase 4 — ZK &amp; demo</td><td class="num">+3,922 / 50 files</td>
-      <td>The circom circuit and compiled artifacts, snarkjs bridge, the six&#8209;step guided demo, the audit explorer with CSV export, live system statistics.</td>
-    </tr>
-    <tr>
-      <td><b>#5</b></td><td>10 Sep</td><td>Deployment hardening</td><td class="num">+409 / 10 files</td>
-      <td>Three failures that only appear when deployed: key rotation across restarts, demo document loading, CORS handling.</td>
-    </tr>
-    <tr class="tot"><td colspan="3">Total across 12 commits</td><td class="num">+19,541 / −367</td><td>170 file changes</td></tr>
-  </table>
+  <h3>6.1 &nbsp;Commit history &nbsp;<span class="cap" style="font-style:normal">— <code>git log --first-parent a13f6cb</code></span></h3>
+  <div class="two" style="grid-template-columns:1.42fr 1fr;gap:11px">
+    <div><pre class="term">$ git log --first-parent --date=short --pretty=&quot;%h %ad  %s&quot; a13f6cb
 
-  <div class="two">
+  a13f6cb 2026-09-12  Fix the three failures that break a deployed demo (#5)
+  abc1b5c 2026-09-09  Phase 4: demo flow, audit UI, and a real ZK proof (#4)
+  99bbb96 2026-09-08  Phase 3: autonomous appeals and cryptographic identity (#3)
+  5f26194 2026-09-07  Phase 2: Insure price transparency (#2)
+  e48ec54 2026-09-07  Phase 1: autonomous prior authorization core loop (#1)
+  d5ea3a7 2026-09-07  Initial commit
+
+$ git log --shortstat a13f6cb   # summed
+
+  12 commits (6 on main, 6 on phase branches)
+  170 file changes   +19541 insertions   -367 deletions</pre></div>
     <div>
-      <h3>6.2 &nbsp;Test suite — 138 passing, 0 failing</h3>
-      <table class="tight">
-        <tr><th>Suite</th><th class="num">Fns</th><th>Covers</th></tr>
-        <tr><td><code>test_rules.py</code></td><td class="num">6</td><td>All five rules, precedence, code normalisation, every decision carrying a rule ID</td></tr>
-        <tr><td><code>test_flow.py</code></td><td class="num">19</td><td>Webhook end to end, FHIR assembly, raw PHI never stored, signature round trip, <b>tamper rejection</b>, private keys never persisted</td></tr>
-        <tr><td><code>test_insure.py</code></td><td class="num">32</td><td>Upload validation, CPT mapping, both cost formulas, every ranking branch, sample&#8209;data labelling</td></tr>
-        <tr><td><code>test_appeals.py</code></td><td class="num">29</td><td>Denial classification, PubMed parsing against fixtures, each appeal outcome, <b>no automated final denial</b></td></tr>
-        <tr><td><code>test_zk.py</code></td><td class="num">22</td><td>Real proofs, every criterion branch, tamper rejection, <b>private inputs absent from responses</b>, system stats</td></tr>
-        <tr><td><code>test_persistence.py</code></td><td class="num">7</td><td>Supabase interface conformance, key rotation across two boots</td></tr>
-        <tr class="tot"><td>115 functions</td><td class="num">138</td><td>cases, 23.4 s</td></tr>
+      <table class="tight" style="margin-top:0">
+        <tr><th>Phase</th><th class="num">Diff</th><th>Delivered</th></tr>
+        <tr><td><b>#1</b> core loop</td><td class="num">+9,429</td><td>Agents, ARIA v1.0, FHIR R4, rule engine, audit log, dashboard</td></tr>
+        <tr><td><b>#2</b> Insure</td><td class="num">+2,364</td><td>Document parsing, CPT mapping, the ranking algorithm</td></tr>
+        <tr><td><b>#3</b> identity</td><td class="num">+2,948</td><td>RSA&#8209;2048 signing, denial classifier, appeals, the 0.70 threshold</td></tr>
+        <tr><td><b>#4</b> ZK &amp; demo</td><td class="num">+3,922</td><td>circom circuit, snarkjs bridge, six&#8209;step demo, audit explorer</td></tr>
+        <tr><td><b>#5</b> hardening</td><td class="num">+409</td><td>Key rotation across restarts, CORS, demo documents</td></tr>
       </table>
-      <p class="cap">Function and case counts differ because several tests are parameterised — <code>test_five_hardcoded_rules</code> alone runs one case per rule.</p>
+    </div>
+  </div>
+
+  <div class="two" style="gap:11px">
+    <div>
+      <h3>6.2 &nbsp;The test suite</h3>
+      <pre class="term">$ .venv/bin/python -m pytest
+
+........................................................
+................ [ 52%]
+........................................................
+..........       [100%]
+138 passed, 1 warning in 22.37s</pre>
+      <p class="cap"><b>115 functions, 138 cases</b> — <code>rules</code> 6 · <code>flow</code> 19 · <code>insure</code> 32 · <code>appeals</code> 29 · <code>zk</code> 22 · <code>persistence</code> 7. They cover every rule and its precedence, raw PHI never reaching storage, tamper rejection, every appeal outcome, and that private ZK inputs never appear in a response.</p>
     </div>
     <div>
-      <h3>6.3 &nbsp;Codebase and build</h3>
-      <table class="tight">
-        <tr><th>Component</th><th class="num">Lines</th><th>Status</th></tr>
-        <tr><td>Backend — FastAPI, Python</td><td class="num">6,799</td><td><span class="pill p-ok">138 tests pass</span></td></tr>
-        <tr><td>Frontend — Next.js 14, TypeScript</td><td class="num">3,703</td><td><span class="pill p-ok">builds clean</span></td></tr>
-        <tr><td>Database — SQL migrations</td><td class="num">183</td><td>4 migrations, 9 tables</td></tr>
-        <tr><td>ZK — circom + snarkjs</td><td class="num">180</td><td>artifacts committed</td></tr>
-      </table>
-      <p><b>Frontend production build</b> compiles clean — 7 routes, 8 static pages, 87.4&nbsp;kB shared JS — and <code>tsc --noEmit</code> passes with zero errors. <b><code>/health</code></b> reports storage backend, file store, whether a model key is configured, and whether the ZK artifacts are present, so the operating mode is never ambiguous during a demo.</p>
-      <h4>The 30-second demo</h4>
-      <p><code>/demo</code> runs all six steps from live data with no further input: EHR trigger, identity, zero&#8209;knowledge, rule engine, decision, price. Measured full run: <b>~11 seconds.</b> Each step also has a manual Next button, and a failed step shows a retry rather than a broken page.</p>
-      <h4>Reproduce every number on this page</h4>
-<pre>git log --shortstat     # +19,541 / −367, 170 files
-cd backend && .venv/bin/python -m pytest  # 138 passed
-cd frontend && npx tsc --noEmit && npm run build
-curl -s localhost:8000/api/system/stats
-  # average_resolution_seconds: 0.0447</pre>
-      <p class="cap">The ZK tests need <code>cd zk &amp;&amp; npm install</code> first; without snarkjs those 7 fail on a missing dependency rather than a logic error, and <code>/health</code> reports <code>zk_artifacts_available</code> accordingly.</p>
+      <h3>6.3 &nbsp;A live decision, end to end</h3>
+      <pre class="term">$ curl -X POST localhost:8000/api/auth/request \
+    -d &#x27;{&quot;procedure_code&quot;:&quot;27447&quot;,&quot;diagnosis_code&quot;:&quot;M17.11&quot;,
+         &quot;patient_id&quot;:&quot;mrn-99001&quot;}&#x27; -w &#x27;  total: %{time_total}s&#x27;
+
+{
+  &quot;outcome&quot;:     &quot;APPROVED&quot;,
+  &quot;rule_id&quot;:     &quot;PAVO-R002&quot;,
+  &quot;confidence&quot;:  1.0,
+  &quot;status&quot;:      &quot;approved&quot;,
+  &quot;patient_id&quot;:  &quot;pat_293e86d31f97652092022a1076aee370&quot;
+}
+  total: 0.090117s</pre>
+      <p class="cap">Note <code>patient_id</code>: <code>mrn-99001</code> went in, a SHA&#8209;256 hash came back. The raw identifier never reaches storage.</p>
+    </div>
+  </div>
+
+  <h3>6.4 &nbsp;The running system</h3>
+  <div class="two" style="gap:11px">
+    <div>
+      <figure><img src="assets/demo_complete.png" alt="The six-step demo, completed"></figure>
+      <p class="cap"><code>/demo</code> — all six steps from live data, no input after the first click. Measured across three consecutive runs: <b>11.00 s, 11.07 s, 11.17 s.</b></p>
+    </div>
+    <div>
+      <figure><img src="assets/dashboard.png" alt="The authorization dashboard"></figure>
+      <p class="cap"><code>/dashboard</code> — every decision with its rule, 44&nbsp;ms average resolution, live ARIA feed. The <b>Escalated</b> row is <code>PAVO-R003</code>, waiting for a human.</p>
     </div>
   </div>
 

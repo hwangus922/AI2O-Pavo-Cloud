@@ -1,5 +1,6 @@
-$ curl -s -w "  total: %{time_total}s" -X POST localhost:8000/api/auth/request \
-    -d '{"procedure_code":"27447","diagnosis_code":"M17.11","patient_id":"mrn-99001"}'
+$ curl -X POST localhost:8000/api/auth/request \
+    -d '{"procedure_code":"27447","diagnosis_code":"M17.11",
+         "patient_id":"mrn-99001"}' -w '  total: %{time_total}s'
 
 {
   "outcome":     "APPROVED",
