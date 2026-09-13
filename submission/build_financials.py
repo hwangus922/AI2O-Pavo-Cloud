@@ -25,6 +25,7 @@ BAND = "EDF1F5"
 MONEY = '$#,##0;($#,##0)'
 MONEY2 = '$#,##0.00;($#,##0.00)'
 MONEY4 = '$#,##0.0000'
+MONEY6 = '$#,##0.000000'
 NUM = '#,##0'
 PCT = '0%'
 PCT1 = '0.0%'
@@ -412,7 +413,7 @@ r += 1
 compute_row = r
 ws.cell(row=r, column=1, value="Compute — vCPU seconds")
 ws.cell(row=r, column=2, value="=B6").number_format = '0.0000'
-ws.cell(row=r, column=3, value=0.0000125).number_format = MONEY4
+ws.cell(row=r, column=3, value=0.0000125).number_format = MONEY6
 ws.cell(row=r, column=4, value=f"=B{r}*C{r}").number_format = '$0.000000'
 ws.cell(row=r, column=5, value="$0.045/vCPU-hour on a managed container platform")
 r += 1
@@ -424,19 +425,19 @@ ws.cell(row=r, column=5, value="6 kB held 84 months at $0.125/GB/month")
 r += 1
 ws.cell(row=r, column=1, value="ZK proof (20% of authorizations)")
 ws.cell(row=r, column=2, value="=B9*0.2").number_format = '0.0000'
-ws.cell(row=r, column=3, value=0.0000125).number_format = MONEY4
+ws.cell(row=r, column=3, value=0.0000125).number_format = MONEY6
 ws.cell(row=r, column=4, value=f"=B{r}*C{r}").number_format = '$0.000000'
 ws.cell(row=r, column=5, value="Short-lived Node process; only when the payer requires it")
 r += 1
 ws.cell(row=r, column=1, value="Model API tokens")
 ws.cell(row=r, column=2, value=0).number_format = NUM
-ws.cell(row=r, column=3, value=0).number_format = MONEY4
+ws.cell(row=r, column=3, value=0).number_format = MONEY6
 ws.cell(row=r, column=4, value=0).number_format = '$0.000000'
 ws.cell(row=r, column=5, value="No inference on the authorization path — by design")
 r += 1
 ws.cell(row=r, column=1, value="Load balancing, logging, observability overhead")
 ws.cell(row=r, column=2, value=1).number_format = NUM
-ws.cell(row=r, column=3, value=0.0005).number_format = MONEY4
+ws.cell(row=r, column=3, value=0.0005).number_format = MONEY6
 ws.cell(row=r, column=4, value=f"=B{r}*C{r}").number_format = '$0.000000'
 ws.cell(row=r, column=5, value="Allocated; dominates the measured components")
 r += 1
@@ -453,7 +454,7 @@ ws.cell(row=r, column=4, value=f"={dref('fee','D')}").number_format = MONEY2
 r += 1
 ws.cell(row=r, column=1, value="Marginal gross margin per authorization").font = Font(bold=True, size=9)
 c = ws.cell(row=r, column=4, value=f"=1-D{tot}/D{r-1}")
-c.number_format = PCT1
+c.number_format = '0.00%' 
 c.font = Font(bold=True, size=9, color=GOOD)
 r += 2
 
