@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pavo Cloud — Build Log & Pitch Deck Guide</title>
+<style>
+  @page { size: Letter; margin: 0.55in 0.6in 0.5in 0.6in; }
+  :root {
+    --ink:#10151f; --body:#2b3440; --muted:#5d6875; --line:#d6dbe2; --hair:#e8ecf1;
+    --navy:#16324f; --accent:#1f6f8b; --good:#1c6b4a; --warn:#8a5a12; --bad:#9b2c2c; --wash:#f5f7fa;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+         font-size:8.7pt; line-height:1.38; color:var(--body); -webkit-font-smoothing:antialiased; }
+  .page { page-break-after:always; display:flex; flex-direction:column; min-height:938px; }
+  .page:last-child { page-break-after:auto; }
+  h1 { font-size:19pt; line-height:1.1; margin:0 0 3px; color:var(--ink); letter-spacing:-0.4px; }
+  h2 { font-size:11.2pt; margin:0 0 6px; color:var(--navy); padding-bottom:4px;
+       border-bottom:1.6px solid var(--navy); letter-spacing:-0.15px; }
+  h2 .n { color:var(--accent); font-weight:700; margin-right:7px; }
+  h3 { font-size:9.2pt; margin:9px 0 3px; color:var(--ink); }
+  h4 { font-size:8.3pt; margin:8px 0 2px; color:var(--navy); text-transform:uppercase; letter-spacing:.06em; }
+  p { margin:0 0 5px; }
+  ul,ol { margin:0 0 6px; padding-left:15px; }
+  li { margin-bottom:2.5px; }
+  b,strong { color:var(--ink); font-weight:600; }
+  code { font-family:"SF Mono",Menlo,Consolas,monospace; font-size:7.5pt;
+         background:var(--wash); padding:.5px 3px; border-radius:2px; color:var(--navy); }
+  .cover-rule { height:5px; background:var(--navy); margin-bottom:12px; }
+  .eyebrow { font-size:7.6pt; letter-spacing:.17em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:6px; }
+  .sub { font-size:10.5pt; color:var(--muted); margin:2px 0 8px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  table { width:100%; border-collapse:collapse; margin:4px 0 7px; font-size:7.9pt; }
+  th { text-align:left; font-weight:700; color:var(--navy); font-size:7.1pt; text-transform:uppercase;
+       letter-spacing:.05em; border-bottom:1.4px solid var(--navy); padding:4px 6px 3px; vertical-align:bottom; }
+  td { padding:3.4px 6px; border-bottom:.8px solid var(--hair); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  .note { background:var(--wash); border-left:2.8px solid var(--accent); padding:6px 8px; margin:6px 0 8px; }
+  .note .t { font-weight:700; color:var(--navy); font-size:8.1pt; display:block; margin-bottom:2px; }
+  .warn { background:#fdfaf4; border-left:2.8px solid var(--warn); padding:6px 8px; margin:6px 0 8px; }
+  .warn .t { font-weight:700; color:var(--warn); font-size:8.1pt; display:block; margin-bottom:2px; }
+  pre { background:#fafbfc; border:1px solid var(--hair); border-left:2.5px solid var(--accent);
+        padding:5px 8px; margin:4px 0 6px; font-family:"SF Mono",Menlo,Consolas,monospace;
+        font-size:6.9pt; line-height:1.4; color:var(--navy); white-space:pre; overflow:hidden; }
+  .pill { display:inline-block; font-size:6.5pt; font-weight:700; text-transform:uppercase;
+          letter-spacing:.05em; padding:1.5px 5px; border-radius:8px; white-space:nowrap; }
+  .p-ok{background:#e2f0e9;color:var(--good)} .p-warn{background:#fbf0da;color:var(--warn)}
+  .p-bad{background:#f8e5e5;color:var(--bad)} .p-info{background:#e4eef3;color:var(--accent)}
+  .slide { border:1px solid var(--line); border-left:3px solid var(--accent); padding:7px 9px; margin-bottom:7px; }
+  .slide .hd { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px; }
+  .slide .num { font-size:8pt; font-weight:700; color:var(--accent); }
+  .slide .ttl { font-size:9.4pt; font-weight:700; color:var(--ink); }
+  .slide .head { font-size:7.4pt; color:var(--muted); font-style:italic; }
+  .layout { background:#fafbfc; border:1px dashed var(--line); padding:5px 7px; margin:4px 0 3px;
+            font-size:7.6pt; color:var(--navy); }
+  .layout b { color:var(--navy); }
+  .footer { margin-top:auto; padding-top:4px; font-size:6.6pt; color:#9aa4b0;
+            border-top:.8px solid var(--hair); display:flex; justify-content:space-between; }
+  .cap { font-size:6.9pt; color:var(--muted); margin-top:2px; font-style:italic; }
+  .chk { list-style:none; padding-left:0; }
+  .chk li { padding-left:15px; position:relative; margin-bottom:4px; }
+  .chk li:before { content:"☐"; position:absolute; left:0; color:var(--accent); font-size:9pt; }
+</style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1 ==================== -->
+<div class="page">
+  <div class="cover-rule"></div>
+  <div class="eyebrow">Round 2 Submission &nbsp;·&nbsp; Companion Guide</div>
+  <h1>Build Log &amp; Pitch Deck Guide</h1>
+  <div class="sub">What to capture for the "Build" Log, and what each deck slide should say</div>
+
+  <h2><span class="n">A</span>The "Build" Log — exactly what to submit</h2>
+  <p>The brief asks for "screenshots of code, GitHub commit history, or version iterations — show us you are actually building." The strongest version of that is <b>evidence a judge can verify without you in the room</b>. Capture these nine artifacts. Every one is reproducible from the repository today; the commands are given.</p>
+
+  <table>
+    <tr><th style="width:4%">#</th><th style="width:26%">Artifact</th><th style="width:36%">How to capture it</th><th>Why a judge cares</th></tr>
+    <tr>
+      <td><b>1</b></td><td><b>Commit graph</b><br><span class="pill p-info">highest value</span></td>
+      <td>GitHub → Insights → Network, or the commits list showing all 12 commits and 5 merged PRs with dates.</td>
+      <td>Shows a sustained build across four phases, not one weekend. The PR-per-phase structure reads as discipline.</td>
+    </tr>
+    <tr>
+      <td><b>2</b></td><td><b>Green test run</b><br><span class="pill p-ok">strongest single image</span></td>
+      <td><code>cd backend &amp;&amp; .venv/bin/python -m pytest -v</code> — capture the tail showing <b>138 passed</b> and the runtime.</td>
+      <td>Almost no hackathon project has a real test suite. This one image separates you from the field.</td>
+    </tr>
+    <tr>
+      <td><b>3</b></td><td><b>A test that proves a safety claim</b></td>
+      <td>Screenshot the source of <code>test_tampered_envelope_fails_verification</code> and <code>test_payer_escalates_rather_than_finally_denying</code>, side by side.</td>
+      <td>Turns "we have human-in-the-loop" from a claim into something a judge can read in nine lines of code.</td>
+    </tr>
+    <tr>
+      <td><b>4</b></td><td><b>The rule engine source</b></td>
+      <td><code>backend/app/rules.py</code>, the <code>COVERAGE_RULES</code> tuple and <code>evaluate_request</code>.</td>
+      <td>Makes "every decision carries a rule ID" visibly true — the <code>Decision</code> return type cannot omit one.</td>
+    </tr>
+    <tr>
+      <td><b>5</b></td><td><b>A live decision, with timing</b></td>
+      <td>Terminal: the <code>curl</code> to <code>/api/auth/request</code> with <code>-w '%{time_total}'</code>, showing the outcome, the rule ID and the elapsed time.</td>
+      <td>The 88.6 ms claim, demonstrated rather than asserted.</td>
+    </tr>
+    <tr>
+      <td><b>6</b></td><td><b>The audit trail for that request</b></td>
+      <td><code>/audit</code> in the UI filtered to that request, or <code>GET /api/audit/{id}</code> showing the five entries.</td>
+      <td>Regulatory credibility. Five timestamped rows with before/after state is what a compliance reviewer looks for.</td>
+    </tr>
+    <tr>
+      <td><b>7</b></td><td><b>The ZK proof response</b></td>
+      <td><code>POST /api/zk/generate</code> output — the six public signals and the three verdicts, with no clinical data anywhere in the body.</td>
+      <td>The privacy story becomes concrete: the judge can see what <i>isn't</i> in the response.</td>
+    </tr>
+    <tr>
+      <td><b>8</b></td><td><b>The six-step demo</b></td>
+      <td><code>/demo</code> mid-run, plus a 15-second screen recording of the full ~11-second run.</td>
+      <td>The recording is your insurance policy if live demo fails on the day. Bring it regardless.</td>
+    </tr>
+    <tr>
+      <td><b>9</b></td><td><b>Clean production build</b></td>
+      <td><code>cd frontend &amp;&amp; npm run build</code> — the route table with all 7 routes.</td>
+      <td>Signals this is deployable software, not a prototype held together for a demo.</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <span class="t">How to present these — two pages, not nine</span>
+    Do not submit nine loose screenshots. Build a <b>two-page appendix</b> to the Technical Execution Report: page one is the commit graph and the green test run at full width (these are the two that land); page two is a 2×3 grid of the rest, each with a one-line caption saying what it proves. A judge should be able to skim it in forty seconds and come away with "these people actually built it."
+  </div>
+
+  <div class="warn">
+    <span class="t">Two things to get right before you capture anything</span>
+    <b>Run <code>cd zk &amp;&amp; npm install</code> first.</b> Without snarkjs installed, 7 of the ZK tests fail on a missing dependency and your screenshot says "131 passed, 7 failed" — which reads as broken code rather than a missing package. With it installed you get a clean 138.<br>
+    <b>Update the README.</b> It still says 129 tests; the suite is now 138. A judge who runs the command and gets a different number than your documentation claims will trust the rest of your numbers less. It is a one-line fix.
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Build Log &amp; Pitch Deck Guide</span><span>Page 1 of 5</span></div>
+</div>
+
+<!-- ==================== PAGE 2 ==================== -->
+<div class="page">
+  <h2><span class="n">B</span>The Updated Pitch Deck — structure</h2>
+  <p>Fourteen slides. The changes from Round 1 are: proof replaces promise wherever you have it, the new <b>Current Traction</b> slide goes at position 9 (after the product is understood, before the money), and the competitive slide gets sharper now that the thing is built.</p>
+
+  <table>
+    <tr><th style="width:6%">#</th><th style="width:26%">Slide</th><th style="width:16%">Status</th><th>The one thing it must land</th></tr>
+    <tr><td>1</td><td>Title</td><td><span class="pill p-info">refresh</span></td><td>Add the tagline and one proof number.</td></tr>
+    <tr><td>2</td><td>The Problem</td><td><span class="pill p-ok">keep</span></td><td>3–14 days, 94%, 97%, $35B. It worked; do not touch it.</td></tr>
+    <tr><td>3</td><td>Why now — CMS-0057-F</td><td><span class="pill p-warn">promote</span></td><td>Was buried in §4.2. It is your timing argument. Give it a slide.</td></tr>
+    <tr><td>4</td><td>The Solution</td><td><span class="pill p-ok">keep</span></td><td>Agent-to-agent, no human starts the request.</td></tr>
+    <tr><td>5</td><td>How it works</td><td><span class="pill p-info">rebuild</span></td><td>Replace the five-step table with the pipeline schematic from the report.</td></tr>
+    <tr><td>6</td><td><b>It works — live</b></td><td><span class="pill p-bad">new</span></td><td>The demo. This is the slide the round is won on.</td></tr>
+    <tr><td>7</td><td>Safety &amp; human-in-the-loop</td><td><span class="pill p-bad">new</span></td><td>The escalation ladder. Pre-empts the question every judge asks.</td></tr>
+    <tr><td>8</td><td>Competition</td><td><span class="pill p-info">sharpen</span></td><td>Same table, one column added: "shipped?"</td></tr>
+    <tr><td>9</td><td><b>Current Traction</b></td><td><span class="pill p-bad">required</span></td><td>See page 4 — this is the slide that needs work you have not done yet.</td></tr>
+    <tr><td>10</td><td>Business model</td><td><span class="pill p-ok">keep</span></td><td>Three streams, $3.00 versus $15–$40.</td></tr>
+    <tr><td>11</td><td>Unit economics</td><td><span class="pill p-bad">new</span></td><td>CAC, LTV, payback. Round 1 had no unit economics at all.</td></tr>
+    <tr><td>12</td><td>Financial projections</td><td><span class="pill p-info">rebuild</span></td><td>Same totals, now bottom-up, with the sensitivity row.</td></tr>
+    <tr><td>13</td><td>Roadmap &amp; the ask</td><td><span class="pill p-info">refresh</span></td><td>$8.0M, what it buys, in order of risk removed.</td></tr>
+    <tr><td>14</td><td>Team</td><td><span class="pill p-ok">keep</span></td><td>Three names, one line each on why you.</td></tr>
+  </table>
+
+  <h3>Slide-by-slide: what goes on each</h3>
+
+  <div class="slide">
+    <div class="hd"><span class="num">01</span><span class="ttl">Title</span><span class="head">"Pavo Cloud — prior authorization, decided in milliseconds"</span></div>
+    <div class="layout"><b>Layout:</b> Logo centred. Tagline beneath. One line at the bottom in small type: <i>19,541 lines committed · 138 tests passing · 88.6 ms median decision</i>. Three names and the track.</div>
+    <p>That bottom line does the work. It tells the judge before you speak that this is a team that shipped.</p>
+  </div>
+
+  <div class="slide">
+    <div class="hd"><span class="num">03</span><span class="ttl">Why now — the 2027 deadline</span><span class="head">Promoted out of the Round 1 appendix</span></div>
+    <div class="layout"><b>Layout:</b> A single horizontal timeline. <b>Jan 2026</b> today · <b>Jan 1 2027</b> CMS-0057-F requires every impacted payer to run FHIR prior-authorization APIs · <b>2028</b> agents handle scheduling and care and need to start authorizations without a person.</div>
+    <p>One sentence underneath: <i>"Every payer is being forced to build the rails we run on, on a deadline. We are not asking them to adopt a new standard — we are the first thing to use the one they must build anyway."</i> That is the strongest strategic sentence you have. Do not bury it.</p>
+  </div>
+
+  <div class="slide">
+    <div class="hd"><span class="num">05</span><span class="ttl">How it works</span><span class="head">Replaces the five-row table</span></div>
+    <div class="layout"><b>Layout:</b> Lift the four-lane pipeline diagram from page 2 of the Technical Execution Report. Keep the measured timings on it. Build it in six clicks so you can narrate lane by lane.</div>
+    <p>The table listed steps; the diagram shows a system. Keep the PHI boundary box visible — it answers a privacy question before it is asked.</p>
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Build Log &amp; Pitch Deck Guide</span><span>Page 2 of 5</span></div>
+</div>
+
+<!-- ==================== PAGE 3 ==================== -->
+<div class="page">
+  <h2><span class="n">B</span>Slide-by-slide, continued</h2>
+
+  <div class="slide">
+    <div class="hd"><span class="num">06</span><span class="ttl">It works — live</span><span class="head">New. The most important slide in the deck.</span></div>
+    <div class="layout"><b>Layout:</b> Almost no text. A large embedded screen recording of the <code>/demo</code> run, or a live browser window. Beneath it, three numbers only: <b>88.6 ms</b> median decision · <b>5</b> audit entries per request · <b>0</b> humans involved.</div>
+    <p>Run it live if the room's network allows, but <b>have the recording embedded in the file as the fallback</b> — not on a laptop, in the deck. The failure mode where you spend ninety seconds troubleshooting wifi is the one that costs you the round.</p>
+    <p>Say while it runs: <i>"Nothing on this screen is mocked. The decision, the signatures, the proof and the audit trail are all produced by the code in our repository, right now."</i></p>
+  </div>
+
+  <div class="slide">
+    <div class="hd"><span class="num">07</span><span class="ttl">When the AI is wrong</span><span class="head">New. Pre-empts the judges' first hard question.</span></div>
+    <div class="layout"><b>Layout:</b> The escalation ladder as six numbered rungs down the slide. Each rung: the failure on the left, the automated response on the right. Highlight rung 5 — <i>appeal rejected → ESCALATED, never DENIED</i>.</div>
+    <p>Lead with the line: <i>"A machine cannot issue a final denial in our system. Not as policy — there is no code path that does it."</i> Then show the test name that proves it. Every judge on a healthcare panel is waiting to ask what happens when the model is wrong; answering before they ask changes the tenor of the whole Q&amp;A.</p>
+  </div>
+
+  <div class="slide">
+    <div class="hd"><span class="num">08</span><span class="ttl">Competition</span><span class="head">Same table, one new column</span></div>
+    <div class="layout"><b>Layout:</b> The Round 1 comparison table. Add a final column: <b>"Working code today?"</b> — Pavo: yes, with the repo link. Others: n/a, they are shipped products.</div>
+    <div class="warn" style="margin:5px 0 0">
+      <span class="t">Be careful with this slide</span>
+      Cohere and Availity are real companies with real revenue. A column implying they have not shipped will read as naïve. Frame it as <i>"we have built the thing that does not exist yet"</i>, not <i>"we are ahead of them."</i> Your honest position is: they own the market, you are betting on a capability none of them has, on a regulatory clock. That is a stronger and more credible story than claiming to be ahead.
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="hd"><span class="num">11</span><span class="ttl">Unit economics</span><span class="head">New. Round 1 had none.</span></div>
+    <div class="layout"><b>Layout:</b> Two columns — provider group and payer. Rows: CAC, 3-year LTV, LTV:CAC, payback. Then one line across the bottom: <b>marginal cost per authorization: $0.00057 against a $3.00 fee.</b></div>
+    <p>Volunteer the weak number. Say: <i>"The payer segment is 2.3× LTV to CAC with a fifteen-month payback — it does not pay for itself as a product. We fund it anyway, because signing one payer makes us reachable by every provider group that submits to them. It is a distribution channel, not a profit centre."</i> Judges remember the team that named its own weak spot before they found it.</p>
+  </div>
+
+  <div class="slide">
+    <div class="hd"><span class="num">12</span><span class="ttl">Financial projections</span><span class="head">Same totals, now derived</span></div>
+    <div class="layout"><b>Layout:</b> Three bars — $1.0M / $8.2M / $36.1M — with the driver beneath each (<i>55 → 330 → 1,400 provider groups</i>). Then a single sensitivity line: <b>if we are wrong on all four key assumptions, 2028 is $13.8M, not $36.1M.</b></div>
+    <p>Gross margin trajectory as a small inset: 31% → 82% → 87%. Note aloud that Year 1 is 31%, not break-even as Round 1 implied, and that you corrected it yourselves after rebuilding the model bottom-up. Correcting your own number is a credibility gain, not a loss.</p>
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Build Log &amp; Pitch Deck Guide</span><span>Page 3 of 5</span></div>
+</div>
+
+<!-- ==================== PAGE 4 ==================== -->
+<div class="page">
+  <h2><span class="n">C</span>Slide 9 — Current Traction</h2>
+
+  <div class="warn">
+    <span class="t">Read this first: the honest position</span>
+    The brief defines traction as <b>"user surveys conducted, pilot tests run, or partnerships formed."</b> The repository was searched for evidence of all three. <b>There is none — and no reason there would be.</b> It contains code, tests and a build specification: no survey responses, no pilot records, no letters of intent, no design-partner agreements.<br><br>
+    So this is the one slide the work so far cannot fill. Everything else in this submission is backed by something verifiable. Below is what you actually have, and the fastest honest ways to get the rest.
+  </div>
+
+  <h3>What you can put on the slide today — build traction</h3>
+  <p>Real, verifiable, and most teams will not have it. Not what the brief asked for, but it belongs on the slide as the left-hand column.</p>
+  <table>
+    <tr><th style="width:36%">Metric</th><th style="width:18%">Value</th><th>Source</th></tr>
+    <tr><td>Build phases shipped</td><td><b>4 of 4</b></td><td>5 merged PRs, 12 commits, 7–10 September</td></tr>
+    <tr><td>Lines of code committed</td><td><b>19,541</b></td><td><code>git log --shortstat</code></td></tr>
+    <tr><td>Automated tests passing</td><td><b>138 / 138</b></td><td><code>pytest</code>, 23.4 seconds</td></tr>
+    <tr><td>Median authorization decision</td><td><b>88.6 ms</b></td><td>20 consecutive measured runs</td></tr>
+    <tr><td>API endpoints live</td><td><b>23</b></td><td>Across 7 routers</td></tr>
+    <tr><td>End-to-end demo runtime</td><td><b>~11 s</b></td><td>Six steps, no manual input</td></tr>
+  </table>
+
+  <h3>What to go and get — in priority order</h3>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:24%">Evidence</th><th style="width:13%">Effort</th><th>How to get it before Round 2</th></tr>
+    <tr>
+      <td><b>1</b></td><td><b>Provider staff survey</b><br><span class="pill p-ok">highest return</span></td><td>2–3 days<br>~20 responses</td>
+      <td>Ten questions to prior-authorization coordinators and practice managers, via your own networks, university health system contacts, and the r/healthIT and MGMA communities. Ask: PAs per week, hours spent, average wait, what they would pay to remove it. <b>Twenty real responses beats any market-research citation</b> — it is yours, and nobody else in the room will have it.</td>
+    </tr>
+    <tr>
+      <td><b>2</b></td><td><b>Design-partner letter of intent</b></td><td>1–2 weeks</td>
+      <td>One independent practice or small group willing to sign a non-binding note saying they would pilot this. It commits them to nothing and is the single strongest item you could put on this slide. Ask your university health system, a family practice, or any clinic a team member knows personally.</td>
+    </tr>
+    <tr>
+      <td><b>3</b></td><td><b>Expert validation</b></td><td>3–5 days</td>
+      <td>Thirty-minute calls with two or three people who live this: a practice manager, a payer-side utilization-review nurse, a health-IT consultant. Quote them on the slide, with name and title if they permit. A named nurse saying "this gives me back six hours a week" outweighs a paragraph of market sizing.</td>
+    </tr>
+    <tr>
+      <td><b>4</b></td><td><b>Advisor</b></td><td>1–2 weeks</td>
+      <td>One person with healthcare revenue-cycle or payer-operations experience willing to be named as an advisor. Signals you have someone who will tell you when you are wrong about the industry.</td>
+    </tr>
+    <tr>
+      <td><b>5</b></td><td><b>Self-run pilot on real workflows</b></td><td>1 week</td>
+      <td>You cannot touch real PHI, and should not try. What you can do: ask a practice for twenty <b>de-identified</b> historical requests, run them through the rule engine, and report how many resolved automatically versus escalated. That is a pilot result, honest about being retrospective.</td>
+    </tr>
+  </table>
+
+  <div class="note">
+    <span class="t">How to lay out the slide</span>
+    Two columns. <b>Left — "What we built"</b>: the six build metrics above as a tight numeric stack. <b>Right — "What we learned"</b>: survey results, quotes, any LOI. Across the bottom, one honest line: <i>"No paying customers yet. Here is what we have validated and what we are testing next."</i><br><br>
+    If the right column is still thin on the day, say so and pivot to your strongest asset: <i>"We have not run a paid pilot. We have built the thing and proved it works — here is the demo and 138 tests. Our next milestone is a design partner."</i> Judges are far more forgiving of a gap you name than one they discover.
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Build Log &amp; Pitch Deck Guide</span><span>Page 4 of 5</span></div>
+</div>
+
+<!-- ==================== PAGE 5 ==================== -->
+<div class="page">
+  <h2><span class="n">D</span>Questions the judges will ask, and how to answer</h2>
+  <p>Every one of these has an answer grounded in the code. Know which file each lives in.</p>
+
+  <table>
+    <tr><th style="width:34%">Question</th><th>Answer</th></tr>
+    <tr>
+      <td><b>"What happens when your AI gets it wrong?"</b></td>
+      <td>It escalates. There is no code path that approves or denies without a matching rule, and the rule set ends in a catch-all whose outcome is <code>ESCALATED</code>. A rejected appeal returns <code>ESCALATED</code>, never <code>DENIED</code>. Both are covered by tests — we can show you the assertions.</td>
+    </tr>
+    <tr>
+      <td><b>"Is this just a wrapper around a language model?"</b></td>
+      <td>No — and this is the architectural point we are most confident about. <b>No model touches an authorization decision.</b> Inference is confined to document parsing, CPT mapping and appeal drafting, all thresholded. If our model provider went down, prior authorization would keep working.</td>
+    </tr>
+    <tr>
+      <td><b>"Why would a payer ever let you do this?"</b></td>
+      <td>Because CMS-0057-F requires them to build FHIR prior-authorization APIs by January 2027 regardless. We are the first thing to use rails they are already obliged to lay. And it is cheaper for them: $3.00 against the $15–$40 they spend handling a request manually.</td>
+    </tr>
+    <tr>
+      <td><b>"How do you handle PHI?"</b></td>
+      <td>Patient identifiers are SHA-256 hashed before the first database write — a test asserts the raw value never appears in storage. Beyond that, the zero-knowledge circuit proves three coverage criteria without transmitting age, diagnosis or deductible at all.</td>
+    </tr>
+    <tr>
+      <td><b>"Five rules is not a product."</b></td>
+      <td>Agreed, and we say so in the report. Five rules prove the mechanism. The commercial build is clinical informaticists encoding each payer's published criteria — it is the largest line in our cost of revenue in all three years, and it is the moat. A competitor can copy the architecture in a quarter; they cannot copy two thousand encoded criteria.</td>
+    </tr>
+    <tr>
+      <td><b>"Your LTV:CAC looks too good."</b></td>
+      <td>The blended figure is 8.6×, and it is high because authorization volume carries almost no marginal cost. The number to look at is the payer segment: 2.3× with a fifteen-month payback. We fund it because it is a distribution channel, not because it pays for itself.</td>
+    </tr>
+    <tr>
+      <td><b>"What is the biggest risk?"</b></td>
+      <td>Provider group count, not price or regulation. Authorization fees are 73% of 2028 revenue and they scale with groups. Halving the group count costs us more than halving payers and cutting price combined — the sensitivity table shows it.</td>
+    </tr>
+    <tr>
+      <td><b>"What does not work yet?"</b></td>
+      <td>Name them before they find them: the ZK diagnosis check reveals which covered diagnosis the patient has; the trusted setup is local and not production-safe; NPI verification is a flag rather than a live CMS lookup; facility pricing is mocked; the predictive classifier is not built, so non-definitive cases escalate. All are in §8.2 of the report.</td>
+    </tr>
+  </table>
+
+  <h2 style="margin-top:14px"><span class="n">E</span>Submission checklist</h2>
+  <div class="two">
+    <div>
+      <h4>Files to submit</h4>
+      <ul class="chk">
+        <li><b>Pavo_Cloud_Technical_Execution_Report.pdf</b> — 8 pages, at the limit</li>
+        <li><b>Build Log appendix</b> — 2 pages, the nine artifacts from §A</li>
+        <li><b>Pavo_Cloud_3Yr_Financial_Model.xlsx</b> — 7 tabs, live formulas</li>
+        <li><b>Updated pitch deck</b> — 14 slides per §B</li>
+        <li><b>Demo recording</b> — 15 s, embedded in the deck, not a separate link</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Before you submit</h4>
+      <ul class="chk">
+        <li>Run <code>cd zk &amp;&amp; npm install</code>, then <code>pytest</code> — confirm <b>138 passed</b></li>
+        <li>Fix the README: it says 129 tests, the suite is 138</li>
+        <li>Re-run the demo end to end on the machine you will present from</li>
+        <li>Open the workbook and change one driver — confirm every tab moves</li>
+        <li>Confirm the report's numbers and the deck's numbers match exactly</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:8px">
+    <span class="t">The thing to remember on the day</span>
+    Round 1 asked you to argue that the human bottleneck in prior authorization can be removed. Round 2 asks you to prove you are building. You have the rarer half of that: working, tested, measured software. The gap is commercial validation — nobody outside your team has used this or committed to using it. Close as much of that gap as you can in the weeks you have, and be straightforward about whatever remains open. A team that has built the thing and is honest about not yet having customers reads far better than one claiming traction it cannot evidence.
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Build Log &amp; Pitch Deck Guide</span><span>Page 5 of 5</span></div>
+</div>
+
+</body>
+</html>

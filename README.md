@@ -198,7 +198,7 @@ Apply the migrations in `supabase/migrations/` in order (`0001_init.sql`, `0002_
 cd backend && .venv/bin/python -m pytest
 ```
 
-129 tests cover all four phases: the five coverage rules and their precedence, identifier hashing, the end-to-end webhook flow, RSA signing and tamper rejection, the audit trail, document upload and validation, CPT mapping, the cash-vs-insurance price bands, every branch of the ranking algorithm, denial classification, PubMed parsing against recorded fixtures, each appeal outcome path, the ZK circuit end to end (real proofs, every criterion branch, tamper rejection, and the guarantee that private inputs never reach the response), and the system statistics.
+138 tests cover all four phases: the five coverage rules and their precedence, identifier hashing, the end-to-end webhook flow, RSA signing and tamper rejection, the audit trail, document upload and validation, CPT mapping, the cash-vs-insurance price bands, every branch of the ranking algorithm, denial classification, PubMed parsing against recorded fixtures, each appeal outcome path, the ZK circuit end to end (real proofs, every criterion branch, tamper rejection, and the guarantee that private inputs never reach the response), and the system statistics.
 
 ## Configuration
 

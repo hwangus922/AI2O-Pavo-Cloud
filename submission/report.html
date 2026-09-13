@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pavo Cloud — Technical Execution Report</title>
+<style>
+  @page { size: Letter; margin: 0.55in 0.6in 0.5in 0.6in; }
+
+  :root {
+    --ink:      #10151f;
+    --body:     #2b3440;
+    --muted:    #5d6875;
+    --line:     #d6dbe2;
+    --hair:     #e8ecf1;
+    --navy:     #16324f;
+    --accent:   #1f6f8b;
+    --good:     #1c6b4a;
+    --warn:     #8a5a12;
+    --bad:      #9b2c2c;
+    --wash:     #f5f7fa;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 8.6pt;
+    line-height: 1.33;
+    color: var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { page-break-after: always; display: flex; flex-direction: column; min-height: 938px; }
+  .page:last-child { page-break-after: auto; }
+
+  h1 { font-size: 21pt; line-height: 1.1; margin: 0 0 4px; color: var(--ink); letter-spacing: -0.4px; }
+  h2 {
+    font-size: 11.4pt; margin: 0 0 6px; color: var(--navy);
+    letter-spacing: -0.15px; padding-bottom: 4px; border-bottom: 1.6px solid var(--navy);
+  }
+  h2 .n { color: var(--accent); font-weight: 700; margin-right: 7px; }
+  h3 { font-size: 9.1pt; margin: 8px 0 3px; color: var(--ink); letter-spacing: 0.01em; }
+  h4 { font-size: 8.3pt; margin: 8px 0 2px; color: var(--navy); text-transform: uppercase; letter-spacing: 0.06em; }
+  p  { margin: 0 0 5px; }
+  ul, ol { margin: 0 0 6px; padding-left: 15px; }
+  li { margin-bottom: 2.5px; }
+  b, strong { color: var(--ink); font-weight: 600; }
+  code, .mono { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 7.5pt; }
+  code { background: var(--wash); padding: 0.5px 3px; border-radius: 2px; color: var(--navy); }
+  a { color: var(--accent); text-decoration: none; }
+
+  /* ---------- cover ---------- */
+  .cover-rule { height: 5px; background: var(--navy); margin-bottom: 13px; }
+  .eyebrow { font-size: 7.6pt; letter-spacing: 0.17em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 7px; }
+  .sub { font-size: 11pt; color: var(--muted); margin: 2px 0 9px; font-weight: 400; }
+  .byline { font-size: 8.2pt; color: var(--muted); padding-top: 8px; border-top: 1px solid var(--line); }
+  .byline b { color: var(--ink); }
+
+  /* ---------- layout ---------- */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .sec { margin-bottom: 9px; }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; margin: 4px 0 6px; font-size: 7.9pt; }
+  th {
+    text-align: left; font-weight: 700; color: var(--navy); font-size: 7.1pt;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1.4px solid var(--navy); padding: 4px 6px 3px; vertical-align: bottom;
+  }
+  td { padding: 3.1px 6px; border-bottom: 0.8px solid var(--hair); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .tot td { border-top: 1.4px solid var(--navy); border-bottom: none; font-weight: 700; color: var(--ink); }
+  .sub-row td { color: var(--muted); }
+  table.tight td, table.tight th { padding: 2.8px 5px; }
+
+  /* ---------- callouts ---------- */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin: 8px 0 9px; }
+  .kpi { border: 1px solid var(--line); border-top: 2.6px solid var(--accent); padding: 7px 8px 8px; }
+  .kpi .v { font-size: 15pt; font-weight: 700; color: var(--ink); line-height: 1; letter-spacing: -0.5px; }
+  .kpi .l { font-size: 6.7pt; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 4px; font-weight: 600; }
+
+  .note {
+    background: var(--wash); border-left: 2.8px solid var(--accent);
+    padding: 6px 8px; margin: 6px 0 7px;
+  }
+  .note .t { font-weight: 700; color: var(--navy); font-size: 8.1pt; display: block; margin-bottom: 2px; }
+
+  .box { border: 1px solid var(--line); padding: 8px 9px; }
+  .box.flag { border-left: 2.8px solid var(--warn); background: #fdfaf4; }
+
+  .pill {
+    display: inline-block; font-size: 6.5pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 1.5px 5px; border-radius: 8px; white-space: nowrap;
+  }
+  .p-ok   { background: #e2f0e9; color: var(--good); }
+  .p-warn { background: #fbf0da; color: var(--warn); }
+  .p-bad  { background: #f8e5e5; color: var(--bad); }
+  .p-info { background: #e4eef3; color: var(--accent); }
+
+  .verified { color: var(--good); font-weight: 700; }
+
+  /* ---------- flow / code ---------- */
+  pre {
+    background: #fafbfc; border: 1px solid var(--hair); border-left: 2.5px solid var(--accent);
+    padding: 5px 8px; margin: 4px 0 6px; font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 6.9pt; line-height: 1.38; color: var(--navy); white-space: pre; overflow: hidden;
+  }
+
+  .ladder { counter-reset: step; }
+  .ladder .rung {
+    display: grid; grid-template-columns: 17px 1fr; gap: 7px;
+    padding: 4px 0; border-bottom: 0.8px solid var(--hair);
+  }
+  .ladder .rung:last-child { border-bottom: none; }
+  .ladder .rung .i {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--navy); color: #fff;
+    font-size: 7pt; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .ladder .rung .t { font-weight: 700; color: var(--ink); }
+
+  .footer {
+    margin-top: auto; padding-top: 4px;
+    font-size: 6.6pt; color: #9aa4b0; border-top: 0.8px solid var(--hair);
+    display: flex; justify-content: space-between;
+  }
+
+  svg { display: block; }
+  .cap { font-size: 6.9pt; color: var(--muted); margin-top: 2px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- ============================ PAGE 1 ============================ -->
+<div class="page">
+  <div class="cover-rule"></div>
+  <div class="eyebrow">Technical Execution Report &nbsp;·&nbsp; Round 2</div>
+  <h1>Pavo Cloud</h1>
+  <div class="sub">Autonomous prior authorization over an agent-to-agent protocol</div>
+  <div class="byline">
+    <b>Dhanvanth Lakshman</b>, CFO &nbsp;·&nbsp; <b>Viraj Gadeela</b>, CTO &nbsp;·&nbsp; <b>Harry Wang</b>, CEO
+    &nbsp;&nbsp;|&nbsp;&nbsp; AI for Business Track &nbsp;&nbsp;|&nbsp;&nbsp; September 2026
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">88.6<span style="font-size:9pt">ms</span></div><div class="l">Median decision, end&#8209;to&#8209;end</div></div>
+    <div class="kpi"><div class="v">138</div><div class="l">Tests passing, 0 failing</div></div>
+    <div class="kpi"><div class="v">19,541</div><div class="l">Lines committed, 4 phases</div></div>
+    <div class="kpi"><div class="v">100%</div><div class="l">Decisions carrying a rule ID</div></div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="n">1</span>Where we are</h2>
+    <p>Round 1 argued that prior authorization is slow because a person has to start every request. Round 2 is the working system: all four build phases complete and running — the autonomous authorization loop, consumer price transparency, cryptographic identity with autonomous appeals, and zero&#8209;knowledge proofs over patient criteria.</p>
+    <p><b>Every number in this report was measured on the committed code on 13 September 2026, not estimated.</b> The commands that reproduce them are listed in §6.3.</p>
+    <p>The core claim from Round 1 — that a routine authorization can be decided without a human touching a form — now has a number attached. A complete request, from simulated EHR webhook through FHIR assembly, RSA signing, signature verification, rule evaluation and a five&#8209;entry audit trail, resolves in a median of <b>88.6&nbsp;ms</b>. The industry baseline is 3–14 days.</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="n">2</span>What changed since Round 1</h2>
+    <table>
+      <tr><th style="width:24%">Area</th><th style="width:31%">Round 1 position</th><th>Round 2 position, and why it moved</th></tr>
+      <tr>
+        <td><b>Decision speed</b></td>
+        <td>"Under 5 minutes"</td>
+        <td>Measured at <b>88.6&nbsp;ms</b> median for the agent loop. The five&#8209;minute figure now covers the round trip <i>including</i> EHR write&#8209;back and payer network latency; the agent work is sub&#8209;second.</td>
+      </tr>
+      <tr>
+        <td><b>AI architecture</b></td>
+        <td>"Deterministic layer + predictive layer"</td>
+        <td>Built, and the split is stricter than described. <b>No language model touches an authorization decision.</b> The probabilistic layer is confined to document parsing, CPT mapping, and appeal drafting — each thresholded, each escalating below threshold.</td>
+      </tr>
+      <tr>
+        <td><b>Privacy</b></td>
+        <td>"Minimum necessary, encrypted"</td>
+        <td>Stronger. Patient identifiers are SHA&#8209;256 hashed before storage, and a Groth16 circuit proves three coverage criteria without transmitting age, diagnosis or deductible at all.</td>
+      </tr>
+      <tr>
+        <td><b>Financials</b></td>
+        <td>Break&#8209;even to 87% margin;<br>$1.0M → $8.2M → $36.1M</td>
+        <td>Revenue targets held, but rebuilt bottom&#8209;up from customer counts and measured infrastructure cost rather than asserted. Year 1 gross margin is <b>31%</b> — pilots are delivered near cost — reaching <b>87%</b> by Year 3. The Year 1 figure was optimistic and is corrected here.</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="sec">
+    <h2><span class="n">3</span>The four things that are true in code, not just on paper</h2>
+    <div class="two">
+      <div>
+        <h4>1 · Every decision names its rule</h4>
+        <p>The rule engine cannot return an outcome without a <code>rule_id</code>. That ID is written to <code>audit_log</code> on every decision and returned in the API response. There is no code path that produces an unexplained outcome. <span class="pill p-ok">6 tests</span></p>
+        <h4>2 · Ambiguity escalates by default</h4>
+        <p>The rule set ends in a catch&#8209;all, <code>PAVO-R005</code>, whose outcome is <code>ESCALATED</code>. Anything the system does not have a definitive rule for routes to a human with the record already assembled. Escalation is the fallback, not an exception path. <span class="pill p-ok">verified live</span></p>
+      </div>
+      <div>
+        <h4>3 · An unverified message never acts</h4>
+        <p>Signature verification runs before the payload is read. A tampered or unsigned envelope is rejected with HTTP 401, the rejection is audited, and the rule engine is never reached. <span class="pill p-ok">4 tests</span></p>
+        <h4>4 · No automated final denial</h4>
+        <p>A denial is either appealed or escalated. When the payer agent rejects an appeal it returns <code>ESCALATED</code> under <code>PAVO-A002</code> — never <code>DENIED</code>. A machine cannot issue a final no to a patient in this system. <span class="pill p-ok">2 tests</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 1 of 8</span></div>
+</div>
+
+<!-- ============================ PAGE 2 ============================ -->
+<div class="page">
+  <h2><span class="n">4</span>System Architecture 2.0 — the authorization pipeline</h2>
+  <p style="margin-bottom:8px">One order, end to end. Solid arrows carry data; the dashed arrow is the only path a human sits on. Timings are measured medians.</p>
+
+  <svg viewBox="0 0 700 372" width="100%" role="img" aria-label="Pavo Cloud authorization pipeline">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#16324f"/>
+      </marker>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#9b2c2c"/>
+      </marker>
+      <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#8a5a12"/>
+      </marker>
+    </defs>
+    <style>
+      .lbl  { font: 700 8.5px "Helvetica Neue", Helvetica, Arial; fill: #10151f; }
+      .sm   { font: 400 7px "Helvetica Neue", Helvetica, Arial; fill: #5d6875; }
+      .mn   { font: 400 6.6px "SF Mono", Menlo, Consolas, monospace; fill: #1f6f8b; }
+      .hdr  { font: 700 7px "Helvetica Neue", Helvetica, Arial; fill: #fff; letter-spacing: .07em; }
+      .tm   { font: 700 6.8px "SF Mono", Menlo, Consolas, monospace; fill: #1c6b4a; }
+      .ed   { stroke: #16324f; stroke-width: 1.3; fill: none; marker-end: url(#a); }
+      .bx   { fill: #fff; stroke: #c3ccd6; stroke-width: 1; }
+    </style>
+
+    <!-- swimlane headers -->
+    <rect x="0"   y="0" width="168" height="15" fill="#16324f"/>
+    <rect x="176" y="0" width="176" height="15" fill="#1f6f8b"/>
+    <rect x="360" y="0" width="176" height="15" fill="#16324f"/>
+    <rect x="544" y="0" width="156" height="15" fill="#5d6875"/>
+    <text x="8"   y="10.5" class="hdr">SOURCE</text>
+    <text x="184" y="10.5" class="hdr">PROVIDER AGENT</text>
+    <text x="368" y="10.5" class="hdr">PAYER AGENT</text>
+    <text x="552" y="10.5" class="hdr">PERSISTENCE &amp; OUTPUT</text>
+
+    <!-- lane separators -->
+    <line x1="172" y1="15" x2="172" y2="372" stroke="#e8ecf1" stroke-width="1"/>
+    <line x1="356" y1="15" x2="356" y2="372" stroke="#e8ecf1" stroke-width="1"/>
+    <line x1="540" y1="15" x2="540" y2="372" stroke="#e8ecf1" stroke-width="1"/>
+
+    <!-- SOURCE -->
+    <rect x="8" y="30" width="156" height="40" class="bx"/>
+    <text x="16" y="44" class="lbl">EHR — order placed</text>
+    <text x="16" y="55" class="sm">Physician enters CPT + ICD-10.</text>
+    <text x="16" y="65" class="mn">POST /api/auth/request</text>
+
+    <rect x="8" y="88" width="156" height="54" class="bx" style="stroke:#1f6f8b;stroke-width:1.6"/>
+    <text x="16" y="102" class="lbl">PHI boundary</text>
+    <text x="16" y="113" class="sm">SHA-256 hash of patient ID.</text>
+    <text x="16" y="124" class="sm">Raw identifier is dropped here</text>
+    <text x="16" y="133" class="sm">and never reaches storage.</text>
+
+    <!-- PROVIDER -->
+    <rect x="184" y="30" width="160" height="46" class="bx"/>
+    <text x="192" y="44" class="lbl">1 · FHIR R4 assembly</text>
+    <text x="192" y="55" class="sm">Patient + Condition +</text>
+    <text x="192" y="65" class="sm">ServiceRequest bundle.</text>
+    <text x="192" y="74" class="mn">fhir.build_fhir_bundle()</text>
+
+    <rect x="184" y="88" width="160" height="52" class="bx"/>
+    <text x="192" y="102" class="lbl">2 · ARIA envelope + signature</text>
+    <text x="192" y="113" class="sm">7 canonical fields → SHA-256</text>
+    <text x="192" y="123" class="sm">→ RSASSA-PSS, RSA-2048.</text>
+    <text x="192" y="134" class="mn">aria.build_message()</text>
+
+    <rect x="184" y="152" width="160" height="48" class="bx" style="stroke-dasharray:3 2"/>
+    <text x="192" y="166" class="lbl">3 · ZK proof <tspan class="sm">(optional)</tspan></text>
+    <text x="192" y="177" class="sm">Groth16 over BN254 proves</text>
+    <text x="192" y="187" class="sm">3 criteria; inputs stay private.</text>
+    <text x="192" y="197" class="tm">406 ms measured</text>
+
+    <!-- PAYER -->
+    <rect x="368" y="30" width="160" height="58" class="bx" style="stroke:#9b2c2c;stroke-width:1.6"/>
+    <text x="376" y="44" class="lbl">4 · Verify before reading</text>
+    <text x="376" y="55" class="sm">Sender's active public key from</text>
+    <text x="376" y="65" class="sm">org_keys. Fail → HTTP 401,</text>
+    <text x="376" y="75" class="sm">audited, payload never parsed.</text>
+    <text x="376" y="85" class="mn">aria.verify_with_repository()</text>
+
+    <rect x="368" y="100" width="160" height="62" class="bx"/>
+    <text x="376" y="114" class="lbl">5 · Deterministic rule engine</text>
+    <text x="376" y="125" class="sm">Extract CPT from ServiceRequest,</text>
+    <text x="376" y="135" class="sm">ICD-10 from Condition. Five ordered</text>
+    <text x="376" y="145" class="sm">rules, first match wins.</text>
+    <text x="376" y="156" class="mn">rules.evaluate_request()</text>
+
+    <rect x="368" y="174" width="160" height="50" class="bx"/>
+    <text x="376" y="188" class="lbl">6 · Decision</text>
+    <text x="376" y="199" class="sm">outcome + rule_id +</text>
+    <text x="376" y="209" class="sm">rule_description + confidence.</text>
+    <text x="376" y="219" class="sm">Signed AUTH_RESPONSE returned.</text>
+
+    <!-- PERSISTENCE -->
+    <rect x="552" y="30" width="140" height="52" class="bx" style="stroke:#16324f;stroke-width:1.6"/>
+    <text x="560" y="44" class="lbl">Audit log</text>
+    <text x="560" y="55" class="sm">5 entries per request, each</text>
+    <text x="560" y="65" class="sm">with before/after state.</text>
+    <text x="560" y="76" class="sm">Decision row carries rule_id.</text>
+
+    <rect x="552" y="94" width="140" height="44" class="bx"/>
+    <text x="560" y="108" class="lbl">ARIA message store</text>
+    <text x="560" y="119" class="sm">Both envelopes retained with</text>
+    <text x="560" y="129" class="sm">signature + verified flag.</text>
+
+    <rect x="552" y="150" width="140" height="40" class="bx" style="stroke:#1c6b4a;stroke-width:1.6"/>
+    <text x="560" y="164" class="lbl">APPROVED → EHR</text>
+    <text x="560" y="176" class="sm">Written back to the chart.</text>
+    <text x="560" y="186" class="tm">no human involved</text>
+
+    <rect x="552" y="202" width="140" height="44" class="bx" style="stroke:#8a5a12;stroke-width:1.8;fill:#fdfaf4"/>
+    <text x="560" y="216" class="lbl">ESCALATED → human</text>
+    <text x="560" y="228" class="sm">Reviewer queue. Bundle, rule,</text>
+    <text x="560" y="238" class="sm">and audit trail pre-assembled.</text>
+
+    <rect x="552" y="258" width="140" height="44" class="bx" style="stroke:#9b2c2c;stroke-width:1.6"/>
+    <text x="560" y="272" class="lbl">DENIED → Appeals Agent</text>
+    <text x="560" y="284" class="sm">Never terminal. See §5 for the</text>
+    <text x="560" y="294" class="sm">appeal sub-pipeline.</text>
+
+    <!-- edges -->
+    <path class="ed" d="M164,50 L182,50"/>
+    <path class="ed" d="M86,70 L86,86"/>
+    <path class="ed" d="M264,76 L264,86"/>
+    <path class="ed" d="M264,140 L264,150"/>
+    <path class="ed" d="M344,114 L366,60"/>
+    <path class="ed" d="M344,176 L366,82"/>
+    <path class="ed" d="M528,59 L550,52"/>
+    <path class="ed" d="M448,88 L448,98"/>
+    <path class="ed" d="M448,162 L448,172"/>
+    <path class="ed" d="M528,196 L550,170"/>
+    <path d="M528,204 L550,222" stroke="#8a5a12" stroke-width="1.4" fill="none" marker-end="url(#ag)" stroke-dasharray="4 2.5"/>
+    <path d="M528,212 L550,278" stroke="#9b2c2c" stroke-width="1.3" fill="none" marker-end="url(#ar)"/>
+    <path class="ed" d="M528,120 L550,112"/>
+
+    <!-- timing rail -->
+    <line x1="8" y1="322" x2="692" y2="322" stroke="#16324f" stroke-width="1.4"/>
+    <text x="8" y="336" class="lbl">Measured latency budget, 20 consecutive runs</text>
+    <text x="8" y="350" class="sm">Agent-to-agent resolution <tspan class="tm">44.7 ms</tspan>  ·  Full HTTP round trip, p50 <tspan class="tm">88.6 ms</tspan>  ·  p95 <tspan class="tm">113.3 ms</tspan>  ·  max <tspan class="tm">118.5 ms</tspan>  ·  ZK prove <tspan class="tm">406 ms</tspan>  ·  ZK verify <tspan class="tm">409 ms</tspan></text>
+    <text x="8" y="364" class="sm">In-memory repository, single container. Signing, verification, rule evaluation, and five audit writes are all inside the p50 figure.</text>
+  </svg>
+
+  <h3>4.1 &nbsp;Why the boundary at step 4 matters</h3>
+  <p>Verification is the first thing the payer agent does, and it happens <i>before</i> the payload is deserialised into anything the rule engine can see. This is not a validation step running alongside processing — it is a gate. Provenance is established, or nothing happens. A judge testing this can tamper with any signed field and watch the request die with a 401 and an <code>aria.verification.failed</code> audit row.</p>
+
+  <h3>4.2 &nbsp;Where inference is allowed, and where it is forbidden</h3>
+  <p>Round 1 described a deterministic layer and a predictive layer. The built system draws the line harder than that. The rule is enforced by the shape of the code: <b>a language model never renders an authorization decision.</b></p>
+  <table class="tight">
+    <tr><th style="width:16%">Layer</th><th style="width:30%">What it does</th><th style="width:25%">Where it runs</th><th>Guarantee</th></tr>
+    <tr>
+      <td><b>Deterministic</b><br><span class="pill p-ok">decides</span></td>
+      <td>Identity verification, coverage rules, ZK verification, pricing arithmetic, denial classification.</td>
+      <td><code>rules.py</code>, <code>aria.py</code>, <code>crypto.py</code>, <code>zk/prover.py</code>, <code>classifier.py</code></td>
+      <td>Same input always yields the same output. Every outcome traces to a named rule ID. Confidence is <code>1.0</code> because the match is definitive, not because a model is sure.</td>
+    </tr>
+    <tr>
+      <td><b>Probabilistic</b><br><span class="pill p-warn">assists</span></td>
+      <td>Insurance&#8209;card and EOC parsing, plain&#8209;language → CPT mapping, appeal letter drafting.</td>
+      <td><code>insure/parser.py</code>, <code>insure/cpt.py</code>, <code>appeals/letter.py</code></td>
+      <td>Output is scored and thresholded. Below threshold it escalates. It is never the last word on whether a patient gets care.</td>
+    </tr>
+  </table>
+  <div class="note" style="margin-bottom:0">
+    <span class="t">The consequence, stated plainly</span>
+    If our model provider went down tomorrow, prior authorization would keep working — the core loop has no inference in it. That is also why the marginal cost of an authorization is a fraction of a cent (§9.3): there is no token spend on the critical path.
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 2 of 8</span></div>
+</div>
+
+<!-- ============================ PAGE 3 ============================ -->
+<div class="page">
+  <h2><span class="n">5</span>Architecture 2.0, continued — the sub&#8209;pipelines</h2>
+
+  <div class="two">
+    <div>
+      <h3>5.1 &nbsp;Appeals sub&#8209;pipeline</h3>
+      <p>Triggered only by a <code>DENIED</code> outcome. Two hard stops sit ahead of anything a model produces.</p>
+<pre>DENIED
+ └─ classify_denial(reason_code)
+     exact X12 CARC match → keyword → "other"
+     │
+     ├─ not_covered ──────► ESCALATE, no letter
+     │   Coverage is a contract question,
+     │   not a clinical one. HARD STOP.
+     │
+     └─ medical_necessity | missing_info | other
+         ├─ PubMed E-utilities → top 3 abstracts
+         │   unreachable → 0 citations, flow
+         │   continues and reports the failure
+         ├─ Claude drafts letter + PMID cites
+         │   → confidence score
+         ├─ ≥ 0.70 → sign ARIA APPEAL → payer
+         │      payer > 0.85 → APPROVED  PAVO-A001
+         │      payer ≤ 0.85 → ESCALATED PAVO-A002
+         │                     never DENIED
+         └─ &lt; 0.70 → ESCALATE with reviewer
+              notes pre-populated: procedure,
+              diagnosis, category, confidence,
+              every citation retrieved</pre>
+      <p>Classification is deterministic on purpose: the whole path forks on that one call, so it reads exact X12 CARC codes first (<code>50</code>, <code>96</code>, <code>16</code>, <code>204</code>, <code>252</code>) before falling back to ordered keyword groups. An unrecognised reason becomes <code>other</code>, which still gets an appeal.</p>
+    </div>
+    <div>
+      <h3>5.2 &nbsp;Insure sub&#8209;pipeline (price transparency)</h3>
+      <p>The consumer layer — where the probabilistic layer does most of its work, and where every output is labelled by source.</p>
+<pre>card.jpg + eoc.pdf
+ ├─ member ID → SHA-256 → storage path
+ │   uses the hash, never the raw ID
+ ├─ Claude vision (card) ─┐
+ ├─ Claude document (EOC) ┴► insurance_plan
+ ├─ plain language → Claude → CPT code
+ │   cpt_source: "claude" | "sample"
+ ├─ 5 facility quotes, deterministic from CPT
+ ├─ estimate_member_cost() per facility
+ │   not met: min(cash, coins × negotiated)
+ │   met:     coins × negotiated
+ └─ rank by what the member actually pays
+     → audit_log, entity_type='price_query'</pre>
+      <h4>Live output, knee replacement, 20% coinsurance</h4>
+      <table class="tight">
+        <tr><th>Facility</th><th class="num">Negotiated</th><th class="num">Cash</th><th class="num">You pay</th></tr>
+        <tr><td>Northgate Community</td><td class="num">$26,482</td><td class="num">$7,176</td><td class="num"><b>$5,296</b></td></tr>
+        <tr><td>Parkside Diagnostic</td><td class="num">$29,887</td><td class="num">$11,051</td><td class="num">$5,977</td></tr>
+        <tr><td>Riverside Imaging</td><td class="num">$31,394</td><td class="num">$11,444</td><td class="num">$6,279</td></tr>
+        <tr><td>Clearview Ambulatory</td><td class="num">$34,397</td><td class="num">$7,275</td><td class="num">$6,879</td></tr>
+        <tr><td>Metro Valley Medical</td><td class="num">$38,857</td><td class="num">$12,608</td><td class="num">$7,771</td></tr>
+      </table>
+      <p class="cap">From <code>POST /api/insure/query</code>, 13 Sep 2026. Every row ships a <code>breakdown</code> object showing the arithmetic. Spread between best and worst: <b>$2,475 for the same procedure.</b></p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>5.3 &nbsp;Zero&#8209;knowledge proofs over patient criteria</h3>
+    <p>A 68&#8209;line circom circuit compiled to Groth16 over BN254, proving three things while transmitting none of the data behind them: the patient meets the age floor, the diagnosis matches the covered condition, the deductible requirement is satisfied. A live proof returns six public signals — three verdicts, three policy parameters — and nothing else. A dedicated test asserts the private inputs never appear in the response body.</p>
+    <div class="box flag">
+      <b>Stated limitation, because a judge will ask.</b> The approved&#8209;diagnosis check compares against a single hash, so a passing proof does tell the payer the patient carries that one diagnosis. Proving membership in a set of many codes without revealing which requires a Merkle circuit and is out of scope for the prototype. The age and deductible criteria leak nothing. Separately, <code>zk/build.sh</code> runs its own local Powers of Tau ceremony, so whoever builds the artifacts knows the toxic waste — fine for a prototype, never for production.
+    </div>
+  </div>
+
+  <div class="two">
+    <div>
+      <h3>5.4 &nbsp;The coverage rule set</h3>
+      <p>Evaluated in order, first match wins — so the specific knee rule is checked before the general one. Precedence is a property of the list, and it is tested. <code>GET /api/rules</code> returns this table at runtime, which is how the dashboard explains a decision back to a user.</p>
+      <table class="tight">
+        <tr><th>Rule</th><th>Procedure</th><th>Diagnosis</th><th>Outcome</th></tr>
+        <tr><td><code>PAVO-R001</code></td><td>70553 MRI brain</td><td>any</td><td><span class="pill p-ok">approved</span></td></tr>
+        <tr><td><code>PAVO-R002</code></td><td>27447 knee replacement</td><td>M17.11</td><td><span class="pill p-ok">approved</span></td></tr>
+        <tr><td><code>PAVO-R003</code></td><td>27447 knee replacement</td><td>any other</td><td><span class="pill p-warn">escalated</span></td></tr>
+        <tr><td><code>PAVO-R004</code></td><td>99214 office visit</td><td>any</td><td><span class="pill p-ok">approved</span></td></tr>
+        <tr><td><code>PAVO-R005</code></td><td><i>anything else</i></td><td>any</td><td><span class="pill p-warn">escalated</span></td></tr>
+      </table>
+      <p class="cap">Five rules prove the mechanism, not a market. Scaling the list is costed as the largest COGS line in §9.3.</p>
+    </div>
+    <div>
+      <h3>5.5 &nbsp;What a signed ARIA envelope looks like</h3>
+      <p>The seven fields above the signature are the ones it covers; change any byte and verification fails.</p>
+<pre>{ "aria_version": "1.0",
+  "message_id": "2531910f-3984-4a82-94d9-efa08…",
+  "timestamp":  "2026-09-13T12:37:07.533216Z",
+  "sender":   { "agent_id": "agent://pavo/provider/…",
+                "npi": "1234567893", "verified": true },
+  "receiver": { "agent_id": "agent://pavo/payer/…",
+                "payer_id": "MER001" },
+  "payload_type": "AUTH_REQUEST",
+  "payload":  { "procedure_code": "27447",
+                "diagnosis_code": "M17.11",
+                "patient_id": "pat_94cc12784b6586…",
+                "fhir_bundle": {…} },
+  "signature": "&lt;RSASSA-PSS over SHA-256 of the above&gt;" }</pre>
+      <p class="cap">Note <code>patient_id</code> — the hash is what travels, and it is the only patient identifier the payer ever receives.</p>
+    </div>
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 3 of 8</span></div>
+</div>
+
+<!-- ============================ PAGE 4 ============================ -->
+<div class="page">
+  <h2><span class="n">6</span>The Build Log — proof of progress</h2>
+  <p>Repository: <code>hwangus922/AI2O-Pavo-Cloud</code>. Twelve commits across five merged pull requests — one per build phase, plus a hardening pass. Every figure below was produced by the commands in §6.3, run against the committed code.</p>
+
+  <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
+    <div class="kpi"><div class="v">5</div><div class="l">Merged PRs, 4 phases</div></div>
+    <div class="kpi"><div class="v">19,541</div><div class="l">Lines added</div></div>
+    <div class="kpi"><div class="v">138</div><div class="l">Tests, all passing</div></div>
+    <div class="kpi"><div class="v">23</div><div class="l">API endpoints</div></div>
+    <div class="kpi"><div class="v">9</div><div class="l">Database tables</div></div>
+  </div>
+
+  <h3>6.1 &nbsp;Commit history</h3>
+  <table class="tight">
+    <tr><th style="width:6%">PR</th><th style="width:11%">Date</th><th style="width:25%">Phase</th><th style="width:15%" class="num">Diff</th><th>What it delivered</th></tr>
+    <tr>
+      <td><b>#1</b></td><td>7 Sep</td><td>Phase 1 — core loop</td><td class="num">+9,429 / 46 files</td>
+      <td>Provider and payer agents, ARIA v1.0 envelope, FHIR R4 assembly, five&#8209;rule engine, audit log, Next.js dashboard, Supabase schema.</td>
+    </tr>
+    <tr>
+      <td><b>#2</b></td><td>8 Sep</td><td>Phase 2 — Insure</td><td class="num">+2,364 / 28 files</td>
+      <td>Document parsing, CPT mapping, facility quotes, the ranking algorithm and its cost breakdown, upload storage, consumer UI.</td>
+    </tr>
+    <tr>
+      <td><b>#3</b></td><td>9 Sep</td><td>Phase 3 — identity &amp; appeals</td><td class="num">+2,948 / 34 files</td>
+      <td>RSA&#8209;2048 provisioning and rotation, RSASSA&#8209;PSS signing and verification, denial classifier, PubMed retrieval, appeal drafting, the 0.70 threshold.</td>
+    </tr>
+    <tr>
+      <td><b>#4</b></td><td>9 Sep</td><td>Phase 4 — ZK &amp; demo</td><td class="num">+3,922 / 50 files</td>
+      <td>The circom circuit and compiled artifacts, snarkjs bridge, the six&#8209;step guided demo, the audit explorer with CSV export, live system statistics.</td>
+    </tr>
+    <tr>
+      <td><b>#5</b></td><td>10 Sep</td><td>Deployment hardening</td><td class="num">+409 / 10 files</td>
+      <td>Three failures that only appear when deployed: key rotation across restarts, demo document loading, CORS handling.</td>
+    </tr>
+    <tr class="tot"><td colspan="3">Total across 12 commits</td><td class="num">+19,541 / −367</td><td>170 file changes</td></tr>
+  </table>
+
+  <div class="two">
+    <div>
+      <h3>6.2 &nbsp;Test suite — 138 passing, 0 failing</h3>
+      <table class="tight">
+        <tr><th>Suite</th><th class="num">Fns</th><th>Covers</th></tr>
+        <tr><td><code>test_rules.py</code></td><td class="num">6</td><td>All five rules, precedence, code normalisation, every decision carrying a rule ID</td></tr>
+        <tr><td><code>test_flow.py</code></td><td class="num">19</td><td>Webhook end to end, FHIR assembly, raw PHI never stored, signature round trip, <b>tamper rejection</b>, private keys never persisted</td></tr>
+        <tr><td><code>test_insure.py</code></td><td class="num">32</td><td>Upload validation, CPT mapping, both cost formulas, every ranking branch, sample&#8209;data labelling</td></tr>
+        <tr><td><code>test_appeals.py</code></td><td class="num">29</td><td>Denial classification, PubMed parsing against fixtures, each appeal outcome, <b>no automated final denial</b></td></tr>
+        <tr><td><code>test_zk.py</code></td><td class="num">22</td><td>Real proofs, every criterion branch, tamper rejection, <b>private inputs absent from responses</b>, system stats</td></tr>
+        <tr><td><code>test_persistence.py</code></td><td class="num">7</td><td>Supabase interface conformance, key rotation across two boots</td></tr>
+        <tr class="tot"><td>115 functions</td><td class="num">138</td><td>cases, 23.4 s</td></tr>
+      </table>
+      <p class="cap">Function and case counts differ because several tests are parameterised — <code>test_five_hardcoded_rules</code> alone runs one case per rule.</p>
+    </div>
+    <div>
+      <h3>6.3 &nbsp;Codebase and build</h3>
+      <table class="tight">
+        <tr><th>Component</th><th class="num">Lines</th><th>Status</th></tr>
+        <tr><td>Backend — FastAPI, Python</td><td class="num">6,799</td><td><span class="pill p-ok">138 tests pass</span></td></tr>
+        <tr><td>Frontend — Next.js 14, TypeScript</td><td class="num">3,703</td><td><span class="pill p-ok">builds clean</span></td></tr>
+        <tr><td>Database — SQL migrations</td><td class="num">183</td><td>4 migrations, 9 tables</td></tr>
+        <tr><td>ZK — circom + snarkjs</td><td class="num">180</td><td>artifacts committed</td></tr>
+      </table>
+      <p><b>Frontend production build</b> compiles clean — 7 routes, 8 static pages, 87.4&nbsp;kB shared JS — and <code>tsc --noEmit</code> passes with zero errors. <b><code>/health</code></b> reports storage backend, file store, whether a model key is configured, and whether the ZK artifacts are present, so the operating mode is never ambiguous during a demo.</p>
+      <h4>The 30-second demo</h4>
+      <p><code>/demo</code> runs all six steps from live data with no further input: EHR trigger, identity, zero&#8209;knowledge, rule engine, decision, price. Measured full run: <b>~11 seconds.</b> Each step also has a manual Next button, and a failed step shows a retry rather than a broken page.</p>
+      <h4>Reproduce every number on this page</h4>
+<pre>git log --shortstat     # +19,541 / −367, 170 files
+cd backend && .venv/bin/python -m pytest  # 138 passed
+cd frontend && npx tsc --noEmit && npm run build
+curl -s localhost:8000/api/system/stats
+  # average_resolution_seconds: 0.0447</pre>
+      <p class="cap">The ZK tests need <code>cd zk &amp;&amp; npm install</code> first; without snarkjs those 7 fail on a missing dependency rather than a logic error, and <code>/health</code> reports <code>zk_artifacts_available</code> accordingly.</p>
+    </div>
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 4 of 8</span></div>
+</div>
+
+<!-- ============================ PAGE 5 ============================ -->
+<div class="page">
+  <h2><span class="n">7</span>Risk Mitigation Protocol</h2>
+  <p>The governing principle: <b>the safe outcome is the default, not the exception.</b> Every failure mode below resolves toward a human or toward a refusal to act — never toward a guess. Each row names the code path that enforces it and the test that proves it.</p>
+
+  <h3>7.1 &nbsp;The escalation ladder</h3>
+  <div class="ladder">
+    <div class="rung"><div class="i">1</div><div>
+      <span class="t">No definitive rule match → ESCALATED</span>
+      The rule set terminates in <code>PAVO-R005</code>, a catch&#8209;all whose outcome is <code>ESCALATED</code>. A request for a procedure with no coverage rule cannot fall through to an approval or a denial; there is no such path. <span class="pill p-info">verified live: CPT 12345 → PAVO-R005</span>
+    </div></div>
+    <div class="rung"><div class="i">2</div><div>
+      <span class="t">Signature fails → 401, payload never read</span>
+      Verification precedes deserialisation. The rejection is written to <code>audit_log</code> as <code>aria.verification.failed</code> with the reason, and the rule engine is never invoked. Applies identically to authorization requests and appeals. <span class="pill p-ok">test_tampered_envelope_fails_verification</span>
+    </div></div>
+    <div class="rung"><div class="i">3</div><div>
+      <span class="t">Appeal confidence below 0.70 → human, with the work already done</span>
+      Nothing below threshold reaches a payer. The escalation carries pre&#8209;populated reviewer notes: procedure and diagnosis with descriptions, denial category, confidence score, and every citation retrieved. A reviewer opens a prepared file, not a blank one. <span class="pill p-ok">test_low_confidence_escalates_rather_than_submitting</span>
+    </div></div>
+    <div class="rung"><div class="i">4</div><div>
+      <span class="t">Coverage exclusion → never auto&#8209;appealed</span>
+      A <code>not_covered</code> denial is a contract question, not a clinical one. No letter drafted, no evidence gathered, no model called. Straight to a person. <span class="pill p-ok">test_not_covered_skips_the_appeal_and_escalates</span>
+    </div></div>
+    <div class="rung"><div class="i">5</div><div>
+      <span class="t">Appeal rejected → ESCALATED, never DENIED</span>
+      The payer agent answers an unsuccessful appeal with <code>PAVO-A002</code>, an escalation. No code path issues a final denial to a patient without a licensed human. <span class="pill p-ok">test_payer_escalates_rather_than_finally_denying</span>
+    </div></div>
+    <div class="rung"><div class="i">6</div><div>
+      <span class="t">Model unavailable → everything escalates; evidence source down → degrade, don't fall over</span>
+      Without model credentials the letter generator returns a labelled placeholder scored <code>0.0</code>, below threshold, so every appeal escalates — the degraded state is the safe state, and <code>/health</code> reports it rather than hiding it. When PubMed is blocked the appeal completes with zero citations and records the failure; confidence drops, which pushes it into human review. Failures propagate into caution, not into a worse letter.
+    </div></div>
+  </div>
+
+  <h3>7.2 &nbsp;Failure mode register</h3>
+  <table>
+    <tr><th style="width:20%">Failure</th><th style="width:15%">Detection</th><th style="width:30%">Automated response</th><th style="width:15%">Human SLA</th><th>Owner</th></tr>
+    <tr><td>Ambiguous clinical case</td><td>No definitive rule match</td><td>Status set to <code>escalated</code>; FHIR bundle, rule trace and audit trail attached</td><td>4 business hours</td><td>Payer clinical reviewer</td></tr>
+    <tr><td>Forged or replayed message</td><td>Signature verification</td><td>HTTP 401 before parsing; rejection audited with reason</td><td>Immediate alert</td><td>Pavo security on&#8209;call</td></tr>
+    <tr><td>Low&#8209;confidence appeal</td><td>Score &lt; 0.70</td><td>Held; reviewer notes generated; never transmitted</td><td>1 business day</td><td>Provider appeals staff</td></tr>
+    <tr><td>Model provider outage</td><td><code>claude_configured</code> / API error</td><td>Labelled placeholder at confidence 0.0 → universal escalation. <b>Core authorization loop unaffected.</b></td><td>None required</td><td>Pavo platform</td></tr>
+    <tr><td>Evidence source down</td><td>HTTP failure on E&#8209;utilities</td><td>Zero citations, failure recorded, confidence lowered</td><td>Follows appeal SLA</td><td>Provider appeals staff</td></tr>
+    <tr><td>Key rotation on restart</td><td>Verification failure against old key</td><td>Previous key revoked before new one registered; one active key per org enforced</td><td>None required</td><td>Pavo platform</td></tr>
+    <tr><td>Rule library drift</td><td>Quarterly criteria diff vs. payer&#8209;published policy</td><td>Affected rules flagged; requests matching them escalate until re&#8209;validated</td><td>5 business days</td><td>Pavo clinical informatics</td></tr>
+    <tr><td>Demographic skew in outcomes</td><td>Quarterly audit of approval rates across demography, geography, diagnosis</td><td>Rules driving a disparity are suspended to <code>ESCALATED</code> pending review</td><td>Quarterly cycle</td><td>Pavo clinical + compliance</td></tr>
+  </table>
+
+  <div class="note">
+    <span class="t">Human&#8209;in&#8209;the&#8209;loop is a routing decision, not a review queue</span>
+    Every escalation arrives complete. The reviewer receives the FHIR bundle, the rule that fired with its full description, the signature verification result, the denial category, the confidence score, and every citation retrieved — assembled before they open it. The bottleneck Round 1 identified was never clinical judgment; it was the paperwork wrapped around it. We removed the paperwork and left the judgment.
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 5 of 8</span></div>
+</div>
+
+<!-- ============================ PAGE 6 ============================ -->
+<div class="page">
+  <h2><span class="n">8</span>Risk, continued — privacy, and what is <i>not</i> yet mitigated</h2>
+
+  <div class="two">
+    <div>
+      <h3>8.1 &nbsp;Privacy controls that hold in code</h3>
+      <table class="tight">
+        <tr><th>Control</th><th>Enforcement</th></tr>
+        <tr><td>Raw PHI never stored</td><td>Patient identifiers SHA&#8209;256 hashed at the request boundary, before the first write. Verified by <code>test_raw_patient_id_is_never_stored</code>.</td></tr>
+        <tr><td>Member IDs hashed too</td><td>Including the ID read off an insurance card; the hash, not the raw value, forms the storage path.</td></tr>
+        <tr><td>Private keys never persisted</td><td><code>org_keys</code> holds the public key and a SHA&#8209;256 digest of the private key. Nothing else. Verified by <code>test_private_keys_are_never_stored</code>.</td></tr>
+        <tr><td>Minimum necessary by construction</td><td>The ZK circuit lets a payer confirm eligibility criteria without receiving age, diagnosis code, or deductible amount at all.</td></tr>
+        <tr><td>Sample data always labelled</td><td>Without model credentials the parsers return obvious placeholders, and both the API response and the UI say so. Nothing silently invents a member's plan.</td></tr>
+        <tr><td>Immutable decision record</td><td>Five audit entries per authorization, each with before and after state. The decision row always carries its <code>rule_id</code>.</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>8.2 &nbsp;Honest gaps, and the plan for each</h3>
+      <p>These are prototype limitations we would rather state than be asked about.</p>
+      <table class="tight">
+        <tr><th style="width:38%">Gap</th><th>Plan</th></tr>
+        <tr><td><b>ZK diagnosis check is single&#8209;hash</b><br><span class="pill p-warn">design limit</span></td><td>A passing proof reveals which covered diagnosis the patient carries. Needs a Merkle set&#8209;membership circuit. Scoped for the next phase.</td></tr>
+        <tr><td><b>Trusted setup is local</b><br><span class="pill p-bad">not production safe</span></td><td><code>build.sh</code> runs its own Powers of Tau, so the builder knows the toxic waste. Production requires a multi&#8209;party ceremony.</td></tr>
+        <tr><td><b>NPI verification is a flag</b><br><span class="pill p-warn">stubbed</span></td><td>Currently set from the seeded organisation record. Needs a live NPPES/CMS enrollment lookup with a cached mirror. One integration.</td></tr>
+        <tr><td><b>Facility pricing is mocked</b><br><span class="pill p-warn">stubbed</span></td><td>Deterministic from the CPT code, not gathered. Replaced by the Vapi voice agent plus payer machine&#8209;readable transparency files.</td></tr>
+        <tr><td><b>Five rules, not a rule library</b><br><span class="pill p-warn">scope</span></td><td>Enough to prove the mechanism, not a market. The commercial build is clinical informaticists encoding each payer's published criteria — costed as a named COGS line in §9.</td></tr>
+        <tr><td><b>Predictive classifier not built</b><br><span class="pill p-info">deliberate</span></td><td>The threshold and its config key exist; the model does not. Until it does, non&#8209;definitive cases escalate. That is the correct default and we are in no hurry to change it.</td></tr>
+        <tr><td><b>Federated learning not built</b><br><span class="pill p-info">deliberate</span></td><td>Round 1 roadmap item. Not started, and not on the critical path to revenue.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>8.3 &nbsp;The one that matters most: pricing formulas we implemented but do not endorse</h3>
+    <p>The Phase 2 specification defines member cost as <code>min(cash, coinsurance × negotiated)</code> before the deductible is met and <code>coinsurance × negotiated</code> after. We implemented that verbatim, and it is <b>not how a real plan behaves</b> — before the deductible is met a member normally owes the full negotiated rate, with coinsurance beginning afterwards. One visible consequence: at a typical 20% coinsurance the insurance path always beats cash, so the cash&#8209;is&#8209;cheaper case, which is the product's central insight, only surfaces at higher coinsurance.</p>
+    <p>We are flagging this rather than quietly fixing it because it illustrates the discipline we want judged: the specification and the implementation agree, the divergence from reality is documented, and there is exactly one function to change — <code>estimate_member_cost</code> in <code>insure/ranking.py</code>. Changing it is a product decision, and we would rather make it with a payer in the room than guess.</p>
+  </div>
+
+  <div class="sec">
+    <h3>8.4 &nbsp;Regulatory and ethical posture</h3>
+    <div class="three">
+      <div class="box">
+        <h4>Overreach</h4>
+        <p style="margin:0">Pavo never judges medical appropriateness. The rule engine matches published criteria; it does not form a clinical opinion. Every denial reaches a licensed human. Structurally enforced, not policy&#8209;enforced.</p>
+      </div>
+      <div class="box">
+        <h4>Bias</h4>
+        <p style="margin:0">Approval rates audited quarterly across demography, geography and diagnosis. Because every decision carries a rule ID, a disparity is traceable to the specific rule producing it — and that rule can be suspended to <code>ESCALATED</code> in one change.</p>
+      </div>
+      <div class="box">
+        <h4>Provenance</h4>
+        <p style="margin:0">Cross&#8209;organisation messages are signed and verified against registered public keys. A payer can prove which provider sent a request and that nothing was altered in transit. This is what makes an agent&#8209;to&#8209;agent network auditable.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 6 of 8</span></div>
+</div>
+
+<!-- ============================ PAGE 7 ============================ -->
+<div class="page">
+  <h2><span class="n">9</span>Three&#8209;Year Financial Model</h2>
+  <p>Built bottom&#8209;up from customer counts and measured infrastructure cost. The full workbook — seven tabs, every formula live — accompanies this report as <code>Pavo_Cloud_3Yr_Financial_Model.xlsx</code>. Every input on this page is a driver in that file.</p>
+
+  <h3>9.1 &nbsp;Volume drivers</h3>
+  <table class="tight">
+    <tr><th style="width:40%">Driver</th><th class="num">2026</th><th class="num">2027</th><th class="num">2028</th><th style="width:26%">Basis</th></tr>
+    <tr><td>Provider groups — ending</td><td class="num">110</td><td class="num">560</td><td class="num">2,240</td><td>Sales plan</td></tr>
+    <tr><td>Provider groups — average active</td><td class="num">55</td><td class="num">330</td><td class="num">1,400</td><td>Monthly weighted</td></tr>
+    <tr><td>Physicians per group</td><td class="num">8</td><td class="num">8</td><td class="num">8</td><td>Mid&#8209;market target</td></tr>
+    <tr><td>Prior auths per physician per week</td><td class="num">30</td><td class="num">30</td><td class="num">30</td><td>Conservative vs. AMA's 43–45</td></tr>
+    <tr><td>Share routed through Pavo</td><td class="num">25%</td><td class="num">40%</td><td class="num">50%</td><td>Grows with rule coverage</td></tr>
+    <tr><td>Authorizations per group per year</td><td class="num">3,120</td><td class="num">4,992</td><td class="num">6,240</td><td>Calculated</td></tr>
+    <tr class="tot"><td>Total authorizations processed</td><td class="num">171,600</td><td class="num">1,647,360</td><td class="num">8,736,000</td><td></td></tr>
+    <tr><td>Payer contracts — average active</td><td class="num">11</td><td class="num">84</td><td class="num">160</td><td>About 18% of the ~900 CMS&#8209;0057&#8209;F payers by 2028</td></tr>
+  </table>
+
+  <h3>9.2 &nbsp;Revenue build</h3>
+  <table class="tight">
+    <tr><th style="width:40%">Stream</th><th class="num">2026</th><th class="num">2027</th><th class="num">2028</th><th style="width:26%">Price</th></tr>
+    <tr><td>Per&#8209;authorization fees</td><td class="num">$514,800</td><td class="num">$4,942,080</td><td class="num">$26,208,000</td><td>$3.00 / auth</td></tr>
+    <tr><td>Provider subscriptions</td><td class="num">$264,000</td><td class="num">$1,584,000</td><td class="num">$6,720,000</td><td>$400 / mo</td></tr>
+    <tr><td>Payer compliance API</td><td class="num">$220,000</td><td class="num">$1,680,000</td><td class="num">$3,200,000</td><td>$20,000 / yr</td></tr>
+    <tr class="tot"><td>Total revenue</td><td class="num">$998,800</td><td class="num">$8,206,080</td><td class="num">$36,128,000</td><td>+722% / +340%</td></tr>
+  </table>
+  <p class="cap">This reconciles to the $1.0M / $8.2M / $36.1M presented in Round 1 — but those figures were asserted, and these are derived. The $3.00 authorization fee remains 85–92% below the $15–$40 payers spend manually today.</p>
+
+  <h3>9.3 &nbsp;Cost of revenue — where the money actually goes</h3>
+  <table class="tight">
+    <tr><th style="width:40%">Line</th><th class="num">2026</th><th class="num">2027</th><th class="num">2028</th><th style="width:26%">Driver</th></tr>
+    <tr><td>Cloud infrastructure — compute, DB, storage, egress</td><td class="num">$54,000</td><td class="num">$198,000</td><td class="num">$900,000</td><td>Volume + 7&#8209;yr retention</td></tr>
+    <tr><td>Model API — Insure parsing, appeal drafting</td><td class="num">$11,000</td><td class="num">$62,000</td><td class="num">$280,000</td><td><b>Not on the auth path</b></td></tr>
+    <tr><td>Clinical rule library — informaticists</td><td class="num">$189,000</td><td class="num">$455,000</td><td class="num">$1,080,000</td><td>1.5 → 3.5 → 8.0 FTE</td></tr>
+    <tr><td>Implementation &amp; onboarding</td><td class="num">$224,000</td><td class="num">$476,000</td><td class="num">$1,428,000</td><td>2.0 → 4.0 → 12.0 FTE</td></tr>
+    <tr><td>Customer support</td><td class="num">$92,000</td><td class="num">$190,000</td><td class="num">$784,000</td><td>1.0 → 2.0 → 8.0 FTE</td></tr>
+    <tr><td>Security &amp; compliance — SOC 2, pen test, HIPAA/BAA</td><td class="num">$118,000</td><td class="num">$112,000</td><td class="num">$290,000</td><td>Type II in Yr 1</td></tr>
+    <tr class="tot"><td>Total cost of revenue</td><td class="num">$688,000</td><td class="num">$1,493,000</td><td class="num">$4,762,000</td><td></td></tr>
+    <tr class="tot"><td>Gross profit &nbsp;/&nbsp; gross margin</td><td class="num">$310,800 · 31%</td><td class="num">$6,713,080 · 82%</td><td class="num">$31,366,000 · 87%</td><td></td></tr>
+  </table>
+
+  <div class="note">
+    <span class="t">The number a judge should push on: marginal cost per authorization</span>
+    Measured, not assumed. One authorization is ~89&nbsp;ms of a single vCPU, eight database rows totalling roughly 6&nbsp;kB, and <b>zero model tokens</b> — the deterministic core has no inference in it. Marginal infrastructure cost lands near <b>$0.00057 per authorization</b> against a $3.00 fee. The real cost of this business is not servers; it is the clinical informaticists encoding each payer's criteria into deterministic rules. That is the largest COGS line in every year, and it is why gross margin climbs with volume rather than with technology.
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 7 of 8</span></div>
+</div>
+
+<!-- ============================ PAGE 8 ============================ -->
+<div class="page">
+  <h2><span class="n">10</span>Unit economics, P&amp;L, and the ask</h2>
+
+  <div class="two">
+    <div>
+      <h3>10.1 &nbsp;CAC, LTV, and payback</h3>
+      <table class="tight">
+        <tr><th style="width:38%">Metric, at 2028 economics</th><th class="num">Provider group</th><th class="num">Payer</th><th class="num">Blended</th></tr>
+        <tr><td>Annual revenue per account</td><td class="num">$23,520</td><td class="num">$20,000</td><td class="num">$23,159</td></tr>
+        <tr><td>Gross profit per account (86.8%)</td><td class="num">$20,420</td><td class="num">$17,364</td><td class="num">$20,106</td></tr>
+        <tr><td>Annual logo churn</td><td class="num">5%</td><td class="num">2%</td><td class="num">4.7%</td></tr>
+        <tr><td><b>CAC</b></td><td class="num"><b>$6,000</b></td><td class="num"><b>$22,000</b></td><td class="num"><b>$6,699</b></td></tr>
+        <tr><td><b>LTV, 3&#8209;year</b></td><td class="num"><b>$58,248</b></td><td class="num"><b>$51,057</b></td><td class="num"><b>$57,533</b></td></tr>
+        <tr><td>LTV, 5&#8209;year</td><td class="num">$92,387</td><td class="num">$83,415</td><td class="num">$91,530</td></tr>
+        <tr class="tot"><td>LTV : CAC (3&#8209;year)</td><td class="num">9.7×</td><td class="num">2.3×</td><td class="num">8.6×</td></tr>
+        <tr class="tot"><td>CAC payback</td><td class="num">3.5 mo</td><td class="num">15.2 mo</td><td class="num">4.0 mo</td></tr>
+      </table>
+      <p class="cap">CAC falls from $9,500 (2026) to $6,000 (2028) for provider groups and $34,000 to $22,000 for payers. LTV is stated on a 3&#8209;year horizon deliberately; the 5&#8209;year figure is shown for comparison but we do not underwrite on it.</p>
+
+      <div class="box flag">
+        <b>Read the payer column correctly.</b> At 2.3× LTV:CAC and a 15&#8209;month payback, payer contracts do not pay for themselves as a standalone product — and we are not pretending otherwise. <b>The payer contract is a distribution channel, not a profit centre.</b> Signing one payer makes Pavo reachable by every provider group already submitting authorizations to it, which is precisely why provider CAC falls 37% across the plan. Judged on its own the payer line looks weak; judged as the thing that makes the provider line work, it is the highest&#8209;leverage spend in the model.
+      </div>
+    </div>
+    <div>
+      <h3>10.2 &nbsp;Three&#8209;year P&amp;L</h3>
+      <table class="tight">
+        <tr><th style="width:40%"></th><th class="num">2026</th><th class="num">2027</th><th class="num">2028</th></tr>
+        <tr><td>Revenue</td><td class="num">$998,800</td><td class="num">$8,206,080</td><td class="num">$36,128,000</td></tr>
+        <tr><td>Cost of revenue</td><td class="num">($688,000)</td><td class="num">($1,493,000)</td><td class="num">($4,762,000)</td></tr>
+        <tr class="tot"><td>Gross profit</td><td class="num">$310,800</td><td class="num">$6,713,080</td><td class="num">$31,366,000</td></tr>
+        <tr class="sub-row"><td>Gross margin</td><td class="num">31%</td><td class="num">82%</td><td class="num">87%</td></tr>
+        <tr><td>Research &amp; development</td><td class="num">($680,000)</td><td class="num">($2,100,000)</td><td class="num">($4,680,000)</td></tr>
+        <tr class="sub-row"><td>Engineers</td><td class="num">4</td><td class="num">12</td><td class="num">26</td></tr>
+        <tr><td>Sales &amp; marketing</td><td class="num">($1,657,000)</td><td class="num">($6,678,000)</td><td class="num">($12,260,000)</td></tr>
+        <tr class="sub-row"><td>New logos acquired</td><td class="num">128</td><td class="num">592</td><td class="num">1,830</td></tr>
+        <tr><td>General &amp; administrative</td><td class="num">($340,000)</td><td class="num">($1,150,000)</td><td class="num">($3,200,000)</td></tr>
+        <tr class="tot"><td>Total operating expense</td><td class="num">($2,677,000)</td><td class="num">($9,928,000)</td><td class="num">($20,140,000)</td></tr>
+        <tr class="tot"><td>EBITDA</td><td class="num" style="color:#9b2c2c">($2,366,200)</td><td class="num" style="color:#9b2c2c">($3,214,920)</td><td class="num" style="color:#1c6b4a">$11,226,000</td></tr>
+        <tr class="sub-row"><td>EBITDA margin</td><td class="num">(237%)</td><td class="num">(39%)</td><td class="num">31%</td></tr>
+      </table>
+      <p><b>Peak cumulative burn: $5.58M</b>, reached in Q4 2027. The company turns EBITDA&#8209;positive during 2028.</p>
+
+      <h3>10.3 &nbsp;Sensitivity — the assumptions that break the model</h3>
+      <table class="tight">
+        <tr><th>If this is wrong</th><th class="num">2028 revenue</th></tr>
+        <tr><td><b>Base case</b></td><td class="num"><b>$36.1M</b></td></tr>
+        <tr><td>CMS&#8209;0057&#8209;F slips a year → payer count halves</td><td class="num">$34.5M</td></tr>
+        <tr><td>Pavo&#8209;routed share is 35%, not 50%</td><td class="num">$28.3M</td></tr>
+        <tr><td>Provider groups reach 900 average, not 1,400</td><td class="num">$24.4M</td></tr>
+        <tr><td>Auth fee compresses to $2.00</td><td class="num">$27.4M</td></tr>
+        <tr><td><b>All four together</b></td><td class="num"><b>$13.8M</b></td></tr>
+      </table>
+      <p class="cap">The model's single greatest exposure is the provider group count, not price. Volume drives 73% of 2028 revenue.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h3>10.4 &nbsp;What we are asking for, and what it buys</h3>
+    <p><b>$8.0M</b> covers the $5.58M peak burn with twelve months of buffer past EBITDA breakeven. It funds, in order of how much it de&#8209;risks the plan:</p>
+    <ol style="margin-bottom:6px">
+      <li><b>The clinical rule library</b> ($1.7M over three years). The largest COGS line and the real moat. Five rules prove a mechanism; a few thousand encoded payer criteria are a business a competitor cannot clone in a quarter.</li>
+      <li><b>SOC 2 Type II and a HIPAA compliance posture</b> ($520K). No payer signs without it. This is a gate, not an optimisation.</li>
+      <li><b>Payer business development</b> ($5.67M across three years). Slow, expensive, and the thing that makes provider acquisition cheap. We would rather over&#8209;invest here than anywhere else.</li>
+      <li><b>Engineering to close the §8.2 gaps</b> ($7.46M). Live NPPES verification, the Merkle&#8209;based ZK circuit, real facility pricing via the voice agent, and the predictive classifier — in that order.</li>
+    </ol>
+  </div>
+
+  <div class="note" style="margin-bottom:0">
+    <span class="t">In one line</span>
+    Round 1 was an argument that the human bottleneck in prior authorization is removable. Round 2 is 19,541 lines of committed code, 138 passing tests, and an 88.6&nbsp;ms measured decision that says it is already removed — for the cases we have encoded. Everything from here is encoding more cases, and the financial model above is an honest account of what that costs.
+  </div>
+
+  <div class="footer"><span>Pavo Cloud — Technical Execution Report</span><span>Page 8 of 8</span></div>
+</div>
+
+</body>
+</html>
