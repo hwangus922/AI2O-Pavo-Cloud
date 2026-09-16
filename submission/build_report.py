@@ -191,11 +191,11 @@ $ git log --shortstat a13f6cb
 
 <div class="figrow">
   <div>
-    <img src="assets/demo_complete.png" alt="The six-step demonstration, completed">
+    <img src="assets/demo_complete_print.jpg" alt="The six-step demonstration, completed">
     <p class="fcap">Figure 4. The guided demonstration after a single click. All six steps &mdash; order, identity, privacy proof, rules, decision, price &mdash; run with no further input and finish in about eleven seconds. The last step prices the same operation at five facilities: a spread of $2,475 for identical care.</p>
   </div>
   <div>
-    <img src="assets/dashboard.png" alt="The authorization dashboard">
+    <img src="assets/dashboard_print.jpg" alt="The authorization dashboard">
     <p class="fcap">Figure 5. The dashboard. Every row carries the rule that produced it, in the RULE column. The single amber row is a knee replacement whose diagnosis did not match the covered condition; it is waiting for a human reviewer, with its file already assembled.</p>
   </div>
 </div>
