@@ -352,12 +352,12 @@ def build():
             para(doc, b.runs, bold=True, before=14 * PX, after=5 * PX,
                  line=body_line, keep=True)
         elif b.kind == "p":
-            if "cap" in b.cls:
-                para(doc, b.runs, italic=True, before=10 * PX, after=4 * PX,
-                     line=body_line, keep=True)
-            elif "fcap" in b.cls:
+            if "fcap" in b.cls:
                 para(doc, b.runs, italic=True, size=10.5, before=3 * PX,
                      after=10 * PX, line=13)
+            elif "cap" in b.cls:
+                para(doc, b.runs, italic=True, before=10 * PX, after=4 * PX,
+                     line=body_line, keep=True)
             else:
                 para(doc, b.runs, align=WD_ALIGN_PARAGRAPH.JUSTIFY,
                      after=8 * PX, line=body_line)
