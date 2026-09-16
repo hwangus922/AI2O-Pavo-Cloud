@@ -153,7 +153,7 @@ BODY = f"""
 
 <h3>2.5 What Happens to Patient Data</h3>
 <p>Patient identifiers are scrambled at the door, before anything is saved, and the scrambling is one-way: the original cannot be recovered from it. A test in the codebase checks that the real identifier never appears in storage.</p>
-<p>The system goes further using a technique called a zero-knowledge proof. It lets the insurer confirm three things &mdash; that the patient is old enough, that the diagnosis is one the plan covers, and that the deductible condition is met &mdash; <em>without receiving the age, the diagnosis or the amount</em>. The insurer learns only whether each condition holds. One limitation is listed in Table 7.</p>
+<p>The system goes further using a technique called a zero-knowledge proof. It lets the insurer confirm three things &mdash; that the patient is old enough, that the diagnosis is one the plan covers, and that the deductible condition is met &mdash; <em>without receiving the age, the diagnosis or the amount</em>. The insurer learns only whether each condition holds. One limitation is listed in Table 6.</p>
 
 <h2>3. The Build Log</h2>
 
@@ -205,7 +205,7 @@ $ git log --shortstat a13f6cb
 <h3>4.1 The Governing Rule</h3>
 <p>One principle runs through every part of the system: <strong>the safe outcome is the default, not the exception.</strong> When the software is unsure it does not guess. It stops and hands the case to a person, with the file already prepared.</p>
 
-<p class="cap">Table 6. What happens when something goes wrong.</p>
+<p class="cap">Table 5. What happens when something goes wrong.</p>
 <table>
   <tr><th style="width:25%">If this happens</th><th style="width:45%">The software does this, automatically</th><th>A person is involved</th></tr>
   <tr>
@@ -251,7 +251,7 @@ $ git log --shortstat a13f6cb
 <h3>4.3 What We Have Not Solved</h3>
 <p>These are real limitations of a prototype. We would rather state them than be caught by them.</p>
 
-<p class="cap">Table 7. Known gaps and what each needs.</p>
+<p class="cap">Table 6. Known gaps and what each needs.</p>
 <table>
   <tr><th style="width:36%">Gap</th><th>What it needs</th></tr>
   <tr><td>The privacy proof reveals which covered condition a patient has</td><td>A more advanced circuit design. Scoped for the next phase.</td></tr>
@@ -267,7 +267,7 @@ $ git log --shortstat a13f6cb
 <h3>5.1 Where the Money Comes From</h3>
 <p>Pavo earns in three ways: a fee for each request, a monthly subscription per medical practice, and a yearly fee to insurers for the connection itself. The figures below are built up from customer counts and request volumes, not from a growth rate applied to a starting number. The full workbook accompanies this report.</p>
 
-<p class="cap">Table 8. Revenue, built up from customers.</p>
+<p class="cap">Table 7. Revenue, built up from customers.</p>
 <table>
   <tr><th>Source</th><th class="n" style="width:16%">2026</th><th class="n" style="width:16%">2027</th><th class="n" style="width:17%">2028</th></tr>
   <tr><td>Medical practices served (average)</td><td class="n">55</td><td class="n">330</td><td class="n">1,400</td></tr>
@@ -284,7 +284,7 @@ $ git log --shortstat a13f6cb
 <h3>5.2 What It Costs to Run</h3>
 <p>Servers are not the expense. Processing one request costs about six hundredths of a cent, because the deciding path uses no AI models at all. The real cost is clinical staff translating each insurer's published rules into the fixed rules the software applies &mdash; the largest line in every year, and the reason margins improve with scale rather than with technology.</p>
 
-<p class="cap">Table 9. Cost of serving customers, and what is left.</p>
+<p class="cap">Table 8. Cost of serving customers, and what is left.</p>
 <table>
   <tr><th>Cost</th><th class="n" style="width:16%">2026</th><th class="n" style="width:16%">2027</th><th class="n" style="width:17%">2028</th></tr>
   <tr><td>Clinical staff writing coverage rules</td><td class="n">$189,000</td><td class="n">$455,000</td><td class="n">$1,080,000</td></tr>
@@ -300,7 +300,7 @@ $ git log --shortstat a13f6cb
 <h3>5.3 Cost to Win a Customer, and What One Is Worth</h3>
 <p>Two standard measures. <em>Acquisition cost</em> is what it costs in sales and marketing to sign one customer. <em>Lifetime value</em> is the profit that customer produces before they leave, stated here over three years, which is deliberately conservative.</p>
 
-<p class="cap">Table 10. Customer economics at 2028 rates.</p>
+<p class="cap">Table 9. Customer economics at 2028 rates.</p>
 <table>
   <tr><th>Measure</th><th class="n" style="width:21%">Practice</th><th class="n" style="width:17%">Insurer</th><th class="n" style="width:17%">Blended</th></tr>
   <tr><td>Cost to acquire one customer</td><td class="n">$6,000</td><td class="n">$22,000</td><td class="n">$6,699</td></tr>
@@ -313,7 +313,7 @@ $ git log --shortstat a13f6cb
 
 <h3>5.4 Profit, and What We Are Asking For</h3>
 <p>After engineering, sales and admin, the company loses $2.37 million in 2026 and $3.21 million in 2027, then makes $11.23 million in 2028. The deepest point is $5.58 million of cumulative losses, in late 2027.</p>
-<p><strong>We are asking for $8.0 million</strong>, which covers that with roughly a year of cushion beyond breaking even. In order of how much risk each removes, it buys the clinical rule library ($1.7m), the security certification no insurer will sign without ($520k), insurer business development ($5.67m), and the engineering to close the gaps in Table 7 ($7.46m).</p>
+<p><strong>We are asking for $8.0 million</strong>, which covers that with roughly a year of cushion beyond breaking even. In order of how much risk each removes, it buys the clinical rule library ($1.7m), the security certification no insurer will sign without ($520k), insurer business development ($5.67m), and the engineering to close the gaps in Table 6 ($7.46m).</p>
 <p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p>
 """
 
