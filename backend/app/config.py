@@ -26,6 +26,16 @@ class Settings:
             "SUPABASE_SERVICE_ROLE_KEY", ""
         ).strip()
         self.anthropic_api_key: str = os.getenv("ANTHROPIC_API_KEY", "").strip()
+        self.deepseek_api_key: str = os.getenv("DEEPSEEK_API_KEY", "").strip()
+        self.deepseek_base_url: str = (
+            os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
+            .strip()
+            .rstrip("/")
+        )
+        self.deepseek_model: str = os.getenv("DEEPSEEK_MODEL", "deepseek-chat").strip()
+        # Forces a provider when both keys are present. Empty means "pick the
+        # one that is configured"; see llm.active_provider.
+        self.llm_provider: str = os.getenv("LLM_PROVIDER", "").strip().lower()
         self.aria_version: str = os.getenv("ARIA_VERSION", "1.0")
         self.ml_classifier_threshold: float = float(
             os.getenv("ML_CLASSIFIER_THRESHOLD", "0.75")

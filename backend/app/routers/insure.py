@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from .. import audit
 from ..db import Repository, get_repository
 from ..hashing import hash_identifier
-from ..claude_client import ClaudeResponseError, ClaudeUnavailableError
+from ..llm import LLMResponseError, LLMUnavailableError
 from ..fhir import CPT_DISPLAY
 from ..insure.cpt import map_procedure_to_cpt
 from ..insure.facilities import get_facility_pricing
@@ -93,9 +93,9 @@ def parse_insurance_documents(
             card_media_type=card_media_type,
             eoc_bytes=eoc_bytes,
         )
-    except ClaudeUnavailableError as exc:  # pragma: no cover - guarded upstream
+    except LLMUnavailableError as exc:  # pragma: no cover - guarded upstream
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    except ClaudeResponseError as exc:
+    except LLMResponseError as exc:
         raise HTTPException(
             status_code=502, detail=f"Document parsing failed: {exc}"
         ) from exc
@@ -172,7 +172,7 @@ def create_price_query(
     else:
         try:
             mapping, cpt_source = map_procedure_to_cpt(payload.procedure_name)
-        except ClaudeResponseError as exc:
+        except LLMResponseError as exc:
             raise HTTPException(
                 status_code=502, detail=f"CPT mapping failed: {exc}"
             ) from exc

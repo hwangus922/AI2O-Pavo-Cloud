@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..claude_client import complete_json, is_configured
+from ..llm import complete_json, is_configured, source_label
 from ..fhir import CPT_DISPLAY, ICD10_DISPLAY
 from .prompts import APPEAL_LETTER_PROMPT
 from .pubmed import format_citations
@@ -94,7 +94,7 @@ def generate_appeal_letter(
     """Draft an appeal letter.
 
     Returns (result, source) where result carries letter, confidence, and
-    key_arguments, and source is "claude" or "sample".
+    key_arguments, and source names the provider, or "sample".
     """
     if not is_configured():
         return (
@@ -138,5 +138,5 @@ def generate_appeal_letter(
             "confidence": confidence,
             "key_arguments": [str(argument) for argument in arguments],
         },
-        "claude",
+        source_label(),
     )
