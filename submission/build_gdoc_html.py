@@ -5,8 +5,23 @@ http(s) ones, so the three figures are referenced from the public repository at
 a pinned commit. Everything else is the same content build_report.py writes,
 read back out of report.html so the two cannot drift.
 
-Two things the importer does on its own and have to be undone here: it gives
-every table cell all four borders, and it rounds font sizes to whole points.
+Google Docs lays text out differently from a browser, so the numbers in CSS
+below are tuned for Docs and will look tight if you open this file in one.
+Measured against a calibration document, for 12pt Times:
+
+    line box = 2.25pt + 12.5pt x line-height
+
+so line-height 1.38 gives 19.5pt, not the 16.56pt a browser gives, and the
+document ran a page long. 1.15 reproduces the printed report. Three further
+things the importer does on its own:
+
+  * a table cell takes its line box from the paragraph's font size, not from
+    a span inside it, so cell text needs its own <p> or every row is set as
+    though it were 12pt;
+  * an empty paragraph inherits the previous paragraph's size, so the
+    spacers after tables carry a non-breaking space;
+  * it gives every table cell all four borders, and rounds font sizes to
+    whole points.
 
     python build_gdoc_html.py
 """
@@ -30,32 +45,34 @@ IMG = {
 }
 
 CSS = """
-body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.38;color:#000}
-p{margin:0 0 6pt;text-align:justify}
+body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.15;color:#000}
+p{margin:0 0 6pt;text-align:justify;line-height:1.15}
 p.t{font-size:16pt;font-weight:bold;text-align:center;margin:0 0 3pt}
 p.s{font-style:italic;text-align:center;margin:0 0 3pt}
 p.a{text-align:center;margin:0 0 15pt}
-h2{font-size:12pt;font-weight:bold;margin:13pt 0 4.5pt;text-align:left}
-h3{font-size:12pt;font-weight:bold;margin:10.5pt 0 4pt;text-align:left}
+h2{font-size:12pt;font-weight:bold;margin:13pt 0 4.5pt;text-align:left;line-height:1.15}
+h3{font-size:12pt;font-weight:bold;margin:10.5pt 0 4pt;text-align:left;line-height:1.15}
 p.c{font-style:italic;margin:7.5pt 0 3pt;text-align:left}
 p.f{font-style:italic;margin:2pt 0 7.5pt;text-align:left}
 p.g{margin:4pt 0 2pt;text-align:left}
-p.z{font-size:4pt;margin:0}
+p.z{font-size:4pt;line-height:1;margin:0}
 table{border-collapse:collapse;width:100%}
-td{font-size:10.5pt;line-height:1.24;text-align:left;vertical-align:top;
-   padding:3.75pt 7.5pt 3.75pt 0;
+td{vertical-align:top;padding:3.75pt 7.5pt 3.75pt 0;
    border-top:0 none #fff;border-left:0 none #fff;border-right:0 none #fff;
    border-bottom:1px solid #DCDCDC}
-td.h{color:#1274C4;font-weight:bold;vertical-align:bottom;
-     padding:3pt 7.5pt 3pt 0;border-bottom:1px solid #555555}
-td.n{text-align:right;padding-right:0}
+td.h{vertical-align:bottom;padding:3pt 7.5pt 3pt 0;border-bottom:1px solid #555555}
+td.n{padding-right:0}
 td.e{border-bottom:1px solid #000000}
-td.o{border-top:1px solid #555555;font-weight:bold}
+td.o{border-top:1px solid #555555}
 td.p{border:1px solid #CCCCCC;background-color:#F4F4F4;padding:5pt 6pt}
 td.i{border:0 none #fff;padding:0 6pt 0 0;vertical-align:top}
-p.m{font-family:'Courier New',Courier,monospace;font-size:8.4pt;line-height:1.35;
+p.q{font-size:10.5pt;line-height:1.05;margin:0;text-align:left}
+p.n{text-align:right}
+p.hh{color:#1274C4;font-weight:bold}
+p.bb{font-weight:bold}
+p.m{font-family:'Courier New',Courier,monospace;font-size:8.4pt;line-height:1.2;
     margin:0;text-align:left}
-p.k{font-size:9.5pt;font-style:italic;margin:0;text-align:left}
+p.k{font-size:9.5pt;font-style:italic;line-height:1.1;margin:0;text-align:left}
 p.w{margin:0 0 3pt;text-align:left}
 """
 
@@ -110,7 +127,7 @@ def build() -> str:
                 pad = "&nbsp;" * (len(ln) - len(stripped))
                 lines.append(pad + H.escape(stripped).replace("  ", " &nbsp;"))
             out.append('<table><tr><td class="p"><p class="m">'
-                       + "<br>".join(lines) + '</p></td></tr></table><p class="z"></p>')
+                       + "<br>".join(lines) + '</p></td></tr></table><p class="z">&nbsp;</p>')
 
         elif b.kind == "table":
             out.append(table_html(b.rows))
@@ -125,7 +142,7 @@ def build() -> str:
                              f'<p class="w"><img src="{RAW}{name}" width="{w}"></p>'
                              f'<p class="k">{cap}</p></td>')
             out.append("<table><tr>" + "".join(cells)
-                       + '</tr></table><p class="z"></p>')
+                       + '</tr></table><p class="z">&nbsp;</p>')
 
     return "\n".join(out)
 
@@ -156,10 +173,18 @@ def table_html(rows) -> str:
             if "tot" in row["cls"]:
                 cls.append("o")
             c = f' class="{" ".join(cls)}"' if cls else ""
+            pcls = ["q"]
+            if "n" in cell["cls"]:
+                pcls.append("n")
+            if cell["head"]:
+                pcls.append("hh")
+            elif "tot" in row["cls"]:
+                pcls.append("bb")
             inner = runs_html(cell["runs"]).replace("\n", "<br>")
-            tds.append(f'<td{c} style="width:{widths[ci] * 100:.0f}%">{inner}</td>')
+            tds.append(f'<td{c} style="width:{widths[ci] * 100:.0f}%">'
+                       f'<p class="{" ".join(pcls)}">{inner}</p></td>')
         trs.append("<tr>" + "".join(tds) + "</tr>")
-    return "<table>" + "".join(trs) + '</table><p class="z"></p>'
+    return "<table>" + "".join(trs) + '</table><p class="z">&nbsp;</p>'
 
 
 if __name__ == "__main__":
