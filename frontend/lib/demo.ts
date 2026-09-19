@@ -62,10 +62,10 @@ export type DemoStepId = (typeof DEMO_STEPS)[number]["id"];
  *  They are real files served from /public/demo — a rendered insurance card
  *  and a one-page Evidence of Coverage — so the flow behaves the same whether
  *  Claude reads them or the sample parser stands in. */
-const SAMPLE_CARD_URL = "/demo/sample-card.png";
-const SAMPLE_EOC_URL = "/demo/sample-eoc.pdf";
+export const SAMPLE_CARD_URL = "/demo/sample-card.png";
+export const SAMPLE_EOC_URL = "/demo/sample-eoc.pdf";
 
-async function fetchAsFile(url: string, name: string, type: string): Promise<File> {
+export async function fetchAsFile(url: string, name: string, type: string): Promise<File> {
   const response = await fetch(url, { cache: "force-cache" });
   if (!response.ok) {
     throw new Error(`Could not load the sample document ${name} (${response.status}).`);

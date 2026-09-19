@@ -1,25 +1,6 @@
 import { formatDuration, formatPercent } from "@/lib/display";
 import type { SystemStats } from "@/lib/types";
-
-function Stat({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-}) {
-  return (
-    <div className="pavo-card p-4">
-      <p className="text-xs text-navy-400">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums">
-        {value}
-      </p>
-      {hint ? <p className="mt-0.5 text-xs text-navy-400">{hint}</p> : null}
-    </div>
-  );
-}
+import { Stat } from "@/components/site/Stat";
 
 export function SystemStatsRow({ stats }: { stats: SystemStats | null }) {
   if (!stats) {

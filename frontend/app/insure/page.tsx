@@ -7,6 +7,8 @@ import { FileDropzone } from "@/components/FileDropzone";
 import { PlanSummary } from "@/components/PlanSummary";
 import { ApiError, parseInsuranceDocuments, submitPriceQuery } from "@/lib/api";
 import type { ParsedDocumentResult, PriceQueryResult } from "@/lib/types";
+import { Container } from "@/components/site/Container";
+import { SAMPLE_CARD_URL, SAMPLE_EOC_URL, fetchAsFile } from "@/lib/demo";
 
 const EXAMPLE_PROCEDURES = [
   "MRI of my knee",
@@ -34,7 +36,33 @@ export default function InsurePage() {
   const [queryError, setQueryError] = useState<string | null>(null);
   const [priceQuery, setPriceQuery] = useState<PriceQueryResult | null>(null);
 
+  const [loadingSamples, setLoadingSamples] = useState(false);
+
   const canUpload = Boolean(cardImage && eocPdf) && !parsing;
+
+  /**
+   * Opened cold, this page is two empty dropzones and nothing to look at.
+   * Loading the same labelled samples the demo uses gives a visitor without an
+   * insurance card to hand something real to run.
+   */
+  async function handleUseSamples() {
+    setLoadingSamples(true);
+    setParseError(null);
+    try {
+      const [card, eoc] = await Promise.all([
+        fetchAsFile(SAMPLE_CARD_URL, "sample-card.png", "image/png"),
+        fetchAsFile(SAMPLE_EOC_URL, "sample-eoc.pdf", "application/pdf"),
+      ]);
+      setCardImage(card);
+      setEocPdf(eoc);
+    } catch (caught) {
+      setParseError(
+        errorMessage(caught, "Could not load the sample documents.")
+      );
+    } finally {
+      setLoadingSamples(false);
+    }
+  }
 
   async function handleParse(event: React.FormEvent) {
     event.preventDefault();
@@ -86,7 +114,7 @@ export default function InsurePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <Container className="space-y-8 py-8 sm:py-10">
       <div>
         <p className="text-sm font-medium uppercase tracking-wide text-navy-400">
           Insure
@@ -99,6 +127,19 @@ export default function InsurePage() {
           plan, then compares what you would pay at nearby facilities — through
           insurance or in cash.
         </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleUseSamples}
+            disabled={loadingSamples || parsing}
+            className="pavo-btn-quiet"
+          >
+            {loadingSamples ? "Loading…" : "Use the sample documents"}
+          </button>
+          <p className="text-xs text-navy-400">
+            No card to hand? These are the same labelled samples the demo uses.
+          </p>
+        </div>
       </div>
 
       {/* Step 1 — documents */}
@@ -228,6 +269,6 @@ export default function InsurePage() {
           </ul>
         </section>
       ) : null}
-    </div>
+    </Container>
   );
 }

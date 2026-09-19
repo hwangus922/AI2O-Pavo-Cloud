@@ -8,11 +8,10 @@ path produced it.
 """
 from __future__ import annotations
 
-import json
-import re
 from typing import Any, Optional
 
 from .config import get_settings
+from .llm import LLMResponseError, LLMUnavailableError, extract_json_object
 
 # Fixed by the Phase 2 specification.
 MODEL = "claude-sonnet-4-6"
@@ -22,12 +21,10 @@ MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 4096
 
 
-class ClaudeUnavailableError(RuntimeError):
-    """Raised when no Anthropic credentials are configured."""
-
-
-class ClaudeResponseError(RuntimeError):
-    """Raised when Claude's reply is not the JSON object we asked for."""
+# The provider-neutral errors, re-exported under their original names so the
+# routers and tests that already catch them keep working.
+ClaudeUnavailableError = LLMUnavailableError
+ClaudeResponseError = LLMResponseError
 
 
 def is_configured() -> bool:
@@ -55,33 +52,6 @@ def _response_text(message: Any) -> str:
         if getattr(block, "type", None) == "text"
     ]
     return "".join(parts).strip()
-
-
-def extract_json_object(raw: str) -> dict[str, Any]:
-    """Parse a JSON object out of a model reply.
-
-    The prompts ask for JSON only, but a fenced code block is a common and
-    harmless deviation, so unwrap that before parsing.
-    """
-    text = raw.strip()
-
-    fenced = re.match(r"^```(?:json)?\s*(.*?)\s*```$", text, re.DOTALL)
-    if fenced:
-        text = fenced.group(1).strip()
-
-    try:
-        parsed = json.loads(text)
-    except json.JSONDecodeError as exc:
-        raise ClaudeResponseError(
-            f"Claude did not return valid JSON: {text[:200]!r}"
-        ) from exc
-
-    if not isinstance(parsed, dict):
-        raise ClaudeResponseError(
-            f"Expected a JSON object, got {type(parsed).__name__}."
-        )
-
-    return parsed
 
 
 def complete_json(

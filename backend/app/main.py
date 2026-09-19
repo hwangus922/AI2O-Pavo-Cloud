@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
 from .db import get_repository
+from . import llm
 from .storage import get_file_store
 from .zk.prover import artifacts_available
 from .routers import appeals, aria, audit, auth, insure, system, zk
@@ -64,6 +65,10 @@ def health() -> dict[str, Any]:
         "aria_version": settings.aria_version,
         "storage_backend": repository.backend_name,
         "file_store_backend": get_file_store().backend_name,
+        # Which model provider is live, and whether it can read the
+        # insurance card and EOC (Anthropic can; DeepSeek is text-only).
+        "llm_provider": llm.active_provider() or None,
+        "document_parsing": llm.supports_documents(),
         "claude_configured": bool(settings.anthropic_api_key),
         "zk_artifacts_available": artifacts_available(),
     }

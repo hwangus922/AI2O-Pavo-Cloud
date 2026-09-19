@@ -3,20 +3,23 @@
 The card image goes to Claude with vision; the EOC PDF goes to Claude as a
 document block. The two JSON results are merged into one insurance_plan.
 
-Without an Anthropic API key the parsers return clearly-labelled sample data
-so the flow stays demoable. Every parse result carries a `source` of "claude"
-or "sample" so the caller — and the UI — can tell which produced it.
+Both documents need a provider that accepts images and PDFs. Without one —
+no key at all, or a text-only provider such as DeepSeek — the parsers return
+clearly-labelled sample data so the flow stays demoable. Every parse result
+carries a `source` naming what produced it, so the caller and the UI can tell
+the difference.
 """
 from __future__ import annotations
 
 import base64
 from typing import Any, Optional
 
-from ..claude_client import (
-    ClaudeResponseError,
-    ClaudeUnavailableError,
+from ..llm import (
+    LLMResponseError,
+    LLMUnavailableError,
     complete_json,
-    is_configured,
+    source_label,
+    supports_documents,
 )
 from .prompts import (
     CARD_FIELDS,
@@ -91,7 +94,7 @@ def parse_card(image_bytes: bytes, media_type: str) -> tuple[dict[str, Any], str
 
     Returns (fields, source).
     """
-    if not is_configured():
+    if not supports_documents():
         return dict(SAMPLE_CARD), "sample"
 
     parsed = complete_json(
@@ -108,7 +111,7 @@ def parse_card(image_bytes: bytes, media_type: str) -> tuple[dict[str, Any], str
             {"type": "text", "text": "Extract the fields from this insurance card."},
         ],
     )
-    return _fill_missing(parsed, CARD_FIELDS), "claude"
+    return _fill_missing(parsed, CARD_FIELDS), source_label()
 
 
 def parse_eoc(pdf_bytes: bytes) -> tuple[dict[str, Any], str]:
@@ -116,7 +119,7 @@ def parse_eoc(pdf_bytes: bytes) -> tuple[dict[str, Any], str]:
 
     Returns (fields, source).
     """
-    if not is_configured():
+    if not supports_documents():
         return dict(SAMPLE_EOC), "sample"
 
     parsed = complete_json(
@@ -137,7 +140,7 @@ def parse_eoc(pdf_bytes: bytes) -> tuple[dict[str, Any], str]:
             },
         ],
     )
-    return _fill_missing(parsed, EOC_FIELDS), "claude"
+    return _fill_missing(parsed, EOC_FIELDS), source_label()
 
 
 def merge_plan(
