@@ -10,7 +10,6 @@ import {
   RulesStep,
   ZkStep,
 } from "@/components/demo/StepPanels";
-import { describeApiFailure } from "@/lib/api";
 import {
   DEMO_STEPS,
   EMPTY_DEMO_STATE,
@@ -32,7 +31,7 @@ const DEFAULT_PROCEDURE = "27447";
 const DEFAULT_DIAGNOSIS = "M17.11";
 const DEFAULT_PATIENT_AGE = 42;
 
-type Phase = "idle" | "running" | "done" | "error";
+type Phase = "idle" | "running" | "done";
 
 export default function DemoPage() {
   const [procedureCode, setProcedureCode] = useState(DEFAULT_PROCEDURE);
@@ -42,7 +41,6 @@ export default function DemoPage() {
   const [stepIndex, setStepIndex] = useState(-1);
   const [phase, setPhase] = useState<Phase>("idle");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [autoRun, setAutoRun] = useState(false);
   const [elapsed, setElapsed] = useState<number | null>(null);
 
@@ -69,11 +67,15 @@ export default function DemoPage() {
     };
   }, []);
 
-  const fail = useCallback((caught: unknown) => {
-    setError(
-      describeApiFailure(caught, "this step")
-    );
-    setPhase("error");
+  /**
+   * A step that cannot complete simply stops the run.
+   *
+   * Whatever already succeeded stays on screen and the controls return to
+   * rest, so pressing Run Full Demo again is the whole recovery. A backend
+   * that was asleep is usually awake by the second press.
+   */
+  const stop = useCallback(() => {
+    setPhase("idle");
     setAutoRun(false);
     setBusy(false);
   }, []);
@@ -82,7 +84,6 @@ export default function DemoPage() {
   const runStep = useCallback(
     async (index: number, current: DemoState): Promise<DemoState | null> => {
       setBusy(true);
-      setError(null);
 
       try {
         let patch: Partial<DemoState> = {};
@@ -112,12 +113,12 @@ export default function DemoPage() {
         setStepIndex(index);
         setBusy(false);
         return next;
-      } catch (caught) {
-        if (mounted.current) fail(caught);
+      } catch {
+        if (mounted.current) stop();
         return null;
       }
     },
-    [diagnosisCode, fail, procedureCode]
+    [diagnosisCode, procedureCode, stop]
   );
 
   /** Manual advance. */
@@ -132,7 +133,6 @@ export default function DemoPage() {
   const runFullDemo = useCallback(async () => {
     setState(EMPTY_DEMO_STATE);
     setStepIndex(-1);
-    setError(null);
     setElapsed(null);
     setPhase("running");
     setAutoRun(true);
@@ -155,12 +155,6 @@ export default function DemoPage() {
     setPhase("done");
     setAutoRun(false);
   }, [runStep]);
-
-  const retry = useCallback(async () => {
-    const index = Math.max(stepIndex + 1, 0);
-    setPhase("running");
-    await runStep(index, state);
-  }, [runStep, state, stepIndex]);
 
   const activeStep = stepIndex >= 0 ? DEMO_STEPS[stepIndex] : null;
 
@@ -303,19 +297,6 @@ export default function DemoPage() {
         })}
       </ol>
 
-      {/* Error with retry, rather than a broken panel */}
-      {phase === "error" ? (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-5">
-          <p className="text-sm font-semibold text-rose-900">
-            This step did not complete
-          </p>
-          <p className="mt-1 text-sm text-rose-800">{error}</p>
-          <button type="button" onClick={retry} className="pavo-btn mt-3">
-            Retry this step
-          </button>
-        </div>
-      ) : null}
-
       {/* Active panel */}
       {busy && stepIndex < 0 ? (
         <div className="pavo-card p-8 text-center">
@@ -323,7 +304,7 @@ export default function DemoPage() {
         </div>
       ) : null}
 
-      {activeStep && phase !== "error" ? (
+      {activeStep ? (
         <section key={activeStep.id} className="animate-fade-up space-y-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-navy-400">

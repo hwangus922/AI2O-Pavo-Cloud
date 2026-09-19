@@ -58,39 +58,6 @@ export class ApiError extends Error {
   }
 }
 
-/**
- * Turn a failure into a sentence that points at the right system.
- *
- * "Is the backend running?" was the answer to every failure, which is
- * actively misleading when the cause is a deployment built without
- * BACKEND_ORIGIN: the backend is fine and the proxy does not exist. A 404 on
- * an /api path is that case, because the rewrite is what would otherwise have
- * handled it.
- */
-export function describeApiFailure(caught: unknown, subject: string): string {
-  if (caught instanceof ApiError) {
-    if (caught.status === 404 && caught.message.startsWith("Request failed")) {
-      return (
-        `The API proxy is not configured on this deployment, so ${subject} ` +
-        "could not be loaded. Set BACKEND_ORIGIN for this environment and redeploy — " +
-        "/status shows the current configuration."
-      );
-    }
-    if (caught.status >= 500) {
-      return `The backend returned ${caught.status}: ${caught.message}`;
-    }
-    return caught.message;
-  }
-
-  // fetch() rejects rather than resolving when it cannot reach the host at
-  // all, which on a sleeping free-tier instance is the common case.
-  return (
-    `Could not reach the backend, so ${subject} could not be loaded. ` +
-    "A free-tier instance that has gone to sleep takes about 50 seconds to " +
-    "wake — try once more. /status shows whether it is reachable."
-  );
-}
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,

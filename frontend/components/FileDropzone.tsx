@@ -31,7 +31,9 @@ export function FileDropzone({
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Not a failure — a file of the wrong kind has to say something, or
+  // dropping one looks like the page ignoring you.
+  const [notice, setNotice] = useState<string | null>(null);
 
   const accepts = useCallback(
     (candidate: File) =>
@@ -47,11 +49,11 @@ export function FileDropzone({
       if (!candidate) return;
 
       if (!accepts(candidate)) {
-        setError(`Expected ${extensions.join(" or ")}.`);
+        setNotice(`This one takes ${extensions.join(" or ")}.`);
         return;
       }
 
-      setError(null);
+      setNotice(null);
       onSelect(candidate);
     },
     [accepts, extensions, onSelect]
@@ -119,7 +121,7 @@ export function FileDropzone({
         />
       </div>
 
-      {error ? <p className="mt-2 text-xs text-rose-700">{error}</p> : null}
+      {notice ? <p className="mt-2 text-xs text-navy-400">{notice}</p> : null}
     </div>
   );
 }

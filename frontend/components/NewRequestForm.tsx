@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { describeApiFailure, submitAuthRequest } from "@/lib/api";
+import { submitAuthRequest } from "@/lib/api";
 import { SCENARIOS } from "@/lib/scenarios";
 import type { SubmitResult } from "@/lib/types";
 
@@ -20,13 +20,11 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [diagnosisCode, setDiagnosisCode] = useState("G43.909");
   const [patientId, setPatientId] = useState("");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitResult | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setPending(true);
-    setError(null);
     setResult(null);
 
     try {
@@ -37,10 +35,8 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
       });
       setResult(submitted);
       onSubmitted();
-    } catch (caught) {
-      setError(
-        describeApiFailure(caught, "the request")
-      );
+    } catch {
+      // No decision to show. The form keeps its values, ready to resubmit.
     } finally {
       setPending(false);
     }
@@ -117,12 +113,6 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
           {pending ? "Submitting…" : "Submit request"}
         </button>
       </form>
-
-      {error ? (
-        <p className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">
-          {error}
-        </p>
-      ) : null}
 
       {result ? (
         <div className="mt-4 rounded-md bg-slate-50 px-3 py-3 text-sm">
