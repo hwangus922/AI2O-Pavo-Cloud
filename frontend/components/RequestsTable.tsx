@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { StatusBadge } from "@/components/StatusBadge";
+import { APPEAL_NOTE, DENIAL_NOTE } from "@/lib/scenarios";
 import type { AuthRequestRecord } from "@/lib/types";
 
 function formatTimestamp(value: string | null): string {
@@ -9,20 +10,59 @@ function formatTimestamp(value: string | null): string {
   return Number.isNaN(parsed.getTime()) ? "—" : parsed.toLocaleString();
 }
 
-export function RequestsTable({ requests }: { requests: AuthRequestRecord[] }) {
+/**
+ * What an empty list means depends on which filter produced it.
+ *
+ * "Denied" in particular is empty by design and always will be, so the
+ * generic "submit one above" message was actively misleading — it invited a
+ * visitor to go looking for a state the engine cannot reach.
+ */
+const EMPTY_STATES: Record<string, { title: string; body: string }> = {
+  "": {
+    title: "No authorization requests yet",
+    body: "Submit one above to watch it move through the agents.",
+  },
+  pending: {
+    title: "Nothing pending",
+    body: "Requests resolve in milliseconds, so this view is almost always empty.",
+  },
+  approved: {
+    title: "No approvals yet",
+    body: "Submit one of the approving scenarios above.",
+  },
+  escalated: {
+    title: "No escalations yet",
+    body: "Try the knee replacement with a non-matching diagnosis, or an unknown procedure.",
+  },
+  denied: { title: "No denials — by design", body: DENIAL_NOTE },
+  appealed: { title: "No appeals yet", body: APPEAL_NOTE },
+};
+
+export function RequestsTable({
+  requests,
+  status = "",
+}: {
+  requests: AuthRequestRecord[];
+  /** The active status filter, so the empty state can explain itself. */
+  status?: string;
+}) {
   if (requests.length === 0) {
+    const empty = EMPTY_STATES[status] ?? EMPTY_STATES[""];
     return (
       <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center">
-        <p className="text-sm font-medium">No authorization requests yet</p>
-        <p className="mt-1 text-sm text-navy-600">
-          Submit one above to watch it move through the agents.
+        <p className="text-sm font-medium">{empty.title}</p>
+        <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-navy-600">
+          {empty.body}
         </p>
       </div>
     );
   }
 
+  // `relative` matters: the visually-hidden "Detail" header is absolutely
+  // positioned, and without a positioned ancestor it escapes this scroll
+  // container and stretches the document instead of being clipped by it.
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+    <div className="relative overflow-x-auto rounded-lg border border-slate-200 bg-white">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-navy-400">
           <tr>

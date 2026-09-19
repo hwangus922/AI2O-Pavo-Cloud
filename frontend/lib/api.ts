@@ -16,17 +16,36 @@ import type {
 } from "./types";
 
 /**
- * Where the browser sends API calls.
+ * Where API calls are sent.
  *
- * An explicit NEXT_PUBLIC_API_BASE_URL always wins. Otherwise a production
- * build uses the empty string, meaning "same origin" — the hosted demo serves
- * the API through the Next rewrite in next.config.mjs, so there is no second
- * origin to name and no CORS to get wrong. Development keeps the direct
- * localhost default, which is what `uvicorn` + `next dev` gives you.
+ * This differs between the browser and the server and must, because "same
+ * origin" is only a thing the browser understands:
+ *
+ * - **Browser, production**: the empty string. Requests go to the page's own
+ *   origin and the rewrite in next.config.mjs forwards them, so there is no
+ *   second origin to name and no CORS to get wrong.
+ * - **Server**: an absolute URL. `/requests/[id]` renders on the server, and
+ *   Node's fetch cannot parse a relative path — it throws before any request
+ *   is made. BACKEND_ORIGIN is the same value the rewrite targets.
+ * - **Development**: the backend directly, which is what `uvicorn` +
+ *   `next dev` gives you.
+ *
+ * An explicit NEXT_PUBLIC_API_BASE_URL overrides all of it.
  */
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
+function resolveApiBaseUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (explicit != null && explicit !== "") return explicit;
+
+  if (typeof window === "undefined") {
+    const origin = process.env.BACKEND_ORIGIN?.replace(/\/+$/, "");
+    if (origin) return origin;
+    return "http://localhost:8000";
+  }
+
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:8000";
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 /** Thrown when the backend answers with a non-2xx status. */
 export class ApiError extends Error {

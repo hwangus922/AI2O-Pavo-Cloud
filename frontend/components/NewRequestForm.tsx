@@ -3,15 +3,17 @@
 import { useState } from "react";
 
 import { ApiError, submitAuthRequest } from "@/lib/api";
+import { SCENARIOS } from "@/lib/scenarios";
 import type { SubmitResult } from "@/lib/types";
 
-const EXAMPLES = [
-  { label: "MRI brain — approves", procedure: "70553", diagnosis: "G43.909" },
-  { label: "Knee replacement, matching Dx — approves", procedure: "27447", diagnosis: "M17.11" },
-  { label: "Knee replacement, other Dx — escalates", procedure: "27447", diagnosis: "M17.12" },
-  { label: "Office visit — approves", procedure: "99214", diagnosis: "Z00.00" },
-  { label: "Unknown procedure — escalates", procedure: "12345", diagnosis: "Z00.00" },
-];
+// The scenario list lives in lib/scenarios so the demo picker and this form
+// cannot drift apart. Labels carry the outcome so the effect is legible
+// before you submit.
+const EXAMPLES = SCENARIOS.map((scenario) => ({
+  label: `${scenario.label} — ${scenario.outcome}`,
+  procedure: scenario.procedure,
+  diagnosis: scenario.diagnosis,
+}));
 
 export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [procedureCode, setProcedureCode] = useState("70553");

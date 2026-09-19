@@ -21,6 +21,8 @@ import {
   type DemoState,
 } from "@/lib/demo";
 import { Container } from "@/components/site/Container";
+import { SCENARIOS } from "@/lib/scenarios";
+import type { Scenario } from "@/lib/scenarios";
 
 // Auto-advance pacing. Six steps at 2s of dwell plus the work itself keeps
 // the whole run comfortably inside the 30-second budget.
@@ -43,6 +45,18 @@ export default function DemoPage() {
   const [error, setError] = useState<string | null>(null);
   const [autoRun, setAutoRun] = useState(false);
   const [elapsed, setElapsed] = useState<number | null>(null);
+
+  // Which preset the current codes correspond to, if any. Typing a code by
+  // hand simply deselects — the inputs stay authoritative.
+  const selectedScenario = SCENARIOS.find(
+    (scenario) =>
+      scenario.procedure === procedureCode && scenario.diagnosis === diagnosisCode
+  );
+
+  function applyScenario(scenario: Scenario) {
+    setProcedureCode(scenario.procedure);
+    setDiagnosisCode(scenario.diagnosis);
+  }
 
   // Guards against a timer firing after the component unmounts.
   const mounted = useRef(true);
@@ -169,6 +183,39 @@ export default function DemoPage() {
 
       {/* Controls */}
       <div className="pavo-card p-4 sm:p-5">
+        {/* Every rule in the engine, reachable in one click. Typing a CPT code
+          still works, but nobody should have to know one to see the system
+          escalate rather than approve. */}
+        <div className="mb-4">
+          <p className="mb-2 text-xs font-medium text-navy-600">Scenario</p>
+          <div className="flex flex-wrap gap-2">
+            {SCENARIOS.map((scenario) => {
+              const active = scenario === selectedScenario;
+              return (
+                <button
+                  key={scenario.ruleId}
+                  type="button"
+                  disabled={autoRun || busy}
+                  onClick={() => applyScenario(scenario)}
+                  className={`rounded-full border px-2.5 py-1 text-xs transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                    active
+                      ? "border-electric-600 bg-electric-600 text-white"
+                      : "border-slate-300 text-navy-600 hover:border-navy-600"
+                  }`}
+                >
+                  {scenario.label} — {scenario.outcome}
+                </button>
+              );
+            })}
+          </div>
+          {selectedScenario ? (
+            <p className="mt-2 max-w-2xl text-xs leading-relaxed text-navy-400">
+              <span className="pavo-id">{selectedScenario.ruleId}</span>{" "}
+              {selectedScenario.detail}
+            </p>
+          ) : null}
+        </div>
+
         <div className="flex flex-wrap items-end gap-3">
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-navy-600">
