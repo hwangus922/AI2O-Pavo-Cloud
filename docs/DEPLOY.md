@@ -55,6 +55,44 @@ Deploy the backend first — the frontend needs its URL.
 
 ---
 
+## 3. Make it reachable
+
+A new Vercel project may have **Deployment Protection** switched on, which
+gates every deployment behind a Vercel login. Anyone outside the team — a
+judge, a reviewer, anyone you send the link to — gets a sign-in screen instead
+of the site.
+
+It is invisible from inside the account. Signed in, everything looks fine,
+which is what makes it worth checking deliberately rather than discovering it
+in front of an audience.
+
+1. Vercel → the project → **Settings** → **Deployment Protection**
+2. **Vercel Authentication** → **Only Preview Deployments**
+3. **Save**
+
+It takes effect immediately; no rebuild or redeploy.
+
+**Why that value rather than *Disabled*.** Production becomes public, which is
+the point, while branch previews still require a login. Preview URLs keep
+serving the code they were built from forever, so a stale one can otherwise be
+mistaken for the live site — leaving previews protected means nobody outside
+the team can open one by accident. Choose **Disabled** only if previews also
+need to be shareable.
+
+> Password Protection and Trusted IPs are Pro/Enterprise features. Vercel
+> Authentication is the setting that applies on a normal plan.
+
+### Confirm it
+
+Open the production URL in a **private/incognito window**. That is exactly
+what a stranger sees, with no session — the only way to test this honestly.
+
+Then open `/status` in the same window. It reports which environment and
+commit you are on, and whether the API proxy and backend are working, so one
+page confirms both "public" and "working".
+
+---
+
 ## How the two connect
 
 The browser never calls Render directly. `frontend/next.config.mjs` rewrites
@@ -89,6 +127,8 @@ sleep.
 | Symptom | Cause |
 |---|---|
 | Every step fails instantly | `BACKEND_ORIGIN` unset, or has a trailing slash |
-| Step 3 (zero-knowledge) fails, others pass | Node or the ZK artifacts missing from the image |
+| Demo step 3 (zero-knowledge) fails, others pass | Node or the ZK artifacts missing from the image |
 | First run hangs ~50s then works | Free-tier cold start, see above |
 | Build fails on Vercel | Root Directory not set to `frontend` |
+| Visitors see a Vercel login screen | Deployment Protection — see *Make it reachable* |
+| Unsure which deployment you are looking at | Open `/status`; a preview also shows an amber banner |
