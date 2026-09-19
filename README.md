@@ -98,6 +98,11 @@ The backend runs on an in-memory store when Supabase credentials are absent, so 
 
 ### 1. Backend
 
+Needs **Python 3.10 or newer** (3.11 recommended, which is what the suite runs
+on). macOS ships 3.9, and `pip install` fails there with a confusing "no
+matching distribution" for `anthropic` — check with `python3 --version` first
+and use `python3.11 -m venv .venv` if the default is older.
+
 ```bash
 cd backend
 python3 -m venv .venv
@@ -211,7 +216,10 @@ Copy `.env.example` to `.env`. `backend/.env.example` and `frontend/.env.local.e
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | frontend | Omit to leave routes public |
 | `NEXT_PUBLIC_API_BASE_URL` | frontend | Defaults to `http://localhost:8000`; inlined at build time |
 | `FRONTEND_ORIGIN` | backend | Comma-separated CORS allowlist; add your origin if not on port 3000 |
-| `ANTHROPIC_API_KEY` | backend | Insure parsing and CPT mapping; unset yields labelled sample data |
+| `ANTHROPIC_API_KEY` | backend | Document parsing, CPT mapping and appeal letters; unset yields labelled sample data |
+| `DEEPSEEK_API_KEY` | backend | Alternative provider. Text-only, so CPT mapping and appeal letters only — the card and EOC stay on sample data |
+| `DEEPSEEK_BASE_URL`, `DEEPSEEK_MODEL` | backend | Default to `https://api.deepseek.com` and `deepseek-chat` |
+| `LLM_PROVIDER` | backend | Forces `anthropic` or `deepseek` when both keys are set; empty prefers Anthropic |
 | `ARIA_VERSION` | backend | Defaults to `1.0` |
 
 ## Operating constraints
@@ -222,7 +230,7 @@ These hold in code, not just on paper:
 - **Every decision carries a `rule_id`.** The rule engine cannot return an outcome without one, and it is written to `audit_log` on every decision.
 - **Ambiguity escalates.** Anything without a definitive rule match becomes `escalated` rather than being guessed at.
 - **Member identifiers are hashed too**, including the member ID read off an insurance card, and the hash — never the raw value — is what appears in storage paths.
-- **Sample data is always labelled.** When `ANTHROPIC_API_KEY` is unset the parsers return obvious placeholder values, and the API response and the UI both say so. Nothing silently invents a member's plan.
+- **Sample data is always labelled.** With no model key — or a text-only provider that cannot read the documents — the parsers return obvious placeholder values, and the API response and the UI both say so. Nothing silently invents a member's plan, and a file is never quietly dropped from a request: a provider that cannot accept it is refused rather than sent a prompt without it.
 - **No automated final denial.** A denial is either appealed or escalated to a human. The payer agent answers a rejected appeal with `ESCALATED`, never `DENIED`.
 - **Private keys never reach the database.** `org_keys` stores the public key and a digest of the private key, nothing more.
 - **Unverified messages do not act.** A signature that fails verification is rejected with a 401 before its payload is read, and the rejection is audited.
@@ -246,10 +254,15 @@ Worth stating plainly before a demo:
   the CPT code rather than gathered by the Vapi voice agent.
 - **NPI verification is a flag, not a lookup** against the live CMS registry.
 - **Federated learning is not built.**
-- **Appeals need `ANTHROPIC_API_KEY`.** Without it the letter generator
+- **DeepSeek cannot read the documents.** Its hosted API is text-only, so
+  with `DEEPSEEK_API_KEY` selected the insurance card and Evidence of Coverage
+  fall back to labelled sample data; CPT mapping and appeal letters do reach
+  the model. `GET /health` reports `llm_provider` and `document_parsing` so
+  you can see which path is live.
+- **Appeals need a model key.** Without it the letter generator
   returns a clearly labelled placeholder scored 0.0, which is below the 0.70
   threshold — so every appeal escalates rather than being submitted. That is
-  the intended safe default, not a failure.
+  the intended safe default, not a failure. Either provider fixes it.
 - **The default backend stores everything in memory.** Data lives as long as
   the process; point it at Supabase for persistence.
 - **The Insure step of the demo parses sample documents.** `/demo` and

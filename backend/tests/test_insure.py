@@ -408,7 +408,8 @@ def test_claude_api_errors_surface_as_response_errors(monkeypatch):
 def test_parse_reports_502_when_claude_rejects_the_document(client, monkeypatch):
     from app.insure import parser
 
-    monkeypatch.setattr(parser, "is_configured", lambda: True)
+    monkeypatch.setattr(parser, "supports_documents", lambda: True)
+    monkeypatch.setattr(parser, "source_label", lambda: "claude")
 
     def _reject(**_: object):
         raise ClaudeResponseError("Claude API request failed: Could not process PDF")
@@ -418,3 +419,226 @@ def test_parse_reports_502_when_claude_rejects_the_document(client, monkeypatch)
     response = upload_documents(client)
     assert response.status_code == 502
     assert "Could not process PDF" in response.json()["detail"]
+
+
+# ------------------------------------------------------- provider selection
+
+
+def test_anthropic_key_selects_anthropic_and_enables_documents(monkeypatch):
+    from app import llm
+    from app.config import get_settings
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    get_settings.cache_clear()
+    try:
+        assert llm.active_provider() == llm.ANTHROPIC
+        assert llm.is_configured()
+        assert llm.supports_documents()
+        assert llm.source_label() == "claude"
+    finally:
+        get_settings.cache_clear()
+
+
+def test_deepseek_key_selects_deepseek_but_not_documents(monkeypatch):
+    """DeepSeek's hosted API is text-only, so the card and EOC parsers must
+    still fall back to sample data rather than send it a file."""
+    from app import llm
+    from app.config import get_settings
+
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-deepseek-test")
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    get_settings.cache_clear()
+    try:
+        assert llm.active_provider() == llm.DEEPSEEK
+        assert llm.is_configured()
+        assert not llm.supports_documents()
+        assert llm.source_label() == "deepseek"
+    finally:
+        get_settings.cache_clear()
+
+
+def test_anthropic_wins_when_both_keys_are_set(monkeypatch):
+    from app import llm
+    from app.config import get_settings
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-deepseek-test")
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    get_settings.cache_clear()
+    try:
+        assert llm.active_provider() == llm.ANTHROPIC
+    finally:
+        get_settings.cache_clear()
+
+
+def test_llm_provider_env_var_forces_the_choice(monkeypatch):
+    from app import llm
+    from app.config import get_settings
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-deepseek-test")
+    monkeypatch.setenv("LLM_PROVIDER", "deepseek")
+    get_settings.cache_clear()
+    try:
+        assert llm.active_provider() == llm.DEEPSEEK
+        assert not llm.supports_documents()
+    finally:
+        get_settings.cache_clear()
+
+
+def test_no_key_configures_nothing(monkeypatch):
+    from app import llm
+    from app.config import get_settings
+
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    get_settings.cache_clear()
+    try:
+        assert llm.active_provider() == ""
+        assert not llm.is_configured()
+        assert not llm.supports_documents()
+        with pytest.raises(llm.LLMUnavailableError):
+            llm.complete_json(system="s", content=[{"type": "text", "text": "t"}])
+    finally:
+        get_settings.cache_clear()
+
+
+# ---------------------------------------------------------- DeepSeek client
+
+
+def _deepseek_env(monkeypatch):
+    from app.config import get_settings
+
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-deepseek-test")
+    monkeypatch.delenv("LLM_PROVIDER", raising=False)
+    get_settings.cache_clear()
+
+
+def test_deepseek_posts_openai_shaped_request_and_parses_the_reply(monkeypatch):
+    import httpx
+
+    from app import deepseek_client
+    from app.config import get_settings
+
+    _deepseek_env(monkeypatch)
+    captured: dict[str, object] = {}
+
+    def _post(url, json, headers, timeout):
+        captured["url"] = url
+        captured["json"] = json
+        captured["headers"] = headers
+        return httpx.Response(
+            200,
+            json={
+                "choices": [
+                    {
+                        "finish_reason": "stop",
+                        "message": {"content": '{"cpt_code": "27447"}'},
+                    }
+                ]
+            },
+            request=httpx.Request("POST", url),
+        )
+
+    monkeypatch.setattr(deepseek_client.httpx, "post", _post)
+    try:
+        parsed = deepseek_client.complete_json(
+            system="Return JSON only.",
+            content=[{"type": "text", "text": "knee replacement"}],
+        )
+    finally:
+        get_settings.cache_clear()
+
+    assert parsed == {"cpt_code": "27447"}
+    assert captured["url"] == "https://api.deepseek.com/chat/completions"
+    assert captured["headers"]["Authorization"] == "Bearer sk-deepseek-test"
+    body = captured["json"]
+    assert body["model"] == "deepseek-chat"
+    assert body["stream"] is False
+    assert body["messages"][0] == {"role": "system", "content": "Return JSON only."}
+    assert body["messages"][1]["content"] == "knee replacement"
+
+
+def test_deepseek_refuses_image_blocks_rather_than_dropping_them(monkeypatch):
+    """Silently discarding the card image would yield a confident answer about
+    a document the model never saw."""
+    from app import deepseek_client
+    from app.llm import LLMResponseError
+
+    _deepseek_env(monkeypatch)
+    try:
+        with pytest.raises(LLMResponseError, match="text only"):
+            deepseek_client.flatten_content(
+                [{"type": "image", "source": {"data": "..."}}]
+            )
+    finally:
+        from app.config import get_settings
+
+        get_settings.cache_clear()
+
+
+def test_deepseek_http_error_carries_the_body(monkeypatch):
+    import httpx
+
+    from app import deepseek_client
+    from app.config import get_settings
+    from app.llm import LLMResponseError
+
+    _deepseek_env(monkeypatch)
+
+    def _post(url, json, headers, timeout):
+        return httpx.Response(
+            401,
+            text='{"error": {"message": "Authentication Fails"}}',
+            request=httpx.Request("POST", url),
+        )
+
+    monkeypatch.setattr(deepseek_client.httpx, "post", _post)
+    try:
+        with pytest.raises(LLMResponseError, match="Authentication Fails"):
+            deepseek_client.complete_json(
+                system="s", content=[{"type": "text", "text": "t"}]
+            )
+    finally:
+        get_settings.cache_clear()
+
+
+def test_deepseek_network_failure_becomes_a_response_error(monkeypatch):
+    import httpx
+
+    from app import deepseek_client
+    from app.config import get_settings
+    from app.llm import LLMResponseError
+
+    _deepseek_env(monkeypatch)
+
+    def _post(url, json, headers, timeout):
+        raise httpx.ConnectTimeout("timed out")
+
+    monkeypatch.setattr(deepseek_client.httpx, "post", _post)
+    try:
+        with pytest.raises(LLMResponseError, match="DeepSeek request failed"):
+            deepseek_client.complete_json(
+                system="s", content=[{"type": "text", "text": "t"}]
+            )
+    finally:
+        get_settings.cache_clear()
+
+
+def test_parse_still_returns_sample_plan_under_deepseek(client, monkeypatch):
+    """End to end: with only a DeepSeek key, the upload succeeds and the plan
+    is labelled sample rather than failing on an unsupported file."""
+    from app.config import get_settings
+
+    _deepseek_env(monkeypatch)
+    try:
+        body = upload_documents(client).json()
+        assert body["sources"] == {"card": "sample", "eoc": "sample"}
+        assert body["insurance_plan"]["plan_name"] == "SAMPLE PPO 2000"
+    finally:
+        get_settings.cache_clear()

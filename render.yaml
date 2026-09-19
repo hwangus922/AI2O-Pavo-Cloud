@@ -1,0 +1,26 @@
+# Render blueprint for the Pavo Cloud API.
+#
+# Docker rather than Render's native Python runtime on purpose: the ZK layer
+# shells out to `node` to run snarkjs, and the Python runtime has no Node. See
+# the Dockerfile.
+#
+# No FRONTEND_ORIGIN is needed. The frontend proxies /api/* server-side (see
+# frontend/next.config.mjs), so the browser only ever talks to one origin and
+# CORS never enters the picture. Set FRONTEND_ORIGIN only if you also want to
+# call this API directly from a browser on another domain.
+services:
+  - type: web
+    name: pavo-cloud-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      # Storage stays in-memory: the demo seeds everything it needs on each
+      # run, so there is no database to provision or keep in sync.
+      - key: LLM_PROVIDER
+        value: deepseek
+      # Set this in the Render dashboard, never in this file.
+      - key: DEEPSEEK_API_KEY
+        sync: false

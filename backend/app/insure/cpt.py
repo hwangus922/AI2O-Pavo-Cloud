@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..claude_client import complete_json, is_configured
+from ..llm import complete_json, is_configured, source_label
 from .prompts import CPT_PROMPT_TEMPLATE
 
 # Fallback table used when Claude is not configured. Keys are matched as
@@ -63,5 +63,5 @@ def map_procedure_to_cpt(procedure_name: str) -> tuple[dict[str, str], str]:
                 parsed.get("procedure_name") or procedure_name
             ).strip(),
         },
-        "claude",
+        source_label(),
     )

@@ -15,8 +15,18 @@ import type {
   ZkVerifyResult,
 } from "./types";
 
+/**
+ * Where the browser sends API calls.
+ *
+ * An explicit NEXT_PUBLIC_API_BASE_URL always wins. Otherwise a production
+ * build uses the empty string, meaning "same origin" — the hosted demo serves
+ * the API through the Next rewrite in next.config.mjs, so there is no second
+ * origin to name and no CORS to get wrong. Development keeps the direct
+ * localhost default, which is what `uvicorn` + `next dev` gives you.
+ */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
 
 /** Thrown when the backend answers with a non-2xx status. */
 export class ApiError extends Error {
