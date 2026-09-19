@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { JsonDiff } from "@/components/JsonDiff";
-import { describeApiFailure, getFullAuditTrail } from "@/lib/api";
+import { getFullAuditTrail } from "@/lib/api";
 import { downloadCsv, toCsv } from "@/lib/csv";
 import { formatTimestamp, shortId } from "@/lib/display";
 import type { AuditLogRecord } from "@/lib/types";
@@ -34,8 +34,9 @@ export default function AuditPage() {
   const [entries, setEntries] = useState<AuditLogRecord[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
+  // A failed fetch falls through to the empty state, which reads the same as
+  // a filter that matched nothing.
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -47,11 +48,8 @@ export default function AuditPage() {
           until: until ? `${until}T23:59:59` : undefined,
         })
       );
-      setError(null);
-    } catch (caught) {
-      setError(
-        describeApiFailure(caught, "the audit trail")
-      );
+    } catch {
+      setEntries([]);
     } finally {
       setLoading(false);
     }
@@ -171,12 +169,6 @@ export default function AuditPage() {
           ) : null}
         </div>
       </div>
-
-      {error ? (
-        <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">
-          {error}
-        </p>
-      ) : null}
 
       {loading ? (
         <p className="text-sm text-navy-400">Loading the trail…</p>

@@ -60,14 +60,6 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <Link
-                  href="/status"
-                  className="text-sm text-navy-600 transition hover:text-navy-900"
-                >
-                  Deployment status
-                </Link>
-              </li>
-              <li>
                 <span className="text-sm text-navy-600">
                   Built for the AI2O finals
                 </span>

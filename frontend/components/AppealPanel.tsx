@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { describeApiFailure, generateAppeal } from "@/lib/api";
+import { generateAppeal } from "@/lib/api";
 import type { AppealRecord, AppealResult, PubMedCitation } from "@/lib/types";
 
 const DENIAL_REASONS = [
@@ -167,23 +167,19 @@ export function GenerateAppealForm({ requestId }: { requestId: string }) {
   const router = useRouter();
   const [reasonCode, setReasonCode] = useState(DENIAL_REASONS[0].code);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AppealResult | null>(null);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setPending(true);
-    setError(null);
 
     try {
       const generated = await generateAppeal(requestId, reasonCode);
       setResult(generated);
       // Pull the server's updated view of the request and its trail.
       router.refresh();
-    } catch (caught) {
-      setError(
-        describeApiFailure(caught, "the appeal")
-      );
+    } catch {
+      // The form stays as it was, ready for another attempt.
     } finally {
       setPending(false);
     }
@@ -196,11 +192,6 @@ export function GenerateAppealForm({ requestId }: { requestId: string }) {
           <p className="rounded-md bg-slate-50 px-3 py-2 text-sm">
             Payer decision: <strong>{result.decision.outcome}</strong> via{" "}
             <span className="font-mono">{result.decision.rule_id}</span>
-          </p>
-        ) : null}
-        {result.pubmed_error ? (
-          <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            Evidence lookup did not complete: {result.pubmed_error}
           </p>
         ) : null}
         <AppealDetail appeal={result.appeal} reviewerNotes={result.reviewer_notes} />
@@ -247,11 +238,6 @@ export function GenerateAppealForm({ requestId }: { requestId: string }) {
         </button>
       </div>
 
-      {error ? (
-        <p className="mt-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }

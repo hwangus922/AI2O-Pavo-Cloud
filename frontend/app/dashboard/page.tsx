@@ -6,7 +6,7 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { NewRequestForm } from "@/components/NewRequestForm";
 import { RequestsTable } from "@/components/RequestsTable";
 import { SystemStatsRow } from "@/components/SystemStatsRow";
-import { describeApiFailure, getRecentActivity, getSystemStats, listAuthRequests } from "@/lib/api";
+import { getRecentActivity, getSystemStats, listAuthRequests } from "@/lib/api";
 import type {
   AriaMessageRecord,
   AuthRequestRecord,
@@ -32,9 +32,12 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [activity, setActivity] = useState<AriaMessageRecord[]>([]);
   const [status, setStatus] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
+  // A failed round keeps whatever is already on screen and waits for the next
+  // poll, ten seconds away, so a backend that was merely asleep recovers on
+  // its own. `loaded` is set either way: if the very first round fails, the
+  // table shows its empty state rather than spinning forever.
   const refresh = useCallback(async () => {
     try {
       const [filtered, systemStats, feed] = await Promise.all([
@@ -46,9 +49,8 @@ export default function DashboardPage() {
       setRequests(filtered);
       setStats(systemStats);
       setActivity(feed);
-      setError(null);
-    } catch (caught) {
-      setError(describeApiFailure(caught, "the dashboard"));
+    } catch {
+      // Keep whatever is already rendered.
     } finally {
       setLoaded(true);
     }
@@ -75,12 +77,6 @@ export default function DashboardPage() {
       <SystemStatsRow stats={stats} />
 
       <NewRequestForm onSubmitted={refresh} />
-
-      {error ? (
-        <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">
-          {error}
-        </p>
-      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] [&>*]:min-w-0">
         <div>

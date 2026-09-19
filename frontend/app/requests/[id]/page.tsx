@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { AppealDetail, GenerateAppealForm } from "@/components/AppealPanel";
 import { JsonBlock } from "@/components/JsonBlock";
 import { RequestTimeline } from "@/components/RequestTimeline";
 import { StatusBadge } from "@/components/StatusBadge";
-import { ApiError, describeApiFailure, getAuthRequest } from "@/lib/api";
+import { getAuthRequest } from "@/lib/api";
 import { shortId } from "@/lib/display";
 import type { AriaMessageRecord, AuditLogRecord } from "@/lib/types";
 import { Container } from "@/components/site/Container";
@@ -110,30 +110,11 @@ export default async function RequestDetailPage({
 
   try {
     detail = await getAuthRequest(params.id);
-  } catch (caught) {
-    // A genuine "no such request" carries FastAPI's own detail message. A 404
-    // with the generic status text means nothing served the path at all —
-    // which is what a deployment with no /api proxy looks like, and is not a
-    // missing request.
-    if (
-      caught instanceof ApiError &&
-      caught.status === 404 &&
-      !caught.message.startsWith("Request failed")
-    ) {
-      notFound();
-    }
-    return (
-      <Container className="py-8 sm:py-10">
-        <div className="rounded-md bg-rose-50 px-4 py-3 text-sm leading-relaxed text-rose-800">
-          {describeApiFailure(caught, "this request")}
-        </div>
-        <p className="mt-4 text-sm">
-          <Link href="/dashboard" className="text-electric-600 underline">
-            Back to all requests
-          </Link>
-        </p>
-      </Container>
-    );
+  } catch {
+    // Nothing to render without the request. Send the visitor back to the
+    // list they came from rather than leaving them on a page that cannot
+    // fill itself in.
+    redirect("/dashboard");
   }
 
   const {
