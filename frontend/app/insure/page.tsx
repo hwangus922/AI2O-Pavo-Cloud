@@ -136,9 +136,6 @@ export default function InsurePage() {
           >
             {loadingSamples ? "Loading…" : "Use the sample documents"}
           </button>
-          <p className="text-xs text-navy-400">
-            No card to hand? These are the same labelled samples the demo uses.
-          </p>
         </div>
       </div>
 

@@ -255,8 +255,7 @@ export default function HomePage() {
               </div>
             </dl>
             <p className="mt-4 text-xs leading-relaxed text-navy-400">
-              One of five facilities returned for this procedure. Prices in this
-              build are generated deterministically from the CPT code.
+              One of five facilities returned for this procedure.
             </p>
           </div>
         </div>
