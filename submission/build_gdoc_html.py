@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "gdoc.html")
 
 RAW = ("https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/"
-       "5c11e2c/submission/assets/")
+       "406a943/submission/assets/")
 IMG = {
     "figure1": ("fig1.png", 480),
     "assets/demo_complete_print.jpg": ("demo_complete_print.jpg", 270),
