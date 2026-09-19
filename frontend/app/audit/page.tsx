@@ -7,6 +7,7 @@ import { ApiError, getFullAuditTrail } from "@/lib/api";
 import { downloadCsv, toCsv } from "@/lib/csv";
 import { formatTimestamp, shortId } from "@/lib/display";
 import type { AuditLogRecord } from "@/lib/types";
+import { Container } from "@/components/site/Container";
 
 const ENTITY_TYPES = [
   { value: "", label: "All" },
@@ -93,7 +94,7 @@ export default function AuditPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <Container className="space-y-6 py-8 sm:py-10">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Audit trail</h1>
@@ -236,6 +237,6 @@ export default function AuditPage() {
           </ol>
         </>
       )}
-    </div>
+    </Container>
   );
 }

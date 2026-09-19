@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { ApiError, getAuthRequest } from "@/lib/api";
 import { shortId } from "@/lib/display";
 import type { AriaMessageRecord, AuditLogRecord } from "@/lib/types";
+import { Container } from "@/components/site/Container";
 
 export const dynamic = "force-dynamic";
 
@@ -132,7 +133,7 @@ export default async function RequestDetailPage({
     request.status === "denied" || request.status === "escalated";
 
   return (
-    <div className="space-y-8">
+    <Container className="space-y-8 py-8 sm:py-10">
       <div>
         <Link
           href="/dashboard"
@@ -234,6 +235,6 @@ export default async function RequestDetailPage({
         </h2>
         <JsonBlock value={request.fhir_bundle} />
       </section>
-    </div>
+    </Container>
   );
 }

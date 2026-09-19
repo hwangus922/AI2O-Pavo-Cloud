@@ -1,88 +1,53 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
+
+import { Footer } from "@/components/site/Footer";
+import { Nav } from "@/components/site/Nav";
 
 import "./globals.css";
 
+// Absolute URLs are needed for og:image. The deployed origin wins; the
+// localhost fallback keeps `next build` from warning during development.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "Pavo Cloud",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Pavo Cloud — prior authorization that resolves in minutes",
+    template: "%s",
+  },
   description:
-    "Autonomous prior authorization over the ARIA protocol. Every decision traces to a rule.",
+    "Autonomous prior authorization over the ARIA protocol. Provider and payer agents settle clear cases in seconds, criteria are proven without disclosing the record, and every decision traces to a rule.",
+  openGraph: {
+    type: "website",
+    siteName: "Pavo Cloud",
+    title: "Pavo Cloud — prior authorization that resolves in minutes",
+    description:
+      "Signed agent-to-agent authorization, zero-knowledge proofs over patient criteria, and a deterministic rule behind every decision.",
+    images: ["/og.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pavo Cloud — prior authorization that resolves in minutes",
+    description:
+      "Signed agent-to-agent authorization, zero-knowledge proofs over patient criteria, and a deterministic rule behind every decision.",
+    images: ["/og.png"],
+  },
 };
 
 const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
-
-const NAV_LINKS = [
-  { href: "/demo", label: "Demo" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/insure", label: "Insure" },
-  { href: "/audit", label: "Audit" },
-];
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen">
-        <header className="border-b border-navy-800 bg-navy-900">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
-            <Link href="/" className="flex items-center gap-2">
-              <span
-                className="inline-block h-6 w-6 rounded bg-electric-500"
-                aria-hidden
-              />
-              <span className="text-base font-semibold tracking-tight text-white">
-                Pavo Cloud
-              </span>
-            </Link>
-
-            <nav className="flex flex-wrap items-center gap-4 text-sm sm:gap-6">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-navy-200 transition hover:text-white"
-                >
-                  {link.label}
-                </Link>
-              ))}
-
-              {clerkConfigured ? (
-                <>
-                  <SignedOut>
-                    <SignInButton mode="modal">
-                      <button className="rounded-md bg-electric-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-electric-500">
-                        Sign in
-                      </button>
-                    </SignInButton>
-                  </SignedOut>
-                  <SignedIn>
-                    <UserButton afterSignOutUrl="/" />
-                  </SignedIn>
-                </>
-              ) : (
-                <span className="rounded-md bg-navy-800 px-2 py-1 text-xs font-medium text-navy-200">
-                  Auth not configured
-                </span>
-              )}
-            </nav>
-          </div>
-        </header>
-
-        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
-          {children}
-        </main>
-
-        <footer className="border-t border-slate-200 py-6">
-          <div className="mx-auto max-w-6xl px-4 text-xs text-navy-400 sm:px-6">
-            ARIA Protocol v1.0 — every decision carries the rule that produced it.
-          </div>
-        </footer>
+        <Nav />
+        {/* Width is deliberately NOT set here. Constraining every page from the
+          layout meant no page could draw a band edge to edge, which the
+          landing page needs. Each page wraps its own content in <Container>. */}
+        <main className="min-h-[60vh]">{children}</main>
+        <Footer />
       </body>
     </html>
   );
