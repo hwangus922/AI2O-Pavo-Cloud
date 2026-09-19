@@ -20,6 +20,7 @@ import {
   runZkStep,
   type DemoState,
 } from "@/lib/demo";
+import { Container } from "@/components/site/Container";
 
 // Auto-advance pacing. Six steps at 2s of dwell plus the work itself keeps
 // the whole run comfortably inside the 30-second budget.
@@ -152,7 +153,7 @@ export default function DemoPage() {
   const activeStep = stepIndex >= 0 ? DEMO_STEPS[stepIndex] : null;
 
   return (
-    <div className="space-y-6">
+    <Container className="space-y-6 py-8 sm:py-10">
       <header>
         <p className="text-sm font-medium uppercase tracking-wide text-electric-600">
           End-to-end demo
@@ -306,6 +307,6 @@ export default function DemoPage() {
           </p>
         </div>
       ) : null}
-    </div>
+    </Container>
   );
 }

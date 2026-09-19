@@ -35,7 +35,7 @@ export function PlanSummary({
         <h2 className="text-sm font-semibold">Your plan</h2>
         {usedSamples ? (
           <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
-            Sample data — set ANTHROPIC_API_KEY to parse real documents
+            Sample data — reading the real documents needs a vision-capable model
           </span>
         ) : (
           <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800">

@@ -12,6 +12,7 @@ import type {
   AuthRequestRecord,
   SystemStats,
 } from "@/lib/types";
+import { Container } from "@/components/site/Container";
 
 // The backend is the source of truth for every counter, so the page polls
 // rather than holding its own derived state.
@@ -62,7 +63,7 @@ export default function DashboardPage() {
   }, [refresh]);
 
   return (
-    <div className="space-y-8">
+    <Container className="space-y-8 py-8 sm:py-10">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
           Authorization requests
@@ -113,6 +114,6 @@ export default function DashboardPage() {
 
         <ActivityFeed messages={activity} />
       </div>
-    </div>
+    </Container>
   );
 }
