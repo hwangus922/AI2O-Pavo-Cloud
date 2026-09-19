@@ -84,7 +84,7 @@ export default function DashboardPage() {
         </p>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] [&>*]:min-w-0">
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <span className="text-xs text-navy-400">Filter:</span>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
           </div>
 
           {loaded ? (
-            <RequestsTable requests={requests} />
+            <RequestsTable requests={requests} status={status} />
           ) : (
             <p className="text-sm text-navy-400">Loading requests…</p>
           )}
