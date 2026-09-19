@@ -37,7 +37,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "gdoc.html")
 
 RAW = ("https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/"
-       "ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/")
+       "dfecd6766325ffbb6d5d1f247d03511ba89305cb/submission/assets/")
 IMG = {
     "figure1": ("fig1.png", 512),
     "assets/demo_complete_print.jpg": ("demo_complete_print.jpg", 294),
@@ -53,7 +53,7 @@ p.a{text-align:center;margin:0 0 15pt}
 h2{font-size:12pt;font-weight:bold;margin:9pt 0 3pt;text-align:left;line-height:1.07}
 h3{font-size:12pt;font-weight:bold;margin:7.5pt 0 2.25pt;text-align:left;line-height:1.07}
 p.c{font-style:italic;margin:4.5pt 0 1.5pt;text-align:left}
-p.f{font-style:italic;margin:2.25pt 0 4.5pt;text-align:left}
+p.f{font-size:9.5pt;font-style:italic;line-height:1.1;margin:2.25pt 0 4.5pt;text-align:left}
 p.g{margin:4pt 0 2pt;text-align:left}
 p.z{font-size:4pt;line-height:1;margin:0}
 table{border-collapse:collapse;width:100%}
@@ -82,8 +82,12 @@ p.w{margin:0;text-align:left}
 
 def runs_html(runs) -> str:
     out = []
-    for text, b, i in runs:
+    for run in runs:
+        text, b, i = run[0], run[1], run[2]
+        mono = run[3] if len(run) > 3 else 0
         t = H.escape(text)
+        if mono:
+            t = f'<span style="font-family:\'Courier New\',monospace;font-size:10pt">{t}</span>'
         if b:
             t = f"<b>{t}</b>"
         if i:
@@ -99,7 +103,7 @@ def build() -> str:
 
     for b in blocks:
         if b.kind == "p" and not seen_head:
-            text = "".join(t for t, _, _ in b.runs)
+            text = "".join(r[0] for r in b.runs)
             if text.startswith("Pavo Cloud") and len(text) < 20:
                 out.append(f'<p class="t">{runs_html(b.runs)}</p>')
                 continue

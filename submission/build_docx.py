@@ -29,7 +29,7 @@ PX = 0.75                      # one CSS pixel in points
 CONTENT_W = 6.5                # inches between the margins
 
 # --------------------------------------------------------------------- parse ---
-INLINE = {"em", "strong", "b", "i", "br", "tspan", "span"}
+INLINE = {"em", "strong", "b", "i", "br", "tspan", "span", "code"}
 
 
 class Block:
@@ -48,6 +48,7 @@ class ReportParser(HTMLParser):
         self.runs: list[tuple] = []
         self.bold = 0
         self.ital = 0
+        self.mono = 0
         self.in_body = False
         self.in_style = False
         self.in_svg = 0
@@ -83,8 +84,10 @@ class ReportParser(HTMLParser):
             self.bold += 1
         elif tag in ("em", "i"):
             self.ital += 1
+        elif tag == "code":
+            self.mono += 1
         elif tag == "br":
-            self.runs.append(("\n", self.bold, self.ital))
+            self.runs.append(("\n", self.bold, self.ital, self.mono))
         elif tag in ("h2", "h3", "pre"):
             self.mode = tag
             self.runs = []
@@ -123,11 +126,13 @@ class ReportParser(HTMLParser):
             self.bold -= 1
         elif tag in ("em", "i"):
             self.ital -= 1
+        elif tag == "code":
+            self.mono -= 1
         elif tag in ("h2", "h3"):
             self.blocks.append(Block(tag, runs=self._flush()))
             self.mode = None
         elif tag == "pre":
-            self.blocks.append(Block("pre", text="".join(t for t, _, _ in self.runs)))
+            self.blocks.append(Block("pre", text="".join(r[0] for r in self.runs)))
             self.runs = []
             self.mode = None
         elif tag in ("td", "th"):
@@ -163,9 +168,9 @@ class ReportParser(HTMLParser):
         if self.cell is not None or self.mode in ("h2", "h3", "p"):
             text = re.sub(r"\s+", " ", data)
             if text.strip() or (self.runs and text == " "):
-                self.runs.append((text, self.bold, self.ital))
+                self.runs.append((text, self.bold, self.ital, self.mono))
         elif self.mode == "pre":
-            self.runs.append((data, 0, 0))
+            self.runs.append((data, 0, 0, 0))
 
 
 def parse(html_text: str) -> list[Block]:
@@ -252,15 +257,19 @@ def para(doc_or_cell, runs, *, size=12, italic=False, bold=False, align=None,
         p.alignment = align
     pf.keep_with_next = keep
     pf.left_indent, pf.right_indent = Inches(indent[0]), Inches(indent[1])
-    for text, b, i in runs:
+    for run in runs:
+        text, b, i = run[0], run[1], run[2]
+        mono = run[3] if len(run) > 3 else 0
         r = p.add_run(text)
-        r.font.size = Pt(size)
+        r.font.size = Pt(size * 0.93 if mono else size)
         r.font.bold = bold or bool(b)
         r.font.italic = italic or bool(i)
         if colour is not None:
             r.font.color.rgb = colour
-        if font != "Times New Roman":            # Normal style already carries it
-            r.font.name = font
+        face = "Courier New" if mono else font
+        if face != "Times New Roman":           # Normal style already carries it
+            r.font.name = face
+            font = face
             rpr = r._element.get_or_add_rPr()
             rf = OxmlElement("w:rFonts")
             for a in ("w:ascii", "w:hAnsi", "w:cs", "w:eastAsia"):
@@ -328,7 +337,7 @@ def build():
 
     for b in blocks:
         if b.kind == "p" and not seen_head:
-            text = "".join(t for t, _, _ in b.runs)
+            text = "".join(r[0] for r in b.runs)
             if text.startswith("Pavo Cloud") and len(text) < 20:
                 para(doc, b.runs, size=16, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER,
                      after=3 * PX, line=19)
