@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { ApiError, submitAuthRequest } from "@/lib/api";
+import { describeApiFailure, submitAuthRequest } from "@/lib/api";
 import { SCENARIOS } from "@/lib/scenarios";
 import type { SubmitResult } from "@/lib/types";
 
@@ -39,9 +39,7 @@ export function NewRequestForm({ onSubmitted }: { onSubmitted: () => void }) {
       onSubmitted();
     } catch (caught) {
       setError(
-        caught instanceof ApiError
-          ? caught.message
-          : "Could not reach the Pavo Cloud API. Is the backend running?"
+        describeApiFailure(caught, "the request")
       );
     } finally {
       setPending(false);
