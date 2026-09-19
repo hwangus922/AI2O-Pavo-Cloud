@@ -84,7 +84,7 @@ BODY = f"""
 
 <h2>1. What Pavo Cloud Is</h2>
 
-<p>Before a doctor can go ahead with many procedures, such as an MRI, a knee replacement or an expensive drug, the insurer has to agree to pay for it first. That permission step is called <em>prior authorization</em>. In principle it is a check against the plan's coverage rules. In practice it is a member of staff filling in a form, faxing it or retyping it into an insurer's portal, and then waiting. Three to fourteen days is typical. The United States spends around $35 billion a year on this, and most of it buys nothing: the great majority of requests are approved in the end, just late.</p>
+<p>Before a doctor can go ahead with a procedure, such as an MRI, a knee replacement or an expensive drug, the insurer has to agree to pay for it first. That permission step is called <em>prior authorization</em>. In principle, it is a check against the plan's coverage rules. In practice, it is a member of staff filling in a form, faxing it or retyping it into an insurer's portal, and then waiting around three to fourteen days, typically. The United States spends around $35 billion a year on this, and most of it buys nothing: the great majority of requests are approved in the end, just late.</p>
 
 <p>Pavo Cloud takes the person out of the start of that process. When a doctor places an order in the hospital's record system, our software assembles the request, signs it so the insurer can prove who sent it, and delivers it straight to the insurer's software. That side checks the signature, applies the insurer's own published coverage rules, and returns a decision naming the exact rule behind it. For a clear-cut request, no person is involved at any point.</p>
 
@@ -93,7 +93,7 @@ BODY = f"""
 <h2>2. What Changed Since Round 1</h2>
 
 <h3>2.1 From an Argument to Working Software</h3>
-<p>All four planned phases are built and running, and the system now has a public website and a deployable build on top of them. Every figure in this report was measured against the committed code on 19 September 2026 rather than estimated.</p>
+<p>All four planned phases are built and running, and the system now has a public website and a deployable build on top of them. Every figure in this report was measured against the committed code leading up to the round rather than estimated.</p>
 
 <p class="cap">Table 1. What was built, in the order it was built.</p>
 <table>
@@ -106,9 +106,9 @@ BODY = f"""
 </table>
 
 <h3>2.2 What the System Does, Measured</h3>
-<p>Round 1 promised a decision in under five minutes. The software turned out to be far faster, because the slow part was never the thinking. It was the paperwork around it. Almost all of the time that remains is cryptography rather than deciding: each authorization signs two messages, the request and the response, and one signature costs about 38 milliseconds. Checking a signature costs a twentieth of a millisecond. A more modern signature scheme would cut the decision into single figures. We have not switched, because 82 milliseconds is already far below anything a person notices.</p>
+<p>Round 1 promised a decision in under five minutes. The software turned out to be a lot faster, because the slow part was never the thinking: it was the paperwork around it. Almost all of the time that remains is cryptography rather than deciding: each authorization signs two messages, the request and the response, and one signature costs about 38 milliseconds. Checking a signature costs a twentieth of a millisecond. A more modern signature scheme would cut the decision into single figures. We have not switched, because 82 milliseconds is already far below anything a person notices.</p>
 
-<p class="cap">Table 2. Measured results. A millisecond is one thousandth of a second.</p>
+<p class="cap">Table 2. Measured results.</p>
 <table>
   <tr><th>What was measured</th><th class="n" style="width:26%">Result</th></tr>
   <tr><td>A complete authorization decision, start to finish</td><td class="n">81.8 milliseconds</td></tr>
@@ -120,7 +120,7 @@ BODY = f"""
 </table>
 
 <h3>2.3 Two Corrections to Round 1</h3>
-<p>Two claims did not survive being built, and it is better to say so here than to be asked. On <em>speed</em>, Round 1 said &ldquo;under five minutes&rdquo;; the agents themselves take under a tenth of a second, so five minutes now covers the round trip once the hospital's record system and the insurer's network are included. On <em>profitability</em>, Round 1 implied the company breaks even on each sale in year one. Rebuilt from what the software costs to run, year one is a 31% gross margin, meaning 31 cents of every dollar is left after the direct cost of serving that customer. Early customers need a great deal of hand-holding. The 87% figure for year three held.</p>
+<p>Two claims did not survive being built, however. On <em>speed</em>, Round 1 said &ldquo;under five minutes&rdquo;; the agents themselves take under a tenth of a second, so five minutes now covers the round trip once the hospital's record system and the insurer's network are included. On <em>profitability</em>, Round 1 implied the company breaks even on each sale in year one. Rebuilt from what the software costs to run, year one is a 31% gross margin, meaning 31 cents of every dollar is left after the direct cost of serving that customer. Early customers need a great deal of hand-holding. The 87% figure for year three held.</p>
 
 <h2>3. System Architecture 2.0</h2>
 
@@ -191,7 +191,7 @@ BODY = f"""
 $ git log --shortstat cd0891a
 
   16 commits  ·  238 file changes  ·  +22,459 insertions  ·  -646 deletions</pre>
-<p class="fcap">Figure 2. The commit history. Each line is a batch of work that was reviewed and merged. Phase 1 was the largest at 9,429 lines. The four entries from 18 and 19 September make the system deployable to a public address, turn the demo into a full website, repair the request detail page, and make a broken deployment say so on screen.</p>
+<p class="fcap">Figure 2. The commit history. Each line is a batch of work that was reviewed and merged. Phase 1 was the largest at 9,429 lines.</p>
 
 <h3>4.2 The Tests</h3>
 <p>An automated test is a small program that checks the main program still behaves correctly. There are 148 of them and they all pass. They matter more than the line count, because they are what turns a claim in this report into something a judge can verify with one command.</p>
@@ -211,7 +211,7 @@ tests/test_zk.py ......................              [100%]
 <p class="fcap">Figure 3. The full test suite; each dot is one passing test. Among the things they prove: every decision records the rule that produced it, an unmatched request goes to a human rather than being guessed at, a tampered message is refused, and a real patient identifier never reaches storage.</p>
 
 <h3>4.3 The System Running</h3>
-<p>The screens below are the live software, not mock-ups. Both were captured on 19 September 2026, against the code in the log above.</p>
+<p>The screens below are the live software, not mock-ups. Both were captured against the code in the log above.</p>
 
 <p>Both are served by the same build that would go to a customer. The interface is a Next.js application, which is a standard framework for building websites in JavaScript, and it talks to the Python backend over exactly the interface an insurer's software would use. Nothing in either screen is a special demonstration mode.</p>
 
@@ -332,15 +332,15 @@ tests/test_zk.py ......................              [100%]
   <tr><td>Months to earn the cost back</td><td class="n">3.5</td><td class="n">15.2</td><td class="n">4.0</td></tr>
 </table>
 
-<p>Read the insurer column honestly. At $2.30 back per $1 spent and fifteen months to recover it, insurer contracts do not pay for themselves as a product. We fund them anyway, because signing one insurer makes Pavo available to every practice that already submits to it. It is a distribution channel, not a profit centre.</p>
+<p>At $2.30 back per $1 spent and fifteen months to recover it, insurer contracts do not pay for themselves as a product. We fund them anyway, because signing one insurer makes Pavo available to every practice that already submits to it. It is a distribution channel, not a profit centre.</p>
 
 <h3>6.4 Profit, and What We Are Asking For</h3>
 <p>After engineering, sales and admin, the company loses $2.37 million in 2026 and $3.21 million in 2027, then makes $11.23 million in 2028. The deepest point is $5.58 million of cumulative losses, in late 2027.</p>
-<p><strong>We are asking for $8.0 million</strong>, which covers that trough with roughly twelve months of cushion past breaking even. It is not a shopping list. Three spending lines across the plan come to more than the raise on their own: $7.46m of engineering, $5.67m of insurer business development and $1.72m of clinical staff encoding coverage rules. Most of that is paid for out of revenue as it arrives. What the raise funds is the part that has to come before any revenue does: the start of the clinical rule library, the security certification no insurer will sign without, and the engineering to close the gaps in Table 6.</p>
+<p><strong>We are asking for $8.0 million</strong>, which covers that trough with roughly twelve months of cushion past breaking even. It is not a shopping list. The three largest spending lines across the plan come to more than the raise on their own: $7.46m of engineering, $5.67m of insurer business development and $1.72m of clinical staff encoding coverage rules. Most of that is paid for out of revenue as it arrives. What the raise funds is the part that has to come before any revenue does: the start of the clinical rule library, the security certification no insurer will sign without, and the engineering to close the gaps in Table 6.</p>
 <p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p>
 
 <h2>7. How to Check Any of This</h2>
-<p>Nothing here has to be taken on trust. <code>git log --shortstat cd0891a</code> reproduces the build figures in section 4.1, and <code>.venv/bin/python -m pytest</code> reproduces the 148 passing tests in 4.2. Starting the backend and posting one request, with the command in the repository's README, returns the decision, the rule behind it and the confidence: the whole of section 3 in one response. The demonstration at <code>/demo</code> runs the entire path end to end in about eleven seconds, and <code>/audit</code> shows every message the two agents exchanged along the way.</p>
+<p><code>git log --shortstat cd0891a</code> reproduces the build figures in section 4.1, and <code>.venv/bin/python -m pytest</code> reproduces the 148 passing tests in 4.2. Starting the backend and posting one request, with the command in the repository's README, returns the decision, the rule behind it and the confidence: the whole of section 3 in one response. The demonstration at <code>/demo</code> runs the entire path end to end in about eleven seconds, and <code>/audit</code> shows every message the two agents exchanged along the way.</p>
 """
 
 doc = (
