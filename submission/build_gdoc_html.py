@@ -37,30 +37,30 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "gdoc.html")
 
 RAW = ("https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/"
-       "dfecd6766325ffbb6d5d1f247d03511ba89305cb/submission/assets/")
+       "5c11e2c/submission/assets/")
 IMG = {
-    "figure1": ("fig1.png", 512),
-    "assets/demo_complete_print.jpg": ("demo_complete_print.jpg", 294),
-    "assets/dashboard_print.jpg": ("dashboard_print.jpg", 322),
+    "figure1": ("fig1.png", 480),
+    "assets/demo_complete_print.jpg": ("demo_complete_print.jpg", 270),
+    "assets/dashboard_print.jpg": ("dashboard_print.jpg", 297),
 }
 
 CSS = """
-body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.07;color:#000}
-p{margin:0 0 3.75pt;text-align:justify;line-height:1.07}
+body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.01;color:#000}
+p{margin:0 0 3.75pt;text-align:justify;line-height:1.01}
 p.t{font-size:16pt;font-weight:bold;text-align:center;margin:0 0 3pt}
 p.s{font-style:italic;text-align:center;margin:0 0 3pt}
 p.a{text-align:center;margin:0 0 15pt}
-h2{font-size:12pt;font-weight:bold;margin:9pt 0 3pt;text-align:left;line-height:1.07}
-h3{font-size:12pt;font-weight:bold;margin:7.5pt 0 2.25pt;text-align:left;line-height:1.07}
-p.c{font-style:italic;margin:4.5pt 0 1.5pt;text-align:left}
-p.f{font-size:9.5pt;font-style:italic;line-height:1.1;margin:2.25pt 0 4.5pt;text-align:left}
+h2{font-size:12pt;font-weight:bold;margin:7pt 0 2.25pt;text-align:left;line-height:1.01}
+h3{font-size:12pt;font-weight:bold;margin:4.5pt 0 1.5pt;text-align:left;line-height:1.01}
+p.c{font-style:italic;margin:3pt 0 1.5pt;text-align:left}
+p.f{font-size:9.5pt;font-style:italic;line-height:1.05;margin:2.25pt 0 3.375pt;text-align:left}
 p.g{margin:4pt 0 2pt;text-align:left}
-p.z{font-size:4pt;line-height:1;margin:0}
+p.z{font-size:2pt;line-height:1;margin:0}
 table{border-collapse:collapse;width:100%}
-td{vertical-align:top;padding:2.6pt 7.5pt 2.6pt 0;
+td{vertical-align:top;padding:1.8pt 7.5pt 1.8pt 0;
    border-top:0 none #fff;border-left:0 none #fff;border-right:0 none #fff;
    border-bottom:1px solid #DCDCDC}
-td.h{vertical-align:bottom;padding:2.25pt 7.5pt 2.25pt 0;border-bottom:1px solid #555555}
+td.h{vertical-align:bottom;padding:1.9pt 7.5pt 1.9pt 0;border-bottom:1px solid #555555}
 td.n{padding-right:0}
 td.e{border-bottom:1px solid #000000}
 td.o{border-top:1px solid #555555}
@@ -75,7 +75,7 @@ p.hh{color:#1274C4;font-weight:bold}
 p.bb{font-weight:bold}
 p.m{font-family:'Courier New',Courier,monospace;font-size:7.6pt;line-height:1.0;
     margin:0;text-align:left}
-p.k{font-size:9.5pt;font-style:italic;line-height:1.1;margin:0;text-align:left}
+p.k{font-size:9.5pt;font-style:italic;line-height:1.05;margin:0;text-align:justify}
 p.w{margin:0;text-align:left}
 """
 
@@ -199,7 +199,7 @@ def table_html(rows) -> str:
 
 if __name__ == "__main__":
     doc = ('<!doctype html><html><head><meta charset="utf-8">'
-           "<title>Pavo Cloud — Technical Execution Report</title>"
+           "<title>Pavo Cloud Technical Execution Report</title>"
            f"<style>{CSS}</style></head>"
            f"<body>{build()}</body></html>")
     open(OUT, "w", encoding="utf-8").write(doc)
