@@ -180,8 +180,7 @@ def parse(html_text: str) -> list[Block]:
     m = re.search(r'<div class="figrow">(.*?)\n</div>', html_text, re.S)
     figrow_html = m.group(1)
     srcs = re.findall(r'<img src="([^"]+)"', figrow_html)
-    caps = re.findall(r'<p class="fcap">(.*?)</p>', figrow_html, re.S)
-    figs = list(zip(srcs, caps))
+    widecap = re.search(r'<p class="fcap wide">(.*?)</p>', figrow_html, re.S).group(1)
     stripped = html_text[: m.start()] + "<!--FIGROW-->" + html_text[m.end():]
 
     p = ReportParser()
@@ -190,8 +189,8 @@ def parse(html_text: str) -> list[Block]:
         out.append(b)
     # splice the figure row back in, in place of the marker paragraph
     idx = next(i for i, b in enumerate(out)
-               if b.kind == "p" and b.runs and "screens below" in b.runs[0][0])
-    out.insert(idx + 1, Block("figrow", figs=figs))
+               if b.kind == "p" and b.runs and "Two additions merged" in b.runs[0][0])
+    out.insert(idx + 1, Block("figrow", srcs=srcs, cap=widecap))
     return out
 
 
@@ -381,7 +380,7 @@ def build():
             r.add_picture(os.path.join(HERE, "assets", "fig1.png"),
                           width=Inches(CONTENT_W))
         elif b.kind == "figrow":
-            write_figrow(doc, b.figs)
+            write_figrow(doc, b.srcs, b.cap)
 
     doc.save(OUT)
     print(f"wrote {OUT} ({os.path.getsize(OUT) / 1024:.0f} KB)")
@@ -484,9 +483,9 @@ def write_table(doc, rows):
     spacer(doc, 11 * PX)
 
 
-def write_figrow(doc, figs):
+def write_figrow(doc, srcs, cap):
     t = doc.add_table(rows=1, cols=2)
-    t.alignment = WD_TABLE_ALIGNMENT.LEFT
+    t.alignment = WD_TABLE_ALIGNMENT.CENTER
     t.autofit = False
     tblPr = t._tbl.tblPr
     lay = OxmlElement("w:tblLayout")
@@ -498,22 +497,24 @@ def write_figrow(doc, figs):
     tblPr.append(ind)
     names = {"assets/demo_complete_print.jpg": "demo_complete_print.jpg",
              "assets/dashboard_print.jpg": "dashboard_print.jpg"}
-    for ci, (src, cap) in enumerate(figs):
+    # 92% of the text column, split so both pictures come out the same height
+    widths = [2.85, 3.13]
+    for ci, src in enumerate(srcs):
         tc = t.rows[0].cells[ci]
-        tc.width = Inches(3.10 if ci == 0 else 3.40)
+        tc.width = Inches(widths[ci] + 0.07)
         tc._tc.remove(tc._tc.find(qn("w:p")))
         cell_margins(tc, right=10 * PX if ci == 0 else 0,
                      left=10 * PX if ci == 1 else 0)
         p = tc.add_paragraph()
-        p.paragraph_format.space_after = Pt(4 * PX)
+        p.paragraph_format.space_after = Pt(0)
         p.paragraph_format.space_before = Pt(0)
         r = p.add_run()
         r.add_picture(os.path.join(HERE, "assets", names[src]),
-                      width=Inches(3.03 if ci == 0 else 3.32))
+                      width=Inches(widths[ci]))
         picture_border(r)
-        runs = [(re.sub(r"<[^>]+>", "", cap).replace("&mdash;", "—")
-                 .replace("&nbsp;", " ").strip(), 0, 0)]
-        para(tc, runs, size=9.5, italic=True, after=0, line=11.5)
+    runs = [(re.sub(r"<[^>]+>", "", cap).replace("&nbsp;", " ").strip(), 0, 0)]
+    para(doc, runs, size=9.5, italic=True, before=3 * PX, after=4 * PX,
+         line=11.5, align=WD_ALIGN_PARAGRAPH.JUSTIFY)
     spacer(doc, 4)
 
 

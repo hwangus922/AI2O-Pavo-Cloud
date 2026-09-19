@@ -140,21 +140,19 @@ def build() -> str:
             out.append(table_html(b.rows))
 
         elif b.kind == "figrow":
-            # images on one row, captions on the next, so the captions line up
-            widths = ["47.7%", "52.3%"]
-            imgs, caps = [], []
-            for i, (src, cap) in enumerate(b.figs):
+            # images on one row, one caption spanning both on the next
+            widths = ["47.6%", "52.4%"]
+            imgs = []
+            for i, src in enumerate(b.srcs):
                 name, w = IMG[src]
-                cap = H.escape(H.unescape(re.sub(r"\s+", " ",
-                                                 re.sub(r"<[^>]+>", "", cap))).strip())
                 cls = "i" if i == 0 else "i2"
-                jcls = "j" if i == 0 else "j2"
                 imgs.append(f'<td class="{cls}" style="width:{widths[i]}">'
                             f'<p class="w"><img src="{RAW}{name}" width="{w}"></p></td>')
-                caps.append(f'<td class="{jcls}" style="width:{widths[i]}">'
-                            f'<p class="k">{cap}</p></td>')
-            out.append("<table><tr>" + "".join(imgs) + "</tr><tr>"
-                       + "".join(caps) + '</tr></table><p class="z">&nbsp;</p>')
+            cap = H.escape(H.unescape(re.sub(r"\s+", " ",
+                                            re.sub(r"<[^>]+>", "", b.cap))).strip())
+            out.append('<table><tr>' + "".join(imgs) + '</tr><tr>'
+                       + f'<td class="j" colspan="2"><p class="k">{cap}</p></td>'
+                       + '</tr></table><p class="z">&nbsp;</p>')
 
     return "\n".join(out)
 
