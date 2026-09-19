@@ -40,8 +40,8 @@ RAW = ("https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/"
        "ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/")
 IMG = {
     "figure1": ("fig1.png", 512),
-    "assets/demo_complete_print.jpg": ("demo_complete_print.jpg", 296),
-    "assets/dashboard_print.jpg": ("dashboard_print.jpg", 296),
+    "assets/demo_complete_print.jpg": ("demo_complete_print.jpg", 294),
+    "assets/dashboard_print.jpg": ("dashboard_print.jpg", 322),
 }
 
 CSS = """
@@ -65,7 +65,10 @@ td.n{padding-right:0}
 td.e{border-bottom:1px solid #000000}
 td.o{border-top:1px solid #555555}
 td.p{border:1px solid #CCCCCC;background-color:#F4F4F4;padding:5pt 6pt}
-td.i{border:0 none #fff;padding:0 6pt 0 0;vertical-align:top}
+td.i{border:0 none #fff;padding:0 6pt 0 0;vertical-align:bottom}
+td.i2{border:0 none #fff;padding:0 0 0 6pt;vertical-align:bottom}
+td.j{border:0 none #fff;padding:3pt 6pt 0 0;vertical-align:top}
+td.j2{border:0 none #fff;padding:3pt 0 0 6pt;vertical-align:top}
 p.q{font-size:10.5pt;line-height:1.05;margin:0;text-align:left}
 p.n{text-align:right}
 p.hh{color:#1274C4;font-weight:bold}
@@ -73,7 +76,7 @@ p.bb{font-weight:bold}
 p.m{font-family:'Courier New',Courier,monospace;font-size:7.6pt;line-height:1.0;
     margin:0;text-align:left}
 p.k{font-size:9.5pt;font-style:italic;line-height:1.1;margin:0;text-align:left}
-p.w{margin:0 0 3pt;text-align:left}
+p.w{margin:0;text-align:left}
 """
 
 
@@ -133,16 +136,21 @@ def build() -> str:
             out.append(table_html(b.rows))
 
         elif b.kind == "figrow":
-            cells = []
-            for src, cap in b.figs:
+            # images on one row, captions on the next, so the captions line up
+            widths = ["47.7%", "52.3%"]
+            imgs, caps = [], []
+            for i, (src, cap) in enumerate(b.figs):
                 name, w = IMG[src]
                 cap = H.escape(H.unescape(re.sub(r"\s+", " ",
                                                  re.sub(r"<[^>]+>", "", cap))).strip())
-                cells.append(f'<td class="i" style="width:50%">'
-                             f'<p class="w"><img src="{RAW}{name}" width="{w}"></p>'
-                             f'<p class="k">{cap}</p></td>')
-            out.append("<table><tr>" + "".join(cells)
-                       + '</tr></table><p class="z">&nbsp;</p>')
+                cls = "i" if i == 0 else "i2"
+                jcls = "j" if i == 0 else "j2"
+                imgs.append(f'<td class="{cls}" style="width:{widths[i]}">'
+                            f'<p class="w"><img src="{RAW}{name}" width="{w}"></p></td>')
+                caps.append(f'<td class="{jcls}" style="width:{widths[i]}">'
+                            f'<p class="k">{cap}</p></td>')
+            out.append("<table><tr>" + "".join(imgs) + "</tr><tr>"
+                       + "".join(caps) + '</tr></table><p class="z">&nbsp;</p>')
 
     return "\n".join(out)
 

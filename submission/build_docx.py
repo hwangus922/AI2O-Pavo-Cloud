@@ -174,11 +174,9 @@ def parse(html_text: str) -> list[Block]:
     # Pull the two-up figure row out first; everything else is linear.
     m = re.search(r'<div class="figrow">(.*?)\n</div>', html_text, re.S)
     figrow_html = m.group(1)
-    figs = []
-    for chunk in re.findall(r"<div>(.*?)</div>", figrow_html, re.S):
-        src = re.search(r'<img src="([^"]+)"', chunk).group(1)
-        cap = re.search(r'<p class="fcap">(.*?)</p>', chunk, re.S).group(1)
-        figs.append((src, cap))
+    srcs = re.findall(r'<img src="([^"]+)"', figrow_html)
+    caps = re.findall(r'<p class="fcap">(.*?)</p>', figrow_html, re.S)
+    figs = list(zip(srcs, caps))
     stripped = html_text[: m.start()] + "<!--FIGROW-->" + html_text[m.end():]
 
     p = ReportParser()
@@ -493,7 +491,7 @@ def write_figrow(doc, figs):
              "assets/dashboard_print.jpg": "dashboard_print.jpg"}
     for ci, (src, cap) in enumerate(figs):
         tc = t.rows[0].cells[ci]
-        tc.width = Inches(3.25)
+        tc.width = Inches(3.10 if ci == 0 else 3.40)
         tc._tc.remove(tc._tc.find(qn("w:p")))
         cell_margins(tc, right=10 * PX if ci == 0 else 0,
                      left=10 * PX if ci == 1 else 0)
@@ -501,7 +499,8 @@ def write_figrow(doc, figs):
         p.paragraph_format.space_after = Pt(4 * PX)
         p.paragraph_format.space_before = Pt(0)
         r = p.add_run()
-        r.add_picture(os.path.join(HERE, "assets", names[src]), width=Inches(3.1))
+        r.add_picture(os.path.join(HERE, "assets", names[src]),
+                      width=Inches(3.03 if ci == 0 else 3.32))
         picture_border(r)
         runs = [(re.sub(r"<[^>]+>", "", cap).replace("&mdash;", "—")
                  .replace("&nbsp;", " ").strip(), 0, 0)]

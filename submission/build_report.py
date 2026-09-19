@@ -58,11 +58,11 @@ CSS = """
   figure { margin: 6px 0 3px; page-break-inside: avoid; }
   figure img { width: 74%; display: block; border: 1px solid #bbb; }
   .fcap { font-style: italic; font-size: 10.5pt; margin: 3px 0 6px; text-align: left; }
-  .figrow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; page-break-inside: avoid;
-            margin: 6px 0 2px; }
-  .figrow > div { min-width: 0; }
-  .figrow img { width: 100%; display: block; border: 1px solid #bbb; }
-  .figrow .fcap { font-size: 9.5pt; margin: 4px 0 0; }
+  .figrow { display: grid; grid-template-columns: 47.7fr 52.3fr; gap: 5px 14px;
+            grid-template-rows: auto auto; align-items: start;
+            page-break-inside: avoid; margin: 6px 0 4px; }
+  .figrow img { width: 100%; display: block; border: 1px solid #bbb; min-width: 0; }
+  .figrow .fcap { font-size: 9.5pt; margin: 0; text-align: left; }
 
   pre {
     font-family: "Courier New", Courier, monospace; font-size: 7.6pt; line-height: 1.24;
@@ -70,6 +70,7 @@ CSS = """
     white-space: pre; overflow: hidden; page-break-inside: avoid;
   }
 
+  code { font-family: "Courier New", Courier, monospace; font-size: 10pt; }
   svg { display: block; width: 82%; margin: 0 auto; page-break-inside: avoid; }
   .keep { page-break-inside: avoid; }
 """
@@ -122,6 +123,8 @@ BODY = f"""
 
 <h3>3.1 How One Request Moves Through the System</h3>
 <p>A doctor places an order in the hospital's electronic health record &mdash; the software that holds a patient's chart. That order starts everything below. No person touches any of the seven steps.</p>
+
+<p>The two sides talk over a small protocol of our own, ARIA. It is deliberately dull: an envelope carrying the message type &mdash; <em>AUTH_REQUEST</em> or <em>AUTH_RESPONSE</em> &mdash; the sender, a timestamp, and the medical details in FHIR. What matters is that every envelope is signed with the sender's private key, over a digest of the whole contents, so altering a single character breaks the signature. Each organisation registers its public key once; the receiving side looks that key up and verifies before reading anything else. That is what lets two companies who have never spoken let their software transact without a person supervising it, and it is why the boundary in the diagram below falls where it does. The keys are RSA-2048, and the private half is never stored: it is handed back once when the organisation is created, and only a digest of it is kept afterwards. A message that fails verification is refused outright, and the refusal is written to the audit trail &mdash; so a rejection leaves as much of a record as an approval does.</p>
 
 {DIAGRAM}
 <p class="fcap">Figure 1. One authorization request, end to end. The heavier box at step 5 is a gate: if the signature does not check out, the insurer's software never reads the request at all.</p>
@@ -206,14 +209,10 @@ tests/test_zk.py ......................              [100%]
 <p>The screens below are the live software, not mock-ups. Both were captured on 19 September 2026, against the code in the log above.</p>
 
 <div class="figrow">
-  <div>
-    <img src="assets/demo_complete_print.jpg" alt="The six-step demonstration, completed">
-    <p class="fcap">Figure 4. The guided demonstration after a single click. All six steps &mdash; order, identity, privacy proof, rules, decision, price &mdash; run with no further input and finish in 11.3 seconds. The last step prices the same operation at five facilities: a spread of $2,475 for identical care.</p>
-  </div>
-  <div>
-    <img src="assets/dashboard_print.jpg" alt="The authorization dashboard">
-    <p class="fcap">Figure 5. The dashboard. Every row carries the rule that produced it, in the RULE column. The two amber rows are knee replacements whose diagnosis did not match the covered condition; both wait for a human reviewer with their files already assembled. Average resolution across the eight: 42 milliseconds.</p>
-  </div>
+  <img src="assets/demo_complete_print.jpg" alt="The six-step demonstration, completed">
+  <img src="assets/dashboard_print.jpg" alt="The authorization dashboard">
+  <p class="fcap">Figure 4. The guided demonstration after a single click. All six steps &mdash; order, identity, privacy proof, rules, decision, price &mdash; run with no further input and finish in 11.3 seconds. The last step prices the same operation at five facilities: a spread of $2,475 for identical care.</p>
+  <p class="fcap">Figure 5. The dashboard, with the request form that sits between the counters and the table left out here. Every row carries the rule that produced it. The two amber rows are knee replacements whose diagnosis did not match the covered condition; both wait for a human reviewer with the file already assembled.</p>
 </div>
 
 <h2>5. Risk Mitigation Protocol</h2>
@@ -331,6 +330,9 @@ tests/test_zk.py ......................              [100%]
 <p>After engineering, sales and admin, the company loses $2.37 million in 2026 and $3.21 million in 2027, then makes $11.23 million in 2028. The deepest point is $5.58 million of cumulative losses, in late 2027.</p>
 <p><strong>We are asking for $8.0 million</strong>, which covers that trough with roughly twelve months of cushion past breaking even. It is not a shopping list. The three largest spending lines across the plan &mdash; $7.46m of engineering, $5.67m of insurer business development and $1.72m of clinical staff encoding coverage rules &mdash; come to more than the raise on their own, and most of that is paid for out of revenue as it arrives. What the raise funds is the part that has to come before any revenue does: the start of the clinical rule library, the security certification no insurer will sign without, and the engineering to close the gaps in Table 6.</p>
 <p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p>
+
+<h2>7. How to Check Any of This</h2>
+<p>Nothing here has to be taken on trust. <code>git log --shortstat 84c4ca5</code> reproduces the build figures in section 4.1, and <code>.venv/bin/python -m pytest</code> reproduces the 148 passing tests in 4.2. Starting the backend and posting one request &mdash; a single command, given in the repository's README &mdash; returns the decision, the rule that produced it and the confidence, which is the whole of section 3 in one response. The demonstration at <code>/demo</code> runs the entire path end to end in about eleven seconds, and <code>/audit</code> shows every message the two agents exchanged along the way.</p>
 """
 
 doc = (

@@ -19,7 +19,10 @@ td.n{padding-right:0}
 td.e{border-bottom:1px solid #000000}
 td.o{border-top:1px solid #555555}
 td.p{border:1px solid #CCCCCC;background-color:#F4F4F4;padding:5pt 6pt}
-td.i{border:0 none #fff;padding:0 6pt 0 0;vertical-align:top}
+td.i{border:0 none #fff;padding:0 6pt 0 0;vertical-align:bottom}
+td.i2{border:0 none #fff;padding:0 0 0 6pt;vertical-align:bottom}
+td.j{border:0 none #fff;padding:3pt 6pt 0 0;vertical-align:top}
+td.j2{border:0 none #fff;padding:3pt 0 0 6pt;vertical-align:top}
 p.q{font-size:10.5pt;line-height:1.05;margin:0;text-align:left}
 p.n{text-align:right}
 p.hh{color:#1274C4;font-weight:bold}
@@ -27,7 +30,7 @@ p.bb{font-weight:bold}
 p.m{font-family:'Courier New',Courier,monospace;font-size:7.6pt;line-height:1.0;
     margin:0;text-align:left}
 p.k{font-size:9.5pt;font-style:italic;line-height:1.1;margin:0;text-align:left}
-p.w{margin:0 0 3pt;text-align:left}
+p.w{margin:0;text-align:left}
 </style></head><body><p class="t">Pavo Cloud</p>
 <p class="s">Technical Execution Report | AI for Business Track</p>
 <p class="a">Dhanvanth Lakshman, CFO · Viraj Gadeela, CTO · Harry Wang, CEO</p>
@@ -49,6 +52,7 @@ p.w{margin:0 0 3pt;text-align:left}
 <h2>3. System Architecture 2.0</h2>
 <h3>3.1 How One Request Moves Through the System</h3>
 <p>A doctor places an order in the hospital&#x27;s electronic health record — the software that holds a patient&#x27;s chart. That order starts everything below. No person touches any of the seven steps.</p>
+<p>The two sides talk over a small protocol of our own, ARIA. It is deliberately dull: an envelope carrying the message type — <i>AUTH_REQUEST</i> or <i>AUTH_RESPONSE</i> — the sender, a timestamp, and the medical details in FHIR. What matters is that every envelope is signed with the sender&#x27;s private key, over a digest of the whole contents, so altering a single character breaks the signature. Each organisation registers its public key once; the receiving side looks that key up and verifies before reading anything else. That is what lets two companies who have never spoken let their software transact without a person supervising it, and it is why the boundary in the diagram below falls where it does. The keys are RSA-2048, and the private half is never stored: it is handed back once when the organisation is created, and only a digest of it is kept afterwards. A message that fails verification is refused outright, and the refusal is written to the audit trail — so a rejection leaves as much of a record as an approval does.</p>
 <p class="g"><img src="https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/fig1.png" width="512"></p>
 <p class="f">Figure 1. One authorization request, end to end. The heavier box at step 5 is a gate: if the signature does not check out, the insurer&#x27;s software never reads the request at all.</p>
 <h3>3.2 Why Step 5 Matters</h3>
@@ -76,7 +80,7 @@ p.w{margin:0 0 3pt;text-align:left}
 <p class="f">Figure 3. The full test suite; each dot is one passing test. Among the things they prove: every decision records the rule that produced it, an unmatched request goes to a human rather than being guessed at, a tampered message is refused, and a real patient identifier never reaches storage.</p>
 <h3>4.3 The System Running</h3>
 <p>The screens below are the live software, not mock-ups. Both were captured on 19 September 2026, against the code in the log above.</p>
-<table><tr><td class="i" style="width:50%"><p class="w"><img src="https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/demo_complete_print.jpg" width="296"></p><p class="k">Figure 4. The guided demonstration after a single click. All six steps — order, identity, privacy proof, rules, decision, price — run with no further input and finish in 11.3 seconds. The last step prices the same operation at five facilities: a spread of $2,475 for identical care.</p></td><td class="i" style="width:50%"><p class="w"><img src="https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/dashboard_print.jpg" width="296"></p><p class="k">Figure 5. The dashboard. Every row carries the rule that produced it, in the RULE column. The two amber rows are knee replacements whose diagnosis did not match the covered condition; both wait for a human reviewer with their files already assembled. Average resolution across the eight: 42 milliseconds.</p></td></tr></table><p class="z">&nbsp;</p>
+<table><tr><td class="i" style="width:47.7%"><p class="w"><img src="https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/demo_complete_print.jpg" width="294"></p></td><td class="i2" style="width:52.3%"><p class="w"><img src="https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/dashboard_print.jpg" width="322"></p></td></tr><tr><td class="j" style="width:47.7%"><p class="k">Figure 4. The guided demonstration after a single click. All six steps — order, identity, privacy proof, rules, decision, price — run with no further input and finish in 11.3 seconds. The last step prices the same operation at five facilities: a spread of $2,475 for identical care.</p></td><td class="j2" style="width:52.3%"><p class="k">Figure 5. The dashboard, with the request form that sits between the counters and the table left out here. Every row carries the rule that produced it. The two amber rows are knee replacements whose diagnosis did not match the covered condition; both wait for a human reviewer with the file already assembled.</p></td></tr></table><p class="z">&nbsp;</p>
 <h2>5. Risk Mitigation Protocol</h2>
 <h3>5.1 The Governing Rule</h3>
 <p>One principle runs through every part of the system: <b>the safe outcome is the default, not the exception.</b> When the software is unsure it does not guess. It stops and hands the case to a person, with the file already prepared.</p>
@@ -106,4 +110,6 @@ p.w{margin:0 0 3pt;text-align:left}
 <h3>6.4 Profit, and What We Are Asking For</h3>
 <p>After engineering, sales and admin, the company loses $2.37 million in 2026 and $3.21 million in 2027, then makes $11.23 million in 2028. The deepest point is $5.58 million of cumulative losses, in late 2027.</p>
 <p><b>We are asking for $8.0 million</b>, which covers that trough with roughly twelve months of cushion past breaking even. It is not a shopping list. The three largest spending lines across the plan — $7.46m of engineering, $5.67m of insurer business development and $1.72m of clinical staff encoding coverage rules — come to more than the raise on their own, and most of that is paid for out of revenue as it arrives. What the raise funds is the part that has to come before any revenue does: the start of the clinical rule library, the security certification no insurer will sign without, and the engineering to close the gaps in Table 6.</p>
-<p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p></body></html>
+<p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p>
+<h2>7. How to Check Any of This</h2>
+<p>Nothing here has to be taken on trust. git log --shortstat 84c4ca5 reproduces the build figures in section 4.1, and .venv/bin/python -m pytest reproduces the 148 passing tests in 4.2. Starting the backend and posting one request — a single command, given in the repository&#x27;s README — returns the decision, the rule that produced it and the confidence, which is the whole of section 3 in one response. The demonstration at /demo runs the entire path end to end in about eleven seconds, and /audit shows every message the two agents exchanged along the way.</p></body></html>
