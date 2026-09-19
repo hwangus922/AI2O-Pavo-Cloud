@@ -5,7 +5,7 @@ import { AppealDetail, GenerateAppealForm } from "@/components/AppealPanel";
 import { JsonBlock } from "@/components/JsonBlock";
 import { RequestTimeline } from "@/components/RequestTimeline";
 import { StatusBadge } from "@/components/StatusBadge";
-import { ApiError, getAuthRequest } from "@/lib/api";
+import { ApiError, describeApiFailure, getAuthRequest } from "@/lib/api";
 import { shortId } from "@/lib/display";
 import type { AriaMessageRecord, AuditLogRecord } from "@/lib/types";
 import { Container } from "@/components/site/Container";
@@ -111,13 +111,28 @@ export default async function RequestDetailPage({
   try {
     detail = await getAuthRequest(params.id);
   } catch (caught) {
-    if (caught instanceof ApiError && caught.status === 404) {
+    // A genuine "no such request" carries FastAPI's own detail message. A 404
+    // with the generic status text means nothing served the path at all —
+    // which is what a deployment with no /api proxy looks like, and is not a
+    // missing request.
+    if (
+      caught instanceof ApiError &&
+      caught.status === 404 &&
+      !caught.message.startsWith("Request failed")
+    ) {
       notFound();
     }
     return (
-      <div className="rounded-md bg-rose-50 px-4 py-3 text-sm text-rose-800">
-        Could not load this request. Is the backend running?
-      </div>
+      <Container className="py-8 sm:py-10">
+        <div className="rounded-md bg-rose-50 px-4 py-3 text-sm leading-relaxed text-rose-800">
+          {describeApiFailure(caught, "this request")}
+        </div>
+        <p className="mt-4 text-sm">
+          <Link href="/dashboard" className="text-electric-600 underline">
+            Back to all requests
+          </Link>
+        </p>
+      </Container>
     );
   }
 

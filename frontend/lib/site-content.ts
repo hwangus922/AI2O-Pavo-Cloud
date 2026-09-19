@@ -77,7 +77,7 @@ export const OPERATING_CONSTRAINTS = [
   },
   {
     title: "Sample data is always labelled",
-    body: "With no model key — or a text-only provider that cannot read the documents — the parsers return obvious placeholder values, and both the API response and the UI say so. Nothing silently invents a member's plan.",
+    body: "With no model key — or a text-only provider that cannot read the documents — the parsers return values that are obviously placeholders, and the API response names the source of each half. Nothing silently invents a member's plan.",
   },
 ] as const;
 

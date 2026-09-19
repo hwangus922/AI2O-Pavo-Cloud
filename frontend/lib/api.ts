@@ -16,17 +16,36 @@ import type {
 } from "./types";
 
 /**
- * Where the browser sends API calls.
+ * Where API calls are sent.
  *
- * An explicit NEXT_PUBLIC_API_BASE_URL always wins. Otherwise a production
- * build uses the empty string, meaning "same origin" — the hosted demo serves
- * the API through the Next rewrite in next.config.mjs, so there is no second
- * origin to name and no CORS to get wrong. Development keeps the direct
- * localhost default, which is what `uvicorn` + `next dev` gives you.
+ * This differs between the browser and the server and must, because "same
+ * origin" is only a thing the browser understands:
+ *
+ * - **Browser, production**: the empty string. Requests go to the page's own
+ *   origin and the rewrite in next.config.mjs forwards them, so there is no
+ *   second origin to name and no CORS to get wrong.
+ * - **Server**: an absolute URL. `/requests/[id]` renders on the server, and
+ *   Node's fetch cannot parse a relative path — it throws before any request
+ *   is made. BACKEND_ORIGIN is the same value the rewrite targets.
+ * - **Development**: the backend directly, which is what `uvicorn` +
+ *   `next dev` gives you.
+ *
+ * An explicit NEXT_PUBLIC_API_BASE_URL overrides all of it.
  */
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
+function resolveApiBaseUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (explicit != null && explicit !== "") return explicit;
+
+  if (typeof window === "undefined") {
+    const origin = process.env.BACKEND_ORIGIN?.replace(/\/+$/, "");
+    if (origin) return origin;
+    return "http://localhost:8000";
+  }
+
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:8000";
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 /** Thrown when the backend answers with a non-2xx status. */
 export class ApiError extends Error {
@@ -37,6 +56,39 @@ export class ApiError extends Error {
     this.name = "ApiError";
     this.status = status;
   }
+}
+
+/**
+ * Turn a failure into a sentence that points at the right system.
+ *
+ * "Is the backend running?" was the answer to every failure, which is
+ * actively misleading when the cause is a deployment built without
+ * BACKEND_ORIGIN: the backend is fine and the proxy does not exist. A 404 on
+ * an /api path is that case, because the rewrite is what would otherwise have
+ * handled it.
+ */
+export function describeApiFailure(caught: unknown, subject: string): string {
+  if (caught instanceof ApiError) {
+    if (caught.status === 404 && caught.message.startsWith("Request failed")) {
+      return (
+        `The API proxy is not configured on this deployment, so ${subject} ` +
+        "could not be loaded. Set BACKEND_ORIGIN for this environment and redeploy — " +
+        "/status shows the current configuration."
+      );
+    }
+    if (caught.status >= 500) {
+      return `The backend returned ${caught.status}: ${caught.message}`;
+    }
+    return caught.message;
+  }
+
+  // fetch() rejects rather than resolving when it cannot reach the host at
+  // all, which on a sleeping free-tier instance is the common case.
+  return (
+    `Could not reach the backend, so ${subject} could not be loaded. ` +
+    "A free-tier instance that has gone to sleep takes about 50 seconds to " +
+    "wake — try once more. /status shows whether it is reachable."
+  );
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

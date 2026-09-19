@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { ApiError, generateAppeal } from "@/lib/api";
+import { describeApiFailure, generateAppeal } from "@/lib/api";
 import type { AppealRecord, AppealResult, PubMedCitation } from "@/lib/types";
 
 const DENIAL_REASONS = [
@@ -182,9 +182,7 @@ export function GenerateAppealForm({ requestId }: { requestId: string }) {
       router.refresh();
     } catch (caught) {
       setError(
-        caught instanceof ApiError
-          ? caught.message
-          : "Could not generate an appeal. Is the backend running?"
+        describeApiFailure(caught, "the appeal")
       );
     } finally {
       setPending(false);

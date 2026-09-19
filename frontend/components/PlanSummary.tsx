@@ -33,11 +33,7 @@ export function PlanSummary({
     <section className="pavo-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold">Your plan</h2>
-        {usedSamples ? (
-          <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
-            Sample data — reading the real documents needs a vision-capable model
-          </span>
-        ) : (
+        {usedSamples ? null : (
           <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800">
             Parsed from your documents
           </span>

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FacilityCard } from "@/components/FacilityCard";
 import { FileDropzone } from "@/components/FileDropzone";
 import { PlanSummary } from "@/components/PlanSummary";
-import { ApiError, parseInsuranceDocuments, submitPriceQuery } from "@/lib/api";
+import { describeApiFailure, parseInsuranceDocuments, submitPriceQuery } from "@/lib/api";
 import type { ParsedDocumentResult, PriceQueryResult } from "@/lib/types";
 import { Container } from "@/components/site/Container";
 import { SAMPLE_CARD_URL, SAMPLE_EOC_URL, fetchAsFile } from "@/lib/demo";
@@ -18,8 +18,9 @@ const EXAMPLE_PROCEDURES = [
   "Knee replacement",
 ];
 
-function errorMessage(caught: unknown, fallback: string): string {
-  return caught instanceof ApiError ? caught.message : fallback;
+/** `subject` completes "…so <subject> could not be loaded." */
+function errorMessage(caught: unknown, subject: string): string {
+  return describeApiFailure(caught, subject);
 }
 
 export default function InsurePage() {
@@ -57,7 +58,7 @@ export default function InsurePage() {
       setEocPdf(eoc);
     } catch (caught) {
       setParseError(
-        errorMessage(caught, "Could not load the sample documents.")
+        errorMessage(caught, "the sample documents")
       );
     } finally {
       setLoadingSamples(false);
@@ -82,10 +83,7 @@ export default function InsurePage() {
       );
     } catch (caught) {
       setParseError(
-        errorMessage(
-          caught,
-          "Could not reach the Pavo Cloud API. Is the backend running?"
-        )
+        errorMessage(caught, "your plan")
       );
     } finally {
       setParsing(false);
@@ -107,7 +105,7 @@ export default function InsurePage() {
         })
       );
     } catch (caught) {
-      setQueryError(errorMessage(caught, "Could not price that procedure."));
+      setQueryError(errorMessage(caught, "prices for that procedure"));
     } finally {
       setQuerying(false);
     }
@@ -136,9 +134,6 @@ export default function InsurePage() {
           >
             {loadingSamples ? "Loading…" : "Use the sample documents"}
           </button>
-          <p className="text-xs text-navy-400">
-            No card to hand? These are the same labelled samples the demo uses.
-          </p>
         </div>
       </div>
 
