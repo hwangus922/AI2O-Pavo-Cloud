@@ -37,30 +37,30 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "gdoc.html")
 
 RAW = ("https://raw.githubusercontent.com/hwangus922/AI2O-Pavo-Cloud/"
-       "2a7b02c442edfa7f0223fba97cd6d57f06564c85/submission/assets/")
+       "ea52bf925edc29e84c75dd1486a4d59090e18b5c/submission/assets/")
 IMG = {
-    "figure1": ("fig1.png", 624),
+    "figure1": ("fig1.png", 512),
     "assets/demo_complete_print.jpg": ("demo_complete_print.jpg", 296),
     "assets/dashboard_print.jpg": ("dashboard_print.jpg", 296),
 }
 
 CSS = """
-body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.15;color:#000}
-p{margin:0 0 6pt;text-align:justify;line-height:1.15}
+body{font-family:'Times New Roman',Times,serif;font-size:12pt;line-height:1.07;color:#000}
+p{margin:0 0 3.75pt;text-align:justify;line-height:1.07}
 p.t{font-size:16pt;font-weight:bold;text-align:center;margin:0 0 3pt}
 p.s{font-style:italic;text-align:center;margin:0 0 3pt}
 p.a{text-align:center;margin:0 0 15pt}
-h2{font-size:12pt;font-weight:bold;margin:13pt 0 4.5pt;text-align:left;line-height:1.15}
-h3{font-size:12pt;font-weight:bold;margin:10.5pt 0 4pt;text-align:left;line-height:1.15}
-p.c{font-style:italic;margin:7.5pt 0 3pt;text-align:left}
-p.f{font-style:italic;margin:2pt 0 7.5pt;text-align:left}
+h2{font-size:12pt;font-weight:bold;margin:9pt 0 3pt;text-align:left;line-height:1.07}
+h3{font-size:12pt;font-weight:bold;margin:7.5pt 0 2.25pt;text-align:left;line-height:1.07}
+p.c{font-style:italic;margin:4.5pt 0 1.5pt;text-align:left}
+p.f{font-style:italic;margin:2.25pt 0 4.5pt;text-align:left}
 p.g{margin:4pt 0 2pt;text-align:left}
 p.z{font-size:4pt;line-height:1;margin:0}
 table{border-collapse:collapse;width:100%}
-td{vertical-align:top;padding:3.75pt 7.5pt 3.75pt 0;
+td{vertical-align:top;padding:2.6pt 7.5pt 2.6pt 0;
    border-top:0 none #fff;border-left:0 none #fff;border-right:0 none #fff;
    border-bottom:1px solid #DCDCDC}
-td.h{vertical-align:bottom;padding:3pt 7.5pt 3pt 0;border-bottom:1px solid #555555}
+td.h{vertical-align:bottom;padding:2.25pt 7.5pt 2.25pt 0;border-bottom:1px solid #555555}
 td.n{padding-right:0}
 td.e{border-bottom:1px solid #000000}
 td.o{border-top:1px solid #555555}
@@ -70,7 +70,7 @@ p.q{font-size:10.5pt;line-height:1.05;margin:0;text-align:left}
 p.n{text-align:right}
 p.hh{color:#1274C4;font-weight:bold}
 p.bb{font-weight:bold}
-p.m{font-family:'Courier New',Courier,monospace;font-size:8.4pt;line-height:1.2;
+p.m{font-family:'Courier New',Courier,monospace;font-size:7.6pt;line-height:1.0;
     margin:0;text-align:left}
 p.k{font-size:9.5pt;font-style:italic;line-height:1.1;margin:0;text-align:left}
 p.w{margin:0 0 3pt;text-align:left}
