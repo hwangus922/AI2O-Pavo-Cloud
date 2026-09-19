@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { JsonDiff } from "@/components/JsonDiff";
-import { ApiError, getFullAuditTrail } from "@/lib/api";
+import { describeApiFailure, getFullAuditTrail } from "@/lib/api";
 import { downloadCsv, toCsv } from "@/lib/csv";
 import { formatTimestamp, shortId } from "@/lib/display";
 import type { AuditLogRecord } from "@/lib/types";
@@ -50,9 +50,7 @@ export default function AuditPage() {
       setError(null);
     } catch (caught) {
       setError(
-        caught instanceof ApiError
-          ? caught.message
-          : "Could not reach the Pavo Cloud API. Is the backend running?"
+        describeApiFailure(caught, "the audit trail")
       );
     } finally {
       setLoading(false);

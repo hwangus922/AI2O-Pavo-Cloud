@@ -10,7 +10,7 @@ import {
   RulesStep,
   ZkStep,
 } from "@/components/demo/StepPanels";
-import { ApiError } from "@/lib/api";
+import { describeApiFailure } from "@/lib/api";
 import {
   DEMO_STEPS,
   EMPTY_DEMO_STATE,
@@ -71,9 +71,7 @@ export default function DemoPage() {
 
   const fail = useCallback((caught: unknown) => {
     setError(
-      caught instanceof ApiError
-        ? caught.message
-        : "Could not reach the Pavo Cloud API. Is the backend running on port 8000?"
+      describeApiFailure(caught, "this step")
     );
     setPhase("error");
     setAutoRun(false);

@@ -6,7 +6,7 @@ import { ActivityFeed } from "@/components/ActivityFeed";
 import { NewRequestForm } from "@/components/NewRequestForm";
 import { RequestsTable } from "@/components/RequestsTable";
 import { SystemStatsRow } from "@/components/SystemStatsRow";
-import { getRecentActivity, getSystemStats, listAuthRequests } from "@/lib/api";
+import { describeApiFailure, getRecentActivity, getSystemStats, listAuthRequests } from "@/lib/api";
 import type {
   AriaMessageRecord,
   AuthRequestRecord,
@@ -47,10 +47,8 @@ export default function DashboardPage() {
       setStats(systemStats);
       setActivity(feed);
       setError(null);
-    } catch {
-      setError(
-        "Could not reach the Pavo Cloud API. Start the backend with: uvicorn app.main:app --reload --port 8000"
-      );
+    } catch (caught) {
+      setError(describeApiFailure(caught, "the dashboard"));
     } finally {
       setLoaded(true);
     }

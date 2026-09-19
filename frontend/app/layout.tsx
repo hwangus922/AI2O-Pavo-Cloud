@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 
+import { DeploymentBanner } from "@/components/site/DeploymentBanner";
 import { Footer } from "@/components/site/Footer";
 import { Nav } from "@/components/site/Nav";
 
@@ -42,6 +43,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen">
+        <DeploymentBanner />
         <Nav />
         {/* Width is deliberately NOT set here. Constraining every page from the
           layout meant no page could draw a band edge to edge, which the
