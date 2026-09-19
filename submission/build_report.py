@@ -24,7 +24,7 @@ CSS = """
     margin: 0;
     font-family: "Times New Roman", Times, serif;
     font-size: 12pt;
-    line-height: 1.38;
+    line-height: 1.30;
     color: #000;
   }
 
@@ -32,23 +32,23 @@ CSS = """
   .docsub   { font-style: italic; margin: 0 0 3px; text-align: center; }
   .docline  { margin: 0 0 20px; text-align: center; }
 
-  h2 { font-size: 12pt; font-weight: bold; margin: 17px 0 6px; page-break-after: avoid; }
-  h3 { font-size: 12pt; font-weight: bold; margin: 14px 0 5px; page-break-after: avoid; }
+  h2 { font-size: 12pt; font-weight: bold; margin: 12px 0 4px; page-break-after: avoid; }
+  h3 { font-size: 12pt; font-weight: bold; margin: 10px 0 3px; page-break-after: avoid; }
 
-  p { margin: 0 0 8px; text-align: justify; }
+  p { margin: 0 0 5px; text-align: justify; }
 
-  .cap { font-style: italic; margin: 10px 0 4px; page-break-after: avoid; }
+  .cap { font-style: italic; margin: 6px 0 2px; page-break-after: avoid; }
   table {
-    width: 100%; border-collapse: collapse; margin: 2px 0 11px;
+    width: 100%; border-collapse: collapse; margin: 2px 0 9px;
     font-size: 10.5pt; border-bottom: 1px solid #000;
   }
   tr { page-break-inside: avoid; }
   th {
-    text-align: left; font-weight: bold; color: #1274C4; padding: 4px 10px 4px 0;
+    text-align: left; font-weight: bold; color: #1274C4; padding: 3px 10px 3px 0;
     border-bottom: 1px solid #555555; vertical-align: bottom;
   }
   td {
-    padding: 5px 10px 5px 0; vertical-align: top;
+    padding: 3.5px 10px 3.5px 0; vertical-align: top;
     border-bottom: 1px solid #DCDCDC;
   }
   tr:last-child td { border-bottom: none; }
@@ -57,7 +57,7 @@ CSS = """
 
   figure { margin: 6px 0 3px; page-break-inside: avoid; }
   figure img { width: 74%; display: block; border: 1px solid #bbb; }
-  .fcap { font-style: italic; font-size: 10.5pt; margin: 3px 0 10px; text-align: left; }
+  .fcap { font-style: italic; font-size: 10.5pt; margin: 3px 0 6px; text-align: left; }
   .figrow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; page-break-inside: avoid;
             margin: 6px 0 2px; }
   .figrow > div { min-width: 0; }
@@ -65,12 +65,12 @@ CSS = """
   .figrow .fcap { font-size: 9.5pt; margin: 4px 0 0; }
 
   pre {
-    font-family: "Courier New", Courier, monospace; font-size: 8.4pt; line-height: 1.35;
+    font-family: "Courier New", Courier, monospace; font-size: 7.6pt; line-height: 1.24;
     background: #f4f4f4; border: 1px solid #ccc; padding: 6px 8px; margin: 4px 0 3px;
     white-space: pre; overflow: hidden; page-break-inside: avoid;
   }
 
-  svg { display: block; width: 100%; page-break-inside: avoid; }
+  svg { display: block; width: 82%; margin: 0 auto; page-break-inside: avoid; }
   .keep { page-break-inside: avoid; }
 """
 
@@ -79,10 +79,18 @@ BODY = f"""
 <div class="docsub">Technical Execution Report | AI for Business Track</div>
 <div class="docline">Dhanvanth Lakshman, CFO &nbsp;·&nbsp; Viraj Gadeela, CTO &nbsp;·&nbsp; Harry Wang, CEO</div>
 
-<h2>1. What Changed Since Round 1</h2>
+<h2>1. What Pavo Cloud Is</h2>
 
-<h3>1.1 From an Argument to Working Software</h3>
-<p>Round 1 argued that prior authorization is slow because a person has to start every request. This report replaces that argument with the software itself. All four planned phases are built and running, and every figure here was measured on the code on 13 September 2026 rather than estimated.</p>
+<p>Before a doctor can go ahead with many procedures &mdash; an MRI, a knee replacement, an expensive drug &mdash; the insurer has to agree to pay for it first. That permission step is called <em>prior authorization</em>. In principle it is a check against the plan's coverage rules. In practice it is a member of staff filling in a form, faxing it or retyping it into an insurer's portal, and then waiting &mdash; three to fourteen days, typically. The United States spends around $35 billion a year on this, and most of it buys nothing: the great majority of requests are approved in the end, just late.</p>
+
+<p>Pavo Cloud takes the person out of the start of that process. When a doctor places an order in the hospital's record system, our software assembles the request, signs it so the insurer can prove who sent it, and delivers it straight to the insurer's software. That side checks the signature, applies the insurer's own published coverage rules, and returns a decision naming the exact rule behind it. For a clear-cut request, no person is involved at any point.</p>
+
+<p>What happens when a request is <em>not</em> clear-cut matters more. The software never guesses. If no coverage rule matches, if a signature fails, or if an appeal is not confident enough, the case stops and goes to a human reviewer with the whole file already assembled. No AI language model is allowed to decide an authorization, and the software cannot issue a final denial to a patient at all. Section 5 sets out that boundary in full. The company earns three ways &mdash; a fee per request, a monthly subscription per practice, and a yearly fee to insurers for the connection. Round 1 argued all of this was possible; this report is about the software that now does it.</p>
+
+<h2>2. What Changed Since Round 1</h2>
+
+<h3>2.1 From an Argument to Working Software</h3>
+<p>All four planned phases are built and running, and the system now has a public website and a deployable build on top of them. Every figure in this report was measured against the committed code on 19 September 2026 rather than estimated.</p>
 
 <p class="cap">Table 1. What was built, in the order it was built.</p>
 <table>
@@ -91,37 +99,38 @@ BODY = f"""
   <tr><td>Phase 2</td><td>Insure: shows a patient what a procedure will actually cost them</td><td>Complete</td></tr>
   <tr><td>Phase 3</td><td>Identity and appeals: agents prove who they are, and denials are appealed automatically</td><td>Complete</td></tr>
   <tr><td>Phase 4</td><td>Privacy proofs: show a patient qualifies without sending their medical details</td><td>Complete</td></tr>
+  <tr><td>Since</td><td>A public website explaining the system, a deployable build, and a second model provider</td><td>Complete</td></tr>
 </table>
 
-<h3>1.2 What the System Does, Measured</h3>
-<p>Round 1 promised a decision in under five minutes. The software turned out to be far faster, because the slow part was never the thinking &mdash; it was the paperwork around it.</p>
+<h3>2.2 What the System Does, Measured</h3>
+<p>Round 1 promised a decision in under five minutes. The software turned out to be far faster, because the slow part was never the thinking &mdash; it was the paperwork around it. Taking the network out barely helps, which tells you the remaining time is signing and rule evaluation, not transport.</p>
 
 <p class="cap">Table 2. Measured results. A millisecond is one thousandth of a second.</p>
 <table>
   <tr><th>What was measured</th><th class="n" style="width:26%">Result</th></tr>
-  <tr><td>A complete authorization decision, start to finish</td><td class="n">88.6 milliseconds</td></tr>
-  <tr><td>The two agents agreeing, without the network in between</td><td class="n">44.7 milliseconds</td></tr>
-  <tr><td>Creating a privacy proof about a patient</td><td class="n">406 milliseconds</td></tr>
-  <tr><td>The full six-step demonstration, front to back</td><td class="n">11.1 seconds</td></tr>
-  <tr><td>Automated tests passing, out of 138</td><td class="n">138</td></tr>
+  <tr><td>A complete authorization decision over the network, start to finish</td><td class="n">83.8 milliseconds</td></tr>
+  <tr><td>The same decision with the network taken out</td><td class="n">80.7 milliseconds</td></tr>
+  <tr><td>Creating a privacy proof about a patient</td><td class="n">523 milliseconds</td></tr>
+  <tr><td>The full six-step demonstration, front to back</td><td class="n">11.3 seconds</td></tr>
+  <tr><td>Automated tests passing, out of 148</td><td class="n">148</td></tr>
 </table>
 
-<h3>1.3 Two Corrections to Round 1</h3>
+<h3>2.3 Two Corrections to Round 1</h3>
 <p>Two claims did not survive being built, and it is better to say so here than to be asked. On <em>speed</em>, Round 1 said &ldquo;under five minutes&rdquo;; the agents themselves take under a tenth of a second, so five minutes now covers the round trip once the hospital's record system and the insurer's network are included. On <em>profitability</em>, Round 1 implied the company breaks even on each sale in year one. Rebuilt from what the software costs to run, year one is a 31% gross margin &mdash; 31 cents of every dollar left after the direct cost of serving that customer &mdash; because early customers need a great deal of hand-holding. The 87% figure for year three held.</p>
 
-<h2>2. System Architecture 2.0</h2>
+<h2>3. System Architecture 2.0</h2>
 
-<h3>2.1 How One Request Moves Through the System</h3>
+<h3>3.1 How One Request Moves Through the System</h3>
 <p>A doctor places an order in the hospital's electronic health record &mdash; the software that holds a patient's chart. That order starts everything below. No person touches any of the seven steps.</p>
 
 {DIAGRAM}
 <p class="fcap">Figure 1. One authorization request, end to end. The heavier box at step 5 is a gate: if the signature does not check out, the insurer's software never reads the request at all.</p>
 
-<h3>2.2 Why Step 5 Matters</h3>
+<h3>3.2 Why Step 5 Matters</h3>
 <p>Two organisations letting software talk automatically only works if each can prove who it is. Step 5 is where that happens, and it happens <em>before</em> the request is opened: either the sender is proven genuine, or nothing happens. A judge can test this by changing any part of a request after it has been signed &mdash; it is refused outright.</p>
 
-<h3>2.3 Two Layers, and Which One Is Allowed to Decide</h3>
-<p>Round 1 described a fixed-rules layer and a learning layer. The built system draws that line harder than promised. <strong>No AI language model ever decides an authorization.</strong> Models are used only where being approximately right is acceptable &mdash; reading a photograph of an insurance card, for instance &mdash; and every result is scored before anything is done with it.</p>
+<h3>3.3 Two Layers, and Which One Is Allowed to Decide</h3>
+<p>Round 1 described a fixed-rules layer and a learning layer. The built system draws that line harder than promised. <strong>No AI language model ever decides an authorization.</strong> Models are used only where being approximately right is acceptable &mdash; reading a photograph of an insurance card &mdash; and every result is scored before it is used.</p>
 
 <p class="cap">Table 3. What each layer is allowed to do.</p>
 <table>
@@ -138,9 +147,9 @@ BODY = f"""
   </tr>
 </table>
 
-<p>One consequence is worth stating plainly. If the AI provider went offline tomorrow, prior authorization would keep working, because there is no AI on that path. The same fact explains why processing one request costs a fraction of a cent (section 5.2).</p>
+<p>One consequence is worth stating plainly. If the AI provider went offline tomorrow, prior authorization would keep working, because there is no AI on that path. The same fact explains why processing one request costs a fraction of a cent (section 6.2).</p>
 
-<h3>2.4 When a Request Is Denied</h3>
+<h3>3.4 When a Request Is Denied</h3>
 <p>A denial is never the end. The software sorts the insurer's stated reason, then acts on it.</p>
 
 <p class="cap">Table 4. What happens after a denial.</p>
@@ -151,17 +160,19 @@ BODY = f"""
   <tr class="tot"><td>Confidence below 70%</td><td>The appeal is held for a person, with the diagnosis, the reason, the score and every study already attached.</td></tr>
 </table>
 
-<h3>2.5 What Happens to Patient Data</h3>
+<h3>3.5 What Happens to Patient Data</h3>
 <p>Patient identifiers are scrambled at the door, before anything is saved, and the scrambling is one-way: the original cannot be recovered from it. A test in the codebase checks that the real identifier never appears in storage.</p>
-<p>The system goes further using a technique called a zero-knowledge proof. It lets the insurer confirm three things &mdash; that the patient is old enough, that the diagnosis is one the plan covers, and that the deductible condition is met &mdash; <em>without receiving the age, the diagnosis or the amount</em>. The insurer learns only whether each condition holds. One limitation is listed in Table 6.</p>
+<p>The system goes further using a technique called a zero-knowledge proof. It lets the insurer confirm three things &mdash; that the patient is old enough, that the diagnosis is covered, and that the deductible condition is met &mdash; <em>without receiving the age, the diagnosis or the amount</em>. One limitation is listed in Table 6.</p>
 
-<h2>3. The Build Log</h2>
+<h2>4. The Build Log</h2>
 
-<h3>3.1 What Was Committed, and When</h3>
-<p>The code lives in a repository called <em>hwangus922/AI2O-Pavo-Cloud</em>. Work was done in five batches &mdash; one per phase, plus a round of fixes &mdash; and each was reviewed before being merged. Together they come to 19,541 lines of code across 170 file changes.</p>
+<h3>4.1 What Was Committed, and When</h3>
+<p>The code lives in a repository called <em>hwangus922/AI2O-Pavo-Cloud</em>. Work was done in seven batches &mdash; one per phase, a round of fixes, and two more since Round 2 opened &mdash; and each was reviewed before being merged. Together they come to 21,806 lines of code across 213 file changes.</p>
 
-<pre>$ git log --first-parent --date=short --pretty="%h %ad  %s" a13f6cb
+<pre>$ git log --first-parent --date=short --pretty="%h %ad  %s" 84c4ca5
 
+  84c4ca5 2026-09-18  Turn the demo app into a full website (#8)
+  8b23760 2026-09-18  Make the demo deployable to a public URL (#6)
   a13f6cb 2026-09-12  Fix the three failures that break a deployed demo (#5)
   abc1b5c 2026-09-09  Phase 4: demo flow, audit UI, and a real ZK proof (#4)
   99bbb96 2026-09-08  Phase 3: autonomous appeals and cryptographic identity (#3)
@@ -169,40 +180,45 @@ BODY = f"""
   e48ec54 2026-09-07  Phase 1: autonomous prior authorization core loop (#1)
   d5ea3a7 2026-09-07  Initial commit
 
-$ git log --shortstat a13f6cb
+$ git log --shortstat 84c4ca5
 
-  12 commits  ·  170 file changes  ·  +19,541 insertions  ·  -367 deletions</pre>
-<p class="fcap">Figure 2. The commit history. Each line is a batch of work that was reviewed and merged. Phase 1 was the largest at 9,429 lines; the last entry fixes three problems that only appear once the software is deployed rather than run on a laptop.</p>
+  14 commits  ·  213 file changes  ·  +21,806 insertions  ·  -577 deletions</pre>
+<p class="fcap">Figure 2. The commit history. Each line is a batch of work that was reviewed and merged. Phase 1 was the largest at 9,429 lines. The two entries from 18 September make the system deployable to a public URL and turn the demo into a full website.</p>
 
-<h3>3.2 The Tests</h3>
-<p>An automated test is a small program that checks the main program still behaves correctly. There are 138 of them and they all pass. They matter more than the line count, because they are what turns a claim in this report into something a judge can verify with one command.</p>
+<h3>4.2 The Tests</h3>
+<p>An automated test is a small program that checks the main program still behaves correctly. There are 148 of them and they all pass. They matter more than the line count, because they are what turns a claim in this report into something a judge can verify with one command.</p>
 
 <pre>$ .venv/bin/python -m pytest
 
-........................................................
-................ [ 52%]
-........................................................
-..........       [100%]
-138 passed, 1 warning in 22.37s</pre>
-<p class="fcap">Figure 3. The full test suite; each dot is one passing test. Among the things they prove: every decision records the rule that produced it, an unmatched request goes to a human rather than being guessed at, a tampered message is refused, a real patient identifier never reaches storage, and a rejected appeal is escalated rather than becoming an automatic final denial.</p>
+tests/test_appeals.py .............................. [ 20%]
+.............                                        [ 29%]
+tests/test_flow.py ...................               [ 41%]
+tests/test_insure.py ............................... [ 62%]
+...........                                          [ 70%]
+tests/test_persistence.py .......                    [ 75%]
+tests/test_rules.py ...............                  [ 85%]
+tests/test_zk.py ......................              [100%]
 
-<h3>3.3 The System Running</h3>
-<p>The screens below are the live software, not mock-ups. Both were captured on 13 September 2026.</p>
+148 passed, 1 warning in 24.45s</pre>
+<p class="fcap">Figure 3. The full test suite; each dot is one passing test. Among the things they prove: every decision records the rule that produced it, an unmatched request goes to a human rather than being guessed at, a tampered message is refused, and a real patient identifier never reaches storage.</p>
+
+<h3>4.3 The System Running</h3>
+<p>The screens below are the live software, not mock-ups. Both were captured on 19 September 2026, against the code in the log above.</p>
 
 <div class="figrow">
   <div>
     <img src="assets/demo_complete_print.jpg" alt="The six-step demonstration, completed">
-    <p class="fcap">Figure 4. The guided demonstration after a single click. All six steps &mdash; order, identity, privacy proof, rules, decision, price &mdash; run with no further input and finish in about eleven seconds. The last step prices the same operation at five facilities: a spread of $2,475 for identical care.</p>
+    <p class="fcap">Figure 4. The guided demonstration after a single click. All six steps &mdash; order, identity, privacy proof, rules, decision, price &mdash; run with no further input and finish in 11.3 seconds. The last step prices the same operation at five facilities: a spread of $2,475 for identical care.</p>
   </div>
   <div>
     <img src="assets/dashboard_print.jpg" alt="The authorization dashboard">
-    <p class="fcap">Figure 5. The dashboard. Every row carries the rule that produced it, in the RULE column. The single amber row is a knee replacement whose diagnosis did not match the covered condition; it is waiting for a human reviewer, with its file already assembled.</p>
+    <p class="fcap">Figure 5. The dashboard. Every row carries the rule that produced it, in the RULE column. The two amber rows are knee replacements whose diagnosis did not match the covered condition; both wait for a human reviewer with their files already assembled. Average resolution across the eight: 42 milliseconds.</p>
   </div>
 </div>
 
-<h2>4. Risk Mitigation Protocol</h2>
+<h2>5. Risk Mitigation Protocol</h2>
 
-<h3>4.1 The Governing Rule</h3>
+<h3>5.1 The Governing Rule</h3>
 <p>One principle runs through every part of the system: <strong>the safe outcome is the default, not the exception.</strong> When the software is unsure it does not guess. It stops and hands the case to a person, with the file already prepared.</p>
 
 <p class="cap">Table 5. What happens when something goes wrong.</p>
@@ -245,10 +261,10 @@ $ git log --shortstat a13f6cb
   </tr>
 </table>
 
-<h3>4.2 Why Human Review Is Not a Queue</h3>
-<p>Escalating a case is a routing decision, not a backlog. Every case handed to a person arrives complete: the medical details, the rule that fired, the signature check, the denial reason, the confidence score and any studies found, all assembled before the reviewer opens it. The bottleneck Round 1 identified was never medical judgement &mdash; it was the paperwork wrapped around it.</p>
+<h3>5.2 Why Human Review Is Not a Queue</h3>
+<p>Escalating a case is a routing decision, not a backlog. Every case handed to a person arrives complete: the medical details, the rule that fired, the signature check, the denial reason, the confidence score and any studies found. The bottleneck Round 1 identified was never medical judgement &mdash; it was the paperwork wrapped around it.</p>
 
-<h3>4.3 What We Have Not Solved</h3>
+<h3>5.3 What We Have Not Solved</h3>
 <p>These are real limitations of a prototype. We would rather state them than be caught by them.</p>
 
 <p class="cap">Table 6. Known gaps and what each needs.</p>
@@ -262,9 +278,9 @@ $ git log --shortstat a13f6cb
   <tr><td>The learning layer is not built</td><td>Deliberate. Until it exists, anything without a definitive rule goes to a person &mdash; which is the correct default anyway.</td></tr>
 </table>
 
-<h2>5. Three-Year Financials</h2>
+<h2>6. Three-Year Financials</h2>
 
-<h3>5.1 Where the Money Comes From</h3>
+<h3>6.1 Where the Money Comes From</h3>
 <p>Pavo earns in three ways: a fee for each request, a monthly subscription per medical practice, and a yearly fee to insurers for the connection itself. The figures below are built up from customer counts and request volumes, not from a growth rate applied to a starting number. The full workbook accompanies this report.</p>
 
 <p class="cap">Table 7. Revenue, built up from customers.</p>
@@ -281,7 +297,7 @@ $ git log --shortstat a13f6cb
 
 <p>The $3.00 fee is 85&ndash;92% below the $15&ndash;$40 an insurer spends handling a request by hand today, which is what makes the switch easy to justify.</p>
 
-<h3>5.2 What It Costs to Run</h3>
+<h3>6.2 What It Costs to Run</h3>
 <p>Servers are not the expense. Processing one request costs about six hundredths of a cent, because the deciding path uses no AI models at all. The real cost is clinical staff translating each insurer's published rules into the fixed rules the software applies &mdash; the largest line in every year, and the reason margins improve with scale rather than with technology.</p>
 
 <p class="cap">Table 8. Cost of serving customers, and what is left.</p>
@@ -297,7 +313,7 @@ $ git log --shortstat a13f6cb
   <tr><td>Gross margin</td><td class="n">31%</td><td class="n">82%</td><td class="n">87%</td></tr>
 </table>
 
-<h3>5.3 Cost to Win a Customer, and What One Is Worth</h3>
+<h3>6.3 Cost to Win a Customer, and What One Is Worth</h3>
 <p>Two standard measures. <em>Acquisition cost</em> is what it costs in sales and marketing to sign one customer. <em>Lifetime value</em> is the profit that customer produces before they leave, stated here over three years, which is deliberately conservative.</p>
 
 <p class="cap">Table 9. Customer economics at 2028 rates.</p>
@@ -309,9 +325,9 @@ $ git log --shortstat a13f6cb
   <tr><td>Months to earn the cost back</td><td class="n">3.5</td><td class="n">15.2</td><td class="n">4.0</td></tr>
 </table>
 
-<p>Read the insurer column honestly. At $2.30 back per $1 spent and fifteen months to recover it, insurer contracts do not pay for themselves as a product. We fund them anyway, because signing one insurer makes Pavo available to every practice that already submits to it. It is a distribution channel, not a profit centre, and it is why the cost of winning a practice falls 37% across the plan.</p>
+<p>Read the insurer column honestly. At $2.30 back per $1 spent and fifteen months to recover it, insurer contracts do not pay for themselves as a product. We fund them anyway, because signing one insurer makes Pavo available to every practice that already submits to it. It is a distribution channel, not a profit centre.</p>
 
-<h3>5.4 Profit, and What We Are Asking For</h3>
+<h3>6.4 Profit, and What We Are Asking For</h3>
 <p>After engineering, sales and admin, the company loses $2.37 million in 2026 and $3.21 million in 2027, then makes $11.23 million in 2028. The deepest point is $5.58 million of cumulative losses, in late 2027.</p>
 <p><strong>We are asking for $8.0 million</strong>, which covers that trough with roughly twelve months of cushion past breaking even. It is not a shopping list. The three largest spending lines across the plan &mdash; $7.46m of engineering, $5.67m of insurer business development and $1.72m of clinical staff encoding coverage rules &mdash; come to more than the raise on their own, and most of that is paid for out of revenue as it arrives. What the raise funds is the part that has to come before any revenue does: the start of the clinical rule library, the security certification no insurer will sign without, and the engineering to close the gaps in Table 6.</p>
 <p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p>
