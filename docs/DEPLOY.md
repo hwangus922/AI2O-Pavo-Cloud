@@ -87,9 +87,9 @@ need to be shareable.
 Open the production URL in a **private/incognito window**. That is exactly
 what a stranger sees, with no session — the only way to test this honestly.
 
-Then open `/status` in the same window. It reports which environment and
-commit you are on, and whether the API proxy and backend are working, so one
-page confirms both "public" and "working".
+Then, in that same window, open `/demo` and press **Run Full Demo**. Six green
+steps confirm the other half of the question: the page is not just reachable,
+it is reaching the backend.
 
 ---
 
@@ -131,4 +131,4 @@ sleep.
 | First run hangs ~50s then works | Free-tier cold start, see above |
 | Build fails on Vercel | Root Directory not set to `frontend` |
 | Visitors see a Vercel login screen | Deployment Protection — see *Make it reachable* |
-| Unsure which deployment you are looking at | Open `/status`; a preview also shows an amber banner |
+| Unsure which deployment you are looking at | Match the commit against the one on the Vercel dashboard — a preview URL keeps serving the code it was built from |
