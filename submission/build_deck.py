@@ -1,0 +1,559 @@
+"""Assemble the Pavo Cloud pitch deck.
+
+Sixteen 16:9 slides, printed straight to PDF by Chromium. The palette is sampled
+from the Gamma deck it replaces (#FFFAFA / #1F1E1E / #3A3535 / #D6DCF4 / #9C9797)
+and the type is Outfit, the closest geometric sans to the original's Poppins that
+is installed here. Every figure comes from the technical report, so the two cannot
+drift.
+
+    python build_deck.py
+    chromium --headless --print-to-pdf=Pavo_Cloud_Pitch_Deck.pdf deck.html
+"""
+from __future__ import annotations
+
+import os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+FONTS = "/mnt/skills/examples/canvas-design/canvas-fonts"
+ASSETS = os.path.join(HERE, "assets")
+
+CSS = f"""
+@font-face {{ font-family: Outfit; font-weight: 400;
+  src: url('file://{FONTS}/Outfit-Regular.ttf'); }}
+@font-face {{ font-family: Outfit; font-weight: 700;
+  src: url('file://{FONTS}/Outfit-Bold.ttf'); }}
+@font-face {{ font-family: Geist; font-weight: 400;
+  src: url('file://{FONTS}/GeistMono-Regular.ttf'); }}
+
+@page {{ size: 10in 5.625in; margin: 0; }}
+* {{ box-sizing: border-box; }}
+html, body {{ margin: 0; padding: 0; }}
+
+body {{ font-family: Outfit, sans-serif; color: #3A3535;
+        -webkit-font-smoothing: antialiased; }}
+
+.slide {{ width: 10in; height: 5.625in; background: #FFFAFA; position: relative;
+          padding: 0.5in 0.55in 0.62in; overflow: hidden;
+          page-break-after: always; display: flex; flex-direction: column; }}
+.main {{ flex: 1; display: flex; flex-direction: column; justify-content: center;
+         min-height: 0; overflow: hidden; }}
+.main.top {{ justify-content: flex-start; }}
+.main > :first-child {{ margin-top: 0; }}
+.slide:last-child {{ page-break-after: auto; }}
+
+.chip {{ display: inline-block; background: #D6DCF4; color: #3A3535;
+         font-size: 8.5pt; font-weight: 700; letter-spacing: .09em;
+         padding: 4px 10px; border-radius: 3px; margin-bottom: 14px; }}
+
+h1 {{ font-size: 44pt; font-weight: 700; color: #1F1E1E; margin: 6px 0 0;
+      letter-spacing: -.015em; line-height: 1.05; }}
+h2 {{ font-size: 25pt; font-weight: 700; color: #1F1E1E; margin: 0 0 4px;
+      letter-spacing: -.012em; line-height: 1.12; }}
+h3 {{ font-size: 13pt; font-weight: 700; color: #1F1E1E; margin: 0 0 3px; }}
+
+p  {{ font-size: 10.5pt; line-height: 1.5; margin: 0 0 9px; }}
+.lede {{ font-size: 12pt; color: #3A3535; margin: 2px 0 16px; }}
+.rule {{ height: 1px; background: #9C9797; opacity: .55; margin: 14px 0 12px; }}
+.src  {{ position: absolute; left: .55in; bottom: .3in;
+         font-size: 7.5pt; color: #9C9797; }}
+.foot {{ position: absolute; left: .55in; bottom: .3in; right: .55in;
+         font-size: 9pt; color: #3A3535; }}
+b, strong {{ font-weight: 700; color: #1F1E1E; }}
+.blue {{ color: #1274C4; }}
+
+/* stat tiles */
+.tiles {{ display: grid; gap: 14px 20px; }}
+.t4 {{ grid-template-columns: repeat(4, 1fr); }}
+.t3 {{ grid-template-columns: repeat(3, 1fr); }}
+.t2x3 {{ grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto; }}
+.tile .n {{ font-size: 29pt; font-weight: 700; color: #1274C4;
+            line-height: 1.05; letter-spacing: -.02em; white-space: nowrap; }}
+.tile .l {{ font-size: 9pt; color: #3A3535; line-height: 1.35; margin-top: 3px; }}
+
+/* tables */
+table {{ width: 100%; border-collapse: collapse; font-size: 9.5pt; }}
+th {{ text-align: left; font-weight: 700; color: #1274C4; font-size: 9pt;
+      padding: 5px 10px 5px 0; border-bottom: 1px solid #9C9797;
+      vertical-align: bottom; }}
+td {{ padding: 5px 10px 5px 0; vertical-align: top;
+      border-bottom: 1px solid rgba(156,151,151,.35); }}
+td.n, th.n {{ text-align: right; padding-right: 0; white-space: nowrap; }}
+tr.tot td {{ border-top: 1px solid #9C9797; font-weight: 700; color: #1F1E1E;
+             border-bottom: none; }}
+tr:last-child td {{ border-bottom: none; }}
+
+/* panels */
+.panel {{ background: #D6DCF4; padding: 13px 16px; border-radius: 4px;
+          font-size: 9.5pt; line-height: 1.45; }}
+.cards {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }}
+.card {{ border: 1px solid rgba(156,151,151,.5); border-radius: 4px;
+         padding: 12px 14px; }}
+.card .p {{ font-size: 19pt; font-weight: 700; color: #1274C4;
+            letter-spacing: -.02em; }}
+.card .d {{ font-size: 9pt; margin-top: 4px; line-height: 1.4; }}
+.bars {{ display: grid; gap: 9px; }}
+.bar {{ border-left: 3px solid #1274C4; padding: 2px 0 2px 12px; }}
+.bar .h {{ font-size: 10.5pt; font-weight: 700; color: #1F1E1E; }}
+.bar .s {{ font-size: 9pt; margin-top: 1px; }}
+
+pre {{ font-family: Geist, monospace; font-size: 7pt; line-height: 1.5;
+       background: #F4F2F2; border: 1px solid rgba(156,151,151,.5);
+       border-radius: 3px; padding: 10px 12px; margin: 0; white-space: pre;
+       color: #3A3535; overflow: hidden; }}
+
+.two {{ display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }}
+.shots {{ display: grid; grid-template-columns: 52.4fr 47.6fr; gap: 14px; }}
+.shots img {{ width: 100%; display: block; border: 1px solid #9C9797; }}
+.cap {{ font-size: 8pt; color: #3A3535; line-height: 1.4; margin-top: 8px; }}
+.era {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }}
+.erabox {{ border: 1px solid rgba(156,151,151,.5); border-radius: 4px;
+           padding: 14px 15px; }}
+.erabox.now {{ background: #1274C4; border-color: #1274C4; }}
+.erabox.now *, .erabox.now .t {{ color: #FFFAFA !important; }}
+.erabox .k {{ font-size: 8pt; font-weight: 700; letter-spacing: .07em;
+              color: #1274C4; }}
+.erabox .t {{ font-size: 12pt; font-weight: 700; color: #1F1E1E; margin: 5px 0 4px; }}
+.erabox .d {{ font-size: 9pt; line-height: 1.4; }}
+.erabox .v {{ font-size: 17pt; font-weight: 700; color: #1F1E1E; margin-top: 9px; }}
+.check {{ color: #1274C4; font-weight: 700; }}
+.dash  {{ color: #9C9797; }}
+"""
+
+
+def slide(chip, body, src=None, foot=None):
+    s = '<div class="slide">'
+    if chip:
+        s += f'<div class="chip">{chip}</div>'
+    s += f'<div class="main">{body}</div>'
+    if src:
+        s += f'<div class="src">{src}</div>'
+    if foot:
+        s += f'<div class="foot">{foot}</div>'
+    return s + "</div>"
+
+
+def tile(n, l):
+    return f'<div class="tile"><div class="n">{n}</div><div class="l">{l}</div></div>'
+
+
+S = []
+
+# 1 -------------------------------------------------------------- title
+S.append(slide(
+    "AI FOR BUSINESS TRACK · ROUND 2",
+    """
+<h1>Pavo Cloud</h1>
+<h2 style="margin-top:20px">Autonomous Prior Authorization</h2>
+<p class="lede" style="margin-top:18px">The insurer's answer in
+<b>88.6 milliseconds</b>. The whole round trip in under five minutes,
+not three to fourteen days.</p>
+<div class="rule" style="margin-top:20px"></div>
+<p style="font-size:10pt">Dhanvanth Lakshman, CFO &nbsp;·&nbsp;
+Viraj Gadeela, CTO &nbsp;·&nbsp; Harry Wang, CEO</p>
+"""))
+
+# 2 -------------------------------------------------------------- problem
+S.append(slide(
+    "THE PROBLEM",
+    """
+<h2>Prior Authorization Is Broken</h2>
+<p class="lede">Before many procedures, the insurer has to agree to pay. In practice
+that is a member of staff filling in a form, faxing it, and then waiting.</p>
+<div class="tiles t4" style="margin-top:26px">
+""" + tile("3&ndash;14 days", "to a decision")
+    + tile("94%", "of doctors report delays")
+    + tile("97%", "of requests approved in the end")
+    + tile("$35B", "spent on the process each year") + """
+</div>
+<div class="rule" style="margin-top:30px"></div>
+<p>Most of that $35 billion buys nothing. The great majority of requests are
+approved anyway, just late.</p>
+"""))
+
+# 3 -------------------------------------------------------------- eras
+S.append(slide(
+    "WHY NOW",
+    """
+<h2>The Three Eras of Prior Authorization</h2>
+<div class="era" style="margin-top:24px">
+  <div class="erabox"><div class="k">ERA 1</div>
+    <div class="t">Fax and Phone</div>
+    <div class="d">A person starts it and a person resolves it.</div>
+    <div class="v">~4 weeks</div></div>
+  <div class="erabox"><div class="k">ERA 2</div>
+    <div class="t">Digital Portals</div>
+    <div class="d">A person starts it, the portal assists.</div>
+    <div class="v">3&ndash;14 days</div></div>
+  <div class="erabox now"><div class="k">ERA 3</div>
+    <div class="t">Autonomous Agents</div>
+    <div class="d">Software starts it and software resolves it.</div>
+    <div class="v">Under 5 min</div></div>
+</div>
+<div class="foot">Only the third era removes the person from the routine cases, so
+clinicians spend their time on the hard ones.</div>
+"""))
+
+# 4 -------------------------------------------------------------- solution
+S.append(slide(
+    "SOLUTION",
+    """
+<h2>Era 3: Agent to Agent</h2>
+<div class="two" style="margin-top:22px">
+<div>
+  <h3>Submitted automatically</h3>
+  <p style="margin-bottom:16px">Clinical documentation leaves the record system
+  directly. No staff touchpoint, no portal login.</p>
+  <h3>Clear cases close in milliseconds</h3>
+  <p>The full decision path takes <b>88.6 milliseconds</b>, and 84.0 of those are
+  the two RSA-2048 signatures every authorization writes. The deciding itself is
+  the cheap part.</p>
+</div>
+<div>
+  <h3>Unclear cases escalate, assembled</h3>
+  <p style="margin-bottom:16px">A human reviewer opens a file that is already
+  complete: records, rule, signature check, confidence score.</p>
+  <h3>The doctor stays in charge</h3>
+  <p>Medical necessity remains a physician's call. Only the administrative
+  burden disappears.</p>
+</div>
+</div>
+"""))
+
+# 5 -------------------------------------------------------------- architecture
+S.append(slide(
+    "HOW IT WORKS",
+    """
+<h2 style="margin-bottom:8px">System Architecture</h2>
+<div><img src="assets/fig1.png"
+     style="width:65%;display:block;margin:0 auto"></div>
+<div class="foot" style="bottom:.26in">
+<b>Stack</b> &nbsp;FastAPI · Next.js 14 · Supabase-ready · FHIR R4 · RSA-2048
+signing · ZK circuits (circom/snarkjs) · timestamped audit log<br>
+<b>Speed</b> &nbsp;Step 1 to step 7 in 88.6ms (median, n=200)</div>
+"""))
+
+# 6 -------------------------------------------------------------- built (NEW)
+S.append(slide(
+    "EVIDENCE",
+    """
+<h2>What We Actually Built</h2>
+<div class="two" style="grid-template-columns:1.05fr 1fr;margin-top:18px">
+<div>
+  <div class="tiles t2x3">
+""" + tile("4 of 4", "phases built and running")
+    + tile("148", "automated tests, all passing")
+    + tile("18", "commits in 11 reviewed batches")
+    + tile("22,739", "lines added across 260 files")
+    + tile("88.6 ms", "end-to-end decision")
+    + tile("13 days", "first commit to working system") + """
+  </div>
+</div>
+<div>
+<pre>$ git log --first-parent --pretty="%h %ad  %s"
+
+  0a24def 2026-09-19  Document the setting that
+                      keeps the site private (#11)
+  bb02bc4 2026-09-19  Give the site a real mark (#12)
+  cd0891a 2026-09-19  Make a broken deployment
+                      say so (#10)
+  ee9ed87 2026-09-18  Fix the request detail page (#9)
+  84c4ca5 2026-09-18  Turn the demo into a website (#8)
+  8b23760 2026-09-18  Make the demo deployable (#6)
+
+$ git log --shortstat
+
+  18 commits  ·  260 file changes
+  +22,739 insertions  ·  -1,215 deletions</pre>
+<div class="cap">Reviewed and merged in eleven batches, 7 to 19 September 2026.</div>
+</div>
+</div>
+<div class="foot">Every number on this slide comes off the committed code, not a
+projection. 15,871 of those insertions are hand-written; the rest is a dependency
+lockfile.</div>
+"""))
+
+# 7 -------------------------------------------------------------- running (NEW)
+S.append(slide(
+    "LIVE SOFTWARE",
+    """
+<h2>The System Running</h2>
+<p class="lede" style="margin-bottom:12px">Not mock-ups. Both screens are the same
+build that would go to a customer.</p>
+<div class="shots">
+  <img src="assets/demo_complete_print.jpg">
+  <img src="assets/dashboard_print.jpg">
+</div>
+<div class="cap" style="margin-top:9px">
+<b>Left:</b> all six steps, order through price, run with no further input and
+finish in 11.0 seconds. <b>Right:</b> every row carries the rule that produced it.
+The two amber rows are knee replacements whose diagnosis did not match the covered
+condition, and both wait for a human reviewer with the file already assembled.</div>
+"""))
+
+# 8 -------------------------------------------------------------- traction
+S.append(slide(
+    "TRACTION",
+    """
+<h2>Customer Discovery and Validation</h2>
+<div class="tiles t3" style="margin-top:24px">
+""" + tile("12+", "interviews with hospital administrators and clinical staff")
+    + tile("8", "insurance provider conversations completed")
+    + tile("3", "test surveys distributed to prior authorization teams") + """
+</div>
+<div class="tiles" style="grid-template-columns:1fr 1fr;margin-top:24px">
+""" + tile("2", "letters of interest received from health systems")
+    + tile("100%", "of interviewed providers cited prior authorization delays as a "
+                   "top operational pain point") + """
+</div>
+"""))
+
+# 9 -------------------------------------------------------------- safety
+S.append(slide(
+    "RISK",
+    """
+<h2>The Safe Outcome Is the Default</h2>
+<div class="two" style="margin-top:18px">
+<div>
+  <h3 class="blue">Fixed rules &nbsp;·&nbsp; decides</h3>
+  <p style="margin-bottom:6px">Same input, same answer, every time, and every
+  answer names the exact rule behind it.</p>
+  <p style="font-size:9.5pt;margin:0">Identity checks &nbsp;·&nbsp; coverage rules
+  &nbsp;·&nbsp; price arithmetic &nbsp;·&nbsp; denial-reason sorting</p>
+</div>
+<div>
+  <h3 class="blue">AI models &nbsp;·&nbsp; assist only</h3>
+  <p style="margin-bottom:6px">Every result carries a confidence score. Below the
+  threshold it goes to a person.</p>
+  <p style="font-size:9.5pt;margin:0">Reading insurance cards &nbsp;·&nbsp; mapping
+  plain English to a medical code &nbsp;·&nbsp; drafting appeal letters</p>
+</div>
+</div>
+<div class="rule"></div>
+<div class="tiles t3" style="gap:14px">
+  <div class="panel">Unmatched request goes to a human reviewer, within 4 hours.</div>
+  <div class="panel">An appeal below 70% confidence is held for a person.</div>
+  <div class="panel">AI provider offline: authorization itself is unaffected.</div>
+</div>
+<div class="foot"><b>No AI language model ever decides an authorization</b>, and the
+software cannot issue a final denial to a patient at all.</div>
+"""))
+
+# 10 ------------------------------------------------------------- gaps
+S.append(slide(
+    "LIMITATIONS",
+    """
+<h2>What We Have Not Solved</h2>
+<p class="lede" style="margin-bottom:10px">These are real limitations of a
+prototype. We would rather state them than be caught by them.</p>
+<table>
+<tr><th style="width:42%">Gap</th><th>What it needs</th></tr>
+<tr><td>The privacy proof reveals which covered condition a patient has</td>
+    <td>A more advanced circuit design. Scoped for the next phase.</td></tr>
+<tr><td>The proof's setup was done on one machine</td>
+    <td>A proper multi-party ceremony before any real use.</td></tr>
+<tr><td>Provider identity is trusted, not verified</td>
+    <td>One integration against the federal provider registry.</td></tr>
+<tr><td>Facility prices are generated, not gathered</td>
+    <td>The voice agent that calls facilities, plus the price files insurers must
+        now publish.</td></tr>
+<tr><td>Five coverage rules, not a rule library</td>
+    <td>Clinical staff encoding each insurer's criteria: our largest cost, and the
+        real barrier to a competitor.</td></tr>
+<tr><td>The learning layer is not built</td>
+    <td>Deliberate. Until it exists, anything without a definitive rule goes to a
+        person, which is the correct default anyway.</td></tr>
+</table>
+"""))
+
+# 11 ------------------------------------------------------------- competition
+S.append(slide(
+    "COMPETITION",
+    """
+<h2>Everyone Else Still Waits for a Person</h2>
+<table style="margin-top:20px">
+<tr><th style="width:40%">Capability</th>
+    <th class="n" style="width:20%">Pavo Cloud</th>
+    <th class="n" style="width:20%">Cohere Health</th>
+    <th class="n" style="width:20%">Availity AuthAI</th></tr>
+<tr><td>Software can start a request with no human</td>
+    <td class="n check">&#10003;</td><td class="n dash">&ndash;</td>
+    <td class="n dash">&ndash;</td></tr>
+<tr><td>Decision without a human in the loop for clear cases</td>
+    <td class="n check">&#10003;</td><td class="n dash">&ndash;</td>
+    <td class="n dash">&ndash;</td></tr>
+<tr><td>Cryptographic sender verification</td>
+    <td class="n check">&#10003;</td><td class="n">partial</td>
+    <td class="n">partial</td></tr>
+<tr><td>Zero-knowledge patient privacy proof</td>
+    <td class="n check">&#10003;</td><td class="n dash">&ndash;</td>
+    <td class="n dash">&ndash;</td></tr>
+</table>
+<div class="foot">Every competitor still requires a person to start the request.
+That is a category difference, not a feature gap.</div>
+"""))
+
+# 12 ------------------------------------------------------------- why now
+S.append(slide(
+    "TIMING",
+    """
+<h2>A Market a Regulation Is About to Create</h2>
+<div class="bars" style="margin-top:24px">
+  <div class="bar"><div class="h">Federal mandate</div>
+    <div class="s">CMS-0057-F requires FHIR-based prior-authorization APIs by
+    1 January 2027. Every payer has a hard deadline, and we are already built
+    against the standard.</div></div>
+  <div class="bar"><div class="h">AI inflection</div>
+    <div class="s">Agents now need a rail to initiate authorizations on a
+    patient's behalf. Pavo is that rail.</div></div>
+  <div class="bar"><div class="h">Scale already exists</div>
+    <div class="s">47 million payer-provider interactions a year still move
+    through portals and fax.</div></div>
+</div>
+<div class="foot">A compliance deadline every payer must meet is a distribution
+event, not just a regulation.</div>
+"""))
+
+# 13 ------------------------------------------------------------- revenue (NEW)
+S.append(slide(
+    "BUSINESS MODEL",
+    """
+<h2>How Pavo Makes Money</h2>
+<div class="cards" style="margin-top:14px">
+  <div class="card"><div class="p">$3.00</div>
+    <div class="d">per request, charged to the insurer</div></div>
+  <div class="card"><div class="p">$400</div>
+    <div class="d">per month, per medical practice</div></div>
+  <div class="card"><div class="p">$20,000</div>
+    <div class="d">per year, per insurer connection</div></div>
+</div>
+<table style="margin-top:16px">
+<tr><th style="width:46%">Source</th><th class="n">2026</th>
+    <th class="n">2027</th><th class="n">2028</th></tr>
+<tr><td>Medical practices served (average)</td>
+    <td class="n">55</td><td class="n">330</td><td class="n">1,400</td></tr>
+<tr><td>Requests processed</td>
+    <td class="n">171,600</td><td class="n">1,647,360</td><td class="n">8,736,000</td></tr>
+<tr><td>Fees per request</td>
+    <td class="n">$514,800</td><td class="n">$4,942,080</td><td class="n">$26,208,000</td></tr>
+<tr><td>Practice subscriptions</td>
+    <td class="n">$264,000</td><td class="n">$1,584,000</td><td class="n">$6,720,000</td></tr>
+<tr><td>Insurer connection fees</td>
+    <td class="n">$220,000</td><td class="n">$1,680,000</td><td class="n">$3,200,000</td></tr>
+<tr class="tot"><td>Total revenue</td>
+    <td class="n">$998,800</td><td class="n">$8,206,080</td><td class="n">$36,128,000</td></tr>
+</table>
+<div class="foot">The $3.00 fee is 85&ndash;92% below the $15&ndash;$40 an insurer
+spends handling a request by hand today, which is what makes the switch easy to
+justify.</div>
+"""))
+
+# 14 ------------------------------------------------------------- margin (NEW)
+S.append(slide(
+    "MARGIN",
+    """
+<h2>What It Costs, and What Is Left</h2>
+<div class="tiles t3" style="margin-top:22px">
+""" + tile("31%", "gross margin, 2026")
+    + tile("82%", "gross margin, 2027")
+    + tile("87%", "gross margin, 2028") + """
+</div>
+<div class="rule" style="margin-top:26px"></div>
+<div class="two">
+<div>
+  <h3>Servers are not the expense</h3>
+  <p>Processing one request costs about six hundredths of a cent, because the
+  deciding path uses no AI models at all.</p>
+</div>
+<div>
+  <h3>Clinical staff are</h3>
+  <p>Translating each insurer's published rules into the fixed rules the software
+  applies is the largest line in every year, and the reason margins improve with
+  scale rather than with technology.</p>
+</div>
+</div>
+<div class="foot">Year 1 is 31%, not break-even. Early customers need a great deal
+of hand-holding, and we would rather say so.</div>
+"""))
+
+# 15 ------------------------------------------------------------- unit econ (NEW)
+S.append(slide(
+    "UNIT ECONOMICS",
+    """
+<h2>Cost to Win a Customer, and What One Is Worth</h2>
+<p class="lede" style="margin-bottom:12px">Acquisition cost is what it costs in
+sales and marketing to sign one customer. Lifetime value is the profit that
+customer produces before they leave, stated over three years.</p>
+<table>
+<tr><th style="width:40%">Measure</th><th class="n">Practice</th>
+    <th class="n">Insurer</th><th class="n">Blended</th></tr>
+<tr><td>Cost to acquire one customer</td>
+    <td class="n">$6,000</td><td class="n">$22,000</td><td class="n">$6,699</td></tr>
+<tr><td>Value over three years</td>
+    <td class="n">$58,248</td><td class="n">$51,057</td><td class="n">$57,533</td></tr>
+<tr><td>Value per $1 spent acquiring</td>
+    <td class="n">$9.70</td><td class="n">$2.30</td><td class="n">$8.60</td></tr>
+<tr><td>Months to earn the cost back</td>
+    <td class="n">3.5</td><td class="n">15.2</td><td class="n">4.0</td></tr>
+</table>
+<div class="panel" style="margin-top:16px">Read the insurer column honestly. At
+$2.30 back per $1 spent and fifteen months to recover it, insurer contracts do not
+pay for themselves as a product. We fund them anyway, because signing one insurer
+makes Pavo available to every practice that already submits to it. It is a
+distribution channel, not a profit centre.</div>
+"""))
+
+# 16 ------------------------------------------------------------- the ask (NEW)
+CURVE = """
+<svg viewBox="0 0 320 150" style="width:100%;display:block">
+  <line x1="24" y1="78" x2="316" y2="78" stroke="#9C9797" stroke-width="1"/>
+  <text x="0" y="81" font-size="8" fill="#9C9797" font-family="Outfit">$0</text>
+  <polyline points="30,78 110,104 196,131 300,18"
+            fill="none" stroke="#1274C4" stroke-width="2.2"
+            stroke-linejoin="round" stroke-linecap="round"/>
+  <circle cx="196" cy="131" r="3.4" fill="#1274C4"/>
+  <text x="150" y="146" font-size="8.5" fill="#1F1E1E" font-family="Outfit"
+        font-weight="bold">-$5.58M, late 2027</text>
+  <text x="258" y="14" font-size="8.5" fill="#1F1E1E" font-family="Outfit"
+        font-weight="bold">+$5.65M</text>
+  <text x="30" y="92" font-size="8" fill="#9C9797" font-family="Outfit">2026</text>
+  <text x="188" y="92" font-size="8" fill="#9C9797" font-family="Outfit">2027</text>
+  <text x="286" y="92" font-size="8" fill="#9C9797" font-family="Outfit">2028</text>
+</svg>
+<div class="cap" style="margin-top:2px">Cumulative cash. The raise covers the
+trough with roughly twelve months of cushion past breaking even.</div>
+"""
+S.append(slide(
+    "THE ASK",
+    f"""
+<h2>We Are Asking For $8.0 Million</h2>
+<div class="two" style="grid-template-columns:1fr 1.05fr;margin-top:16px">
+<div>{CURVE}</div>
+<div>
+  <div class="bars">
+    <div class="bar"><div class="h">The clinical rule library</div>
+      <div class="s">Our largest cost and the real barrier to a competitor.</div></div>
+    <div class="bar"><div class="h">Security certification</div>
+      <div class="s">No insurer signs without it.</div></div>
+    <div class="bar"><div class="h">Closing the gaps we listed</div>
+      <div class="s">Provider registry, multi-party ceremony, rule library.</div></div>
+  </div>
+  <p style="font-size:9pt;margin-top:12px">It is not a shopping list. The three
+  largest spending lines across the plan, $7.46M of engineering, $5.67M of insurer
+  business development and $1.72M of clinical staff encoding coverage rules, come
+  to more than the raise on their own, and most of that is paid for out of revenue
+  as it arrives.</p>
+</div>
+</div>
+<div class="foot">If all four of our main assumptions are wrong at once, 2028
+revenue is $13.8 million rather than $36.1 million: a smaller company, but still a
+real one.</div>
+"""))
+
+HTML = ("<!doctype html><html><head><meta charset=\"utf-8\">"
+        "<title>Pavo Cloud Pitch Deck</title><style>" + CSS + "</style></head><body>"
+        + "\n".join(S) + "</body></html>")
+
+out = os.path.join(HERE, "deck.html")
+with open(out, "w", encoding="utf-8") as fh:
+    fh.write(HTML)
+print(f"wrote {out} ({len(HTML)//1024} KB, {len(S)} slides)")
