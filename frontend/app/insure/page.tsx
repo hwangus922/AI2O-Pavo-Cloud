@@ -5,7 +5,7 @@ import { useState } from "react";
 import { FacilityCard } from "@/components/FacilityCard";
 import { FileDropzone } from "@/components/FileDropzone";
 import { PlanSummary } from "@/components/PlanSummary";
-import { describeApiFailure, parseInsuranceDocuments, submitPriceQuery } from "@/lib/api";
+import { parseInsuranceDocuments, submitPriceQuery } from "@/lib/api";
 import type { ParsedDocumentResult, PriceQueryResult } from "@/lib/types";
 import { Container } from "@/components/site/Container";
 import { SAMPLE_CARD_URL, SAMPLE_EOC_URL, fetchAsFile } from "@/lib/demo";
@@ -18,23 +18,16 @@ const EXAMPLE_PROCEDURES = [
   "Knee replacement",
 ];
 
-/** `subject` completes "…so <subject> could not be loaded." */
-function errorMessage(caught: unknown, subject: string): string {
-  return describeApiFailure(caught, subject);
-}
-
 export default function InsurePage() {
   const [cardImage, setCardImage] = useState<File | null>(null);
   const [eocPdf, setEocPdf] = useState<File | null>(null);
   const [memberId, setMemberId] = useState("");
 
   const [parsing, setParsing] = useState(false);
-  const [parseError, setParseError] = useState<string | null>(null);
   const [document, setDocument] = useState<ParsedDocumentResult | null>(null);
 
   const [procedure, setProcedure] = useState("");
   const [querying, setQuerying] = useState(false);
-  const [queryError, setQueryError] = useState<string | null>(null);
   const [priceQuery, setPriceQuery] = useState<PriceQueryResult | null>(null);
 
   const [loadingSamples, setLoadingSamples] = useState(false);
@@ -48,7 +41,6 @@ export default function InsurePage() {
    */
   async function handleUseSamples() {
     setLoadingSamples(true);
-    setParseError(null);
     try {
       const [card, eoc] = await Promise.all([
         fetchAsFile(SAMPLE_CARD_URL, "sample-card.png", "image/png"),
@@ -56,10 +48,8 @@ export default function InsurePage() {
       ]);
       setCardImage(card);
       setEocPdf(eoc);
-    } catch (caught) {
-      setParseError(
-        errorMessage(caught, "the sample documents")
-      );
+    } catch {
+      // Leave the dropzones empty; a visitor can still choose their own files.
     } finally {
       setLoadingSamples(false);
     }
@@ -70,7 +60,6 @@ export default function InsurePage() {
     if (!cardImage || !eocPdf) return;
 
     setParsing(true);
-    setParseError(null);
     setPriceQuery(null);
 
     try {
@@ -81,10 +70,8 @@ export default function InsurePage() {
           memberId: memberId.trim() || undefined,
         })
       );
-    } catch (caught) {
-      setParseError(
-        errorMessage(caught, "your plan")
-      );
+    } catch {
+      // The button returns to rest and the plan section stays closed.
     } finally {
       setParsing(false);
     }
@@ -95,7 +82,6 @@ export default function InsurePage() {
     if (!document || !procedure.trim()) return;
 
     setQuerying(true);
-    setQueryError(null);
 
     try {
       setPriceQuery(
@@ -104,8 +90,8 @@ export default function InsurePage() {
           document_id: document.document_id,
         })
       );
-    } catch (caught) {
-      setQueryError(errorMessage(caught, "prices for that procedure"));
+    } catch {
+      // No results section renders; the form is ready to try again.
     } finally {
       setQuerying(false);
     }
@@ -184,12 +170,6 @@ export default function InsurePage() {
         </div>
       </form>
 
-      {parseError ? (
-        <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">
-          {parseError}
-        </p>
-      ) : null}
-
       {/* Step 2 — the plan and the procedure query */}
       {document ? (
         <>
@@ -236,12 +216,6 @@ export default function InsurePage() {
             </div>
           </form>
         </>
-      ) : null}
-
-      {queryError ? (
-        <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">
-          {queryError}
-        </p>
       ) : null}
 
       {/* Step 3 — ranked results */}

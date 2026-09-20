@@ -7,20 +7,20 @@ import {
 } from "@clerk/nextjs";
 
 import { Container } from "./Container";
+import { Logo } from "./Logo";
 import { APP_LINKS, PRODUCT_LINKS } from "./nav-links";
 
 const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
+/**
+ * Sign-in, when there is auth to sign into.
+ *
+ * Without a Clerk key there is nothing to render here — the header simply
+ * ends at the last nav link. ClerkProvider is only mounted when the key is
+ * present, so these components must not render without one.
+ */
 function AuthSlot() {
-  // ClerkProvider is only mounted when a key is present, so these components
-  // must not render without one.
-  if (!clerkConfigured) {
-    return (
-      <span className="rounded-md bg-navy-800 px-2 py-1 text-xs font-medium text-navy-200">
-        Auth not configured
-      </span>
-    );
-  }
+  if (!clerkConfigured) return null;
 
   return (
     <>
@@ -38,17 +38,6 @@ function AuthSlot() {
   );
 }
 
-function Mark() {
-  return (
-    <span className="flex items-center gap-2">
-      <span className="inline-block h-6 w-6 rounded bg-electric-500" aria-hidden />
-      <span className="text-base font-semibold tracking-tight text-white">
-        Pavo Cloud
-      </span>
-    </span>
-  );
-}
-
 const linkClass = "text-navy-200 transition hover:text-white";
 
 export function Nav() {
@@ -62,7 +51,7 @@ export function Nav() {
       <details className="md:hidden">
         <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
           <Container className="flex items-center justify-between gap-3 py-3">
-            <Mark />
+            <Logo />
             <span className="rounded-md border border-navy-700 px-3 py-1.5 text-sm text-navy-200">
               Menu
             </span>
@@ -105,7 +94,7 @@ export function Nav() {
       <div className="hidden md:block">
         <Container className="flex items-center justify-between gap-3 py-4">
           <Link href="/">
-            <Mark />
+            <Logo />
           </Link>
           <nav className="flex items-center gap-6 text-sm">
             {PRODUCT_LINKS.map((link) => (

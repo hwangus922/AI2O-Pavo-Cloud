@@ -1,4 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Pavo Cloud">
-  <rect width="64" height="64" rx="14" fill="#0A1B33"/>
-  <rect x="14" y="14" width="36" height="36" rx="9" fill="#2F80FF"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Pavo Cloud">
+  <rect width="32" height="32" rx="7.5" fill="#0A1B33"/>
+  <!-- The same fan as components/site/Logo.tsx, sized to sit inside the tile.
+       The mark's own bounding box centres near (16, 20), so it is re-centred
+       on the tile rather than simply scaled in place. -->
+  <g transform="translate(16 18.2) scale(0.74) translate(-16 -20)">
+    <g transform="translate(16 31) scale(0.87) translate(-16 -31)">
+      <g transform="translate(16 31) rotate(-47) scale(0.75) translate(-16 -31)">
+        <path d="M16 31C14.4 25 12.4 18 12.4 11.5a3.6 3.6 0 0 1 7.2 0c0 6.5-1.6 13.5-3.6 19.5Z" fill="#0B5CD6"/>
+        <circle cx="16" cy="11.2" r="1.45" fill="#0A1B33"/>
+      </g>
+      <g transform="translate(16 31) rotate(47) scale(0.75) translate(-16 -31)">
+        <path d="M16 31C14.4 25 12.4 18 12.4 11.5a3.6 3.6 0 0 1 7.2 0c0 6.5-1.6 13.5-3.6 19.5Z" fill="#0B5CD6"/>
+        <circle cx="16" cy="11.2" r="1.45" fill="#0A1B33"/>
+      </g>
+      <g transform="translate(16 31) rotate(-25) scale(0.88) translate(-16 -31)">
+        <path d="M16 31C14.4 25 12.4 18 12.4 11.5a3.6 3.6 0 0 1 7.2 0c0 6.5-1.6 13.5-3.6 19.5Z" fill="#2F80FF"/>
+        <circle cx="16" cy="11.2" r="1.45" fill="#0A1B33"/>
+      </g>
+      <g transform="translate(16 31) rotate(25) scale(0.88) translate(-16 -31)">
+        <path d="M16 31C14.4 25 12.4 18 12.4 11.5a3.6 3.6 0 0 1 7.2 0c0 6.5-1.6 13.5-3.6 19.5Z" fill="#2F80FF"/>
+        <circle cx="16" cy="11.2" r="1.45" fill="#0A1B33"/>
+      </g>
+      <g>
+        <path d="M16 31C14.4 25 12.4 18 12.4 11.5a3.6 3.6 0 0 1 7.2 0c0 6.5-1.6 13.5-3.6 19.5Z" fill="#4D9BFF"/>
+        <circle cx="16" cy="11.2" r="1.45" fill="#0A1B33"/>
+      </g>
+    </g>
+  </g>
 </svg>
