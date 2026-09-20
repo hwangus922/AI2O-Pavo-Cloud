@@ -111,10 +111,10 @@ BODY = f"""
 <p class="cap">Table 2. Measured results.</p>
 <table>
   <tr><th>What was measured</th><th class="n" style="width:26%">Result</th></tr>
-  <tr><td>A complete authorization decision, start to finish</td><td class="n">89.2 milliseconds</td></tr>
-  <tr><td>One signature, of the two every decision needs</td><td class="n">42.1 milliseconds</td></tr>
+  <tr><td>A complete authorization decision, start to finish</td><td class="n">88.6 milliseconds</td></tr>
+  <tr><td>One signature, of the two every decision needs</td><td class="n">42.0 milliseconds</td></tr>
   <tr><td>Checking a signature</td><td class="n">0.05 milliseconds</td></tr>
-  <tr><td>Creating a privacy proof about a patient</td><td class="n">402 milliseconds</td></tr>
+  <tr><td>Creating a privacy proof about a patient</td><td class="n">401 milliseconds</td></tr>
   <tr><td>The full six-step demonstration, front to back</td><td class="n">11.0 seconds</td></tr>
   <tr><td>Automated tests passing, out of 148</td><td class="n">148</td></tr>
 </table>

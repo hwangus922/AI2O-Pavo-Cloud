@@ -25,13 +25,13 @@ report.** The figures are given to you in section 3 below; use those exact value
    revenue and no deployment. Its traction is *build* traction: working software, a test
    suite, measured performance. If you catch yourself writing "3 design partners" or
    "$40k in signed LOIs", stop; that is fabrication and it will lose the round.
-2. **Do not round numbers up.** 81.8 milliseconds is not "under 50ms". $998,800 is not
+2. **Do not round numbers up.** 88.6 milliseconds is not "under 50ms". $998,800 is not
    "$1M+" (you may write "$1.0M" where space demands, since the report does).
-3. **The speed claim must be stated carefully.** The *agents* reach a decision in 81.8
+3. **The speed claim must be stated carefully.** The *agents* reach a decision in 88.6
    milliseconds. The *end-to-end* round trip is under five minutes once the hospital's
    record system and the insurer's network are included. Round 1 said "3 to 4 minutes"
    without that distinction; the report corrects it. Every speed claim in this deck must
-   carry the distinction. Never imply a patient gets an answer in 82 milliseconds.
+   carry the distinction. Never imply a patient gets an answer in 89 milliseconds.
 4. **Year 1 gross margin is 31%, not break-even.** Round 1 implied the company breaks even
    per sale in year one. It does not. Say 31% and say why (early customers need heavy
    hand-holding). The 87% figure is year 3.
@@ -56,25 +56,25 @@ report.** The figures are given to you in section 3 below; use those exact value
 
 Copy these exactly. Do not recompute, do not restate in other units.
 
-### Measured system performance (measured 19 Sept 2026 against committed code)
+### Measured system performance (measured 20 Sept 2026 against committed code)
 | Metric | Value |
 |---|---|
-| Complete authorization decision, start to finish | 81.8 milliseconds |
-| One RSA-2048 signature, of the two every decision needs | 37.9 milliseconds |
+| Complete authorization decision, start to finish | 88.6 milliseconds |
+| One RSA-2048 signature, of the two every decision needs | 42.0 milliseconds |
 | Checking a signature | 0.05 milliseconds |
-| Creating one zero-knowledge privacy proof | 365 milliseconds |
-| Full six-step guided demonstration | 11.1 seconds |
+| Creating one zero-knowledge privacy proof | 401 milliseconds |
+| Full six-step guided demonstration | 11.0 seconds |
 | Automated tests passing | 148 of 148 |
 
-### Build metrics (repository `hwangus922/AI2O-Pavo-Cloud`, through commit `cd0891a`)
+### Build metrics (repository `hwangus922/AI2O-Pavo-Cloud`, through commit `0a24def`)
 | Metric | Value |
 |---|---|
-| Lines of code | 22,459 insertions, 646 deletions |
-| File changes | 238 |
-| Commits | 16, in 9 reviewed batches |
+| Lines added | 22,739 insertions, 1,215 deletions (15,871 hand-written) |
+| File changes | 260 |
+| Commits | 18, in 11 reviewed batches |
 | Build window | 7–19 September 2026 (13 days) |
 | Phases complete | 4 of 4 |
-| Largest phase | Phase 1, 9,429 lines |
+| Largest phase | Phase 1, 9,896 lines by git; by hand-written lines Phase 4, 3,550 |
 | Coverage rules encoded | 5 |
 
 ### Commit history (use verbatim if you show a terminal block)
@@ -155,7 +155,7 @@ append-only audit log, five time-stamped entries per request.
 **Copy**
 - Wordmark "Pavo Cloud" 120px bold.
 - Subhead: "Autonomous Prior Authorization"
-- One line: "The insurer's answer in 81.8 milliseconds. The whole round trip in under five minutes, not three days."
+- One line: "The insurer's answer in 88.6 milliseconds. The whole round trip in under five minutes, not three days."
 - Rule, then team line: "Dhanvanth Lakshman, CFO · Viraj Gadeela, CTO · Harry Wang, CEO"
 - Bottom-right badge: "AI for Business Track · Round 2"
 **Visual** None beyond a single 4px blue rule under the wordmark. Resist the urge to
@@ -200,7 +200,7 @@ routine cases, so clinicians spend their time on the hard ones."
 | Quadrant | Heading | Body |
 |---|---|---|
 | 1 | Submitted automatically | Clinical documentation leaves the EHR directly. No staff touchpoint, no portal login. |
-| 2 | Clear cases close in milliseconds | The full decision path takes 81.8ms, almost all of it the two signatures it writes. |
+| 2 | Clear cases close in milliseconds | The full decision path takes 88.6ms, almost all of it the two signatures it writes. |
 | 3 | Unclear cases escalate, assembled | A human reviewer opens a file that is already complete: records, rule, signature check, confidence score. |
 | 4 | The doctor stays in charge | Medical necessity remains a physician's call. Only the administrative burden disappears. |
 **Visual** One small line icon per quadrant, 64px, stroke `#1274C4`, 2px: an outbound
@@ -229,8 +229,7 @@ boxes: **Approved** (written straight back into the chart, no person involved) �
 **Unclear** (a human reviewer gets the assembled file) · **Denied** (appealed
 automatically or sent to a person; *the software cannot issue a final denial by itself*).
 Set the three outcome titles in `#1274C4` bold.
-**Footer strip** "Typical time from step 1 to step 7: **81.8 milliseconds**, measured over
-twenty consecutive runs."
+**Footer strip** "Typical time from step 1 to step 7: **88.6 milliseconds**, measured over two hundred consecutive runs."
 
 ### Slide 6: Current Traction  ← NEW, REQUIRED SLIDE
 **This slide is the one the round explicitly asks for. It is about proof of progress, not
@@ -244,13 +243,13 @@ software: every number on this slide came off the committed code, not a projecti
 **Left panel**: a 2×3 grid of six stat tiles, numeral 72px blue bold, label 20px grey:
 | 4 of 4 | phases built and running |
 | 148 | automated tests, all passing |
-| 22,459 | lines of code, 238 files |
-| 16 | commits in 9 reviewed batches |
-| 81.8 ms | end-to-end decision |
+| 22,739 | lines added, 260 files |
+| 18 | commits in 11 reviewed batches |
+| 88.6 ms | end-to-end decision |
 | 13 days | from first commit to working system |
 **Right panel**: the commit history in a mono terminal block (grey `#F4F4F4` fill, 1px
-`#CCCCCC` border, 16px mono), using the ten commits verbatim from section 3. Caption under
-it in 16px italic: "Reviewed and merged in nine batches, 7-19 September 2026."
+`#CCCCCC` border, 16px mono), using the twelve commits verbatim from section 3. Caption under
+it in 16px italic: "Reviewed and merged in eleven batches, 7-19 September 2026."
 **Bottom strip across full width**: three short "what this proves" items separated by
 vertical rules: "A tampered message is refused" · "An unmatched request goes to a human,
 never a guess" · "Every decision names the rule that produced it", each followed by
@@ -432,8 +431,7 @@ never as a budget that sums to $8M):
 months. We are asking for the capital to be the default before the market consolidates."
 
 ### Appendix A: Measured performance
-The five-row performance table from section 3, plus the methodology note: "measured over
-twenty consecutive runs against the committed code on 13 September 2026."
+The six-row performance table from section 3, plus the methodology note: "measured over two hundred consecutive runs against the committed code on 20 September 2026."
 
 ### Appendix B: Full revenue build
 The seven-row revenue table from section 3.
@@ -456,7 +454,7 @@ automatic action and who gets involved.
 
 ## 7. Self-check before you hand it back
 
-- [ ] Every speed claim distinguishes agent latency (81.8ms) from end-to-end (<5 min)
+- [ ] Every speed claim distinguishes agent latency (88.6ms) from end-to-end (<5 min)
 - [ ] Year 1 margin stated as 31%, never as break-even
 - [ ] No fabricated customers, pilots, LOIs or revenue anywhere
 - [ ] No use-of-funds figure or chart sums to more than $8.0M
