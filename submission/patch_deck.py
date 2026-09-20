@@ -155,8 +155,10 @@ CARD_FILL = (0xD5 / 255, 0xDC / 255, 0xF6 / 255)   # #D5DCF6
 CARD_EDGE = (0xBB / 255, 0xC2 / 255, 0xDC / 255)   # #BBC2DC
 
 # the deck's own card grid, lifted off slide 6
-COL3 = ((50.0, 327.2), (341.6, 618.8), (633.2, 910.4))
-COL2 = ((50.0, 473.4), (487.1, 910.4))
+COL3 = ((50.04, 327.24), (341.64, 618.84), (633.24, 910.44))
+COL2 = ((50.04, 473.40), (487.08, 910.44))
+ROW1 = (192.65, 322.28)     # slide 6's upper card row, to the hundredth
+ROW2 = (336.68, 443.27)     # and its lower one
 
 
 def put(page, text, x, baseline, size, f, colour):
@@ -186,18 +188,48 @@ def page_shell(title_text, chip_text):
     page = doc.new_page(width=W, height=H)
     page.draw_rect(page.rect, color=None, fill=BG)
     w = REG_F.text_length(chip_text, 10.8)
-    page.draw_rect(pymupdf.Rect(49.7, 97.2, 49.7 + w + 17.1, 118.8),
-                   color=None, fill=CARD_FILL)
+    chip_pill(page, 49.68, 97.22, 49.68 + w + 17.08, 118.83)
     put(page, chip_text, 58.3, 110.8, 10.8, REG_F, INK)
     put(page, title_text, 49.8, 159.1, 36.8, HEAVY_F, HEAD)
     return page
 
 
+CARD_R = 5.97      # slide 6's corner radius, read off its bezier control points
+KAPPA = 0.5523     # and the circle approximation it uses
+
+
+def rounded(page, x0, y0, x1, y1, r=CARD_R, edge=True):
+    """Slide 6's card outline: straight edges, r-radius corners, same kappa."""
+    k = r * KAPPA
+    sh = page.new_shape()
+    sh.draw_line(pymupdf.Point(x0 + r, y0), pymupdf.Point(x1 - r, y0))
+    sh.draw_bezier(pymupdf.Point(x1 - r, y0), pymupdf.Point(x1 - r + k, y0),
+                   pymupdf.Point(x1, y0 + r - k), pymupdf.Point(x1, y0 + r))
+    sh.draw_line(pymupdf.Point(x1, y0 + r), pymupdf.Point(x1, y1 - r))
+    sh.draw_bezier(pymupdf.Point(x1, y1 - r), pymupdf.Point(x1, y1 - r + k),
+                   pymupdf.Point(x1 - r + k, y1), pymupdf.Point(x1 - r, y1))
+    sh.draw_line(pymupdf.Point(x1 - r, y1), pymupdf.Point(x0 + r, y1))
+    sh.draw_bezier(pymupdf.Point(x0 + r, y1), pymupdf.Point(x0 + r - k, y1),
+                   pymupdf.Point(x0, y1 - r + k), pymupdf.Point(x0, y1 - r))
+    sh.draw_line(pymupdf.Point(x0, y1 - r), pymupdf.Point(x0, y0 + r))
+    sh.draw_bezier(pymupdf.Point(x0, y0 + r), pymupdf.Point(x0, y0 + r - k),
+                   pymupdf.Point(x0 + r - k, y0), pymupdf.Point(x0 + r, y0))
+    if edge:
+        sh.finish(color=CARD_EDGE, fill=CARD_FILL, width=0.5, closePath=True)
+    else:
+        sh.finish(color=None, fill=CARD_FILL, closePath=True)
+    sh.commit()
+
+
+def chip_pill(page, x0, y0, x1, y1):
+    """The label pill: same shape, 4.78pt corners, fill only, no edge."""
+    rounded(page, x0, y0, x1, y1, r=4.78, edge=False)
+
+
 def card(page, span, y0, y1, big, label, label_w=248):
-    page.draw_rect(pymupdf.Rect(span[0], y0, span[1], y1),
-                   color=CARD_EDGE, fill=CARD_FILL, width=0.5)
-    put(page, big, span[0] + 14.5, y0 + 32.1, 18.7, HEAVY_F, INK)
-    lines(page, label, span[0] + 14.5, y0 + 63.4, 13.7, REG_F, INK, label_w, 22.3)
+    rounded(page, span[0], y0, span[1], y1)
+    put(page, big, span[0] + 14.46, y0 + 32.05, 18.7, HEAVY_F, INK)
+    lines(page, label, span[0] + 14.46, y0 + 63.35, 13.7, REG_F, INK, label_w, 22.3)
 
 
 # ---- how Pavo makes money: slide 6's card grid, three over two -------------
@@ -207,20 +239,21 @@ for span, big, lab in zip(COL3,
                           ("per request, to the insurer",
                            "per practice, per month",
                            "per insurer, per year")):
-    card(p, span, 192.6, 292.6, big, lab)
+    card(p, span, *ROW1, big, lab)
 for span, big, lab in zip(COL2,
                           ("$36.1M", "87%"),
                           ("2028 revenue, from $1.0M in 2026",
                            "gross margin by 2028, 31% in year one")):
-    card(p, span, 336.7, 443.3, big, lab, label_w=394)
+    card(p, span, *ROW2, big, lab, label_w=394)
 
 # ---- what a customer is worth: slide 2's centred stat grid ------------------
 p = page_shell("What a Customer Is Worth", "UNIT ECONOMICS")
+R1, R2 = 159.1 + 82.5, 159.1 + 82.5 + 123.7
 for cx, base, big, lab in (
-        (260.6, 244.9, "$6,699", "to win one customer"),
-        (700.0, 244.9, "$57,533", "back over three years"),
-        (260.6, 368.6, "$8.60", "returned per $1 spent"),
-        (700.0, 368.6, "4 months", "to earn it back")):
+        (260.6, R1, "$6,699", "to win one customer"),
+        (700.0, R1, "$57,533", "back over three years"),
+        (260.6, R2, "$8.60", "returned per $1 spent"),
+        (700.0, R2, "4 months", "to earn it back")):
     centred(p, big, cx, base, 46.9, HEAVY_F, INK)
     centred(p, lab, cx, base + 47.4, 18.7, HEAVY_F, INK)
 
@@ -231,12 +264,12 @@ for span, big, lab in zip(COL3,
                           ("clinical staff encoding each insurer's criteria",
                            "no insurer signs without it",
                            "provider registry, ceremony, rule library")):
-    card(p, span, 192.6, 292.6, big, lab)
+    card(p, span, *ROW1, big, lab)
 for span, big, lab in zip(COL2,
                           ("$5.58M", "12 months"),
                           ("deepest point, late 2027",
                            "of cushion past breaking even")):
-    card(p, span, 336.7, 443.3, big, lab, label_w=394)
+    card(p, span, *ROW2, big, lab, label_w=394)
 
 doc.save(OUT, garbage=3, deflate=True)
 print(f"wrote {OUT} ({doc.page_count} slides, {os.path.getsize(OUT)//1024} KB)")
