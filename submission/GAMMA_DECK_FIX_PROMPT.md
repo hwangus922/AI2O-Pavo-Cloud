@@ -1,9 +1,9 @@
 Rebuild my existing 10-slide Pavo Cloud pitch deck into a 16-slide deck. Keep every
-visual decision from the current deck exactly as it is — I am fixing content, not
+visual decision from the current deck exactly as it is. I am fixing content, not
 redesigning. Six slides need specific corrections, four need source lines, and six
 new slides need to be built in the same style.
 
-## DESIGN SYSTEM — match the existing slides exactly, do not invent a new look
+## DESIGN SYSTEM: match the existing slides exactly, do not invent a new look
 
 Colours, used verbatim:
 - Page background: #FFFAFA (warm off-white, never pure white, never a gradient)
@@ -17,7 +17,7 @@ Type: one geometric sans throughout (Poppins, or the closest Gamma has). Slide t
 bold and large. Section label chips in ALL CAPS, ~11px, letter-spaced, sitting in a
 #D6DCF4 pill. Body copy regular weight, generous line height.
 
-Layout: left-aligned, never centred. Very generous whitespace — the current deck breathes
+Layout: left-aligned, never centred. Very generous whitespace, because the current deck breathes
 and that is the point. One idea per slide. Thin horizontal rule to separate a title block
 from content where the current deck does that. No drop shadows, no gradients, no stock
 photography, no 3D icons. Flat line icons only, in #1274C4, if any.
@@ -32,7 +32,7 @@ Writing rules, applied to every slide:
 - Any statistic about the outside world carries a visible source line in 12px #9C9797
   under the slide. If there is no source, cut the statistic.
 
-## THE NUMBER SHEET — use these exact values, do not recompute or restate in other units
+## THE NUMBER SHEET: use these exact values, do not recompute or restate in other units
 
 Measured on the committed code at commit 0a24def, 20 September 2026:
 | Complete authorization decision, start to finish | 88.6 milliseconds (median, n=200) |
@@ -70,7 +70,7 @@ Unit economics at 2028 rates:
 The raise: $8.0 million. Losses of $2.37M in 2026 and $3.21M in 2027, then $11.23M of
 profit in 2028. Deepest point is $5.58M of cumulative losses, in late 2027.
 
-## PART 1 — CORRECTIONS TO EXISTING SLIDES
+## PART 1: CORRECTIONS TO EXISTING SLIDES
 
 **Slide 1, Title.** Change the subtitle line. It currently reads "The insurer's answer in
 88.6 milliseconds. The whole round trip in under five minutes, not three days." Replace
@@ -120,17 +120,17 @@ sourced becomes a grey dot, not a claim.
 lines: CMS-0057-F for the January 1 2027 FHIR prior-authorization API mandate, and the
 CAQH Index for the 47M payer-provider interactions figure.
 
-## PART 2 — SIX NEW SLIDES, BUILT IN THE SAME STYLE
+## PART 2: SIX NEW SLIDES, BUILT IN THE SAME STYLE
 
 **New slide, place after System Architecture. Title: "What We Actually Built".**
 Label chip: EVIDENCE. Left two thirds is a 2x3 grid of stat tiles, numeral 72px bold in
 #1274C4, label 20px #3A3535 beneath:
-  4 of 4 — phases built and running
-  148 — automated tests, all passing
-  18 — commits in 11 reviewed batches
-  22,739 — lines added across 260 files
-  88.6 ms — end-to-end decision
-  13 days — from first commit to working system
+  4 of 4 / phases built and running
+  148 / automated tests, all passing
+  18 / commits in 11 reviewed batches
+  22,739 / lines added across 260 files
+  88.6 ms / end-to-end decision
+  13 days / from first commit to working system
 Right third is a monospace terminal block, #F4F4F4 fill with a 1px #CCCCCC border, 14px
 mono, showing the last six commit subjects. Caption under it, 14px italic #3A3535:
 "Reviewed and merged in eleven batches, 7 to 19 September 2026." Add one line across the
@@ -197,7 +197,7 @@ Bottom line in 14px #3A3535: "If all four of our main assumptions are wrong at o
 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real
 one."
 
-## PART 3 — FINAL SLIDE ORDER
+## PART 3: FINAL SLIDE ORDER
 
 1. Pavo Cloud (title, corrected)
 2. Prior Authorization Is Broken (sourced)
