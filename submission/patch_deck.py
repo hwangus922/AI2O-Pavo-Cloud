@@ -246,30 +246,29 @@ for span, big, lab in zip(COL2,
                            "gross margin by 2028, 31% in year one")):
     card(p, span, *ROW2, big, lab, label_w=394)
 
-# ---- what a customer is worth: slide 2's centred stat grid ------------------
-p = page_shell("What a Customer Is Worth", "UNIT ECONOMICS")
-R1, R2 = 159.1 + 82.5, 159.1 + 82.5 + 123.7
-for cx, base, big, lab in (
-        (260.6, R1, "$6,699", "to win one customer"),
-        (700.0, R1, "$57,533", "back over three years"),
-        (260.6, R2, "$8.60", "returned per $1 spent"),
-        (700.0, R2, "4 months", "to earn it back")):
-    centred(p, big, cx, base, 46.9, HEAVY_F, INK)
-    centred(p, lab, cx, base + 47.4, 18.7, HEAVY_F, INK)
-
-# ---- the ask: card grid again, three over two ------------------------------
-p = page_shell("We Are Asking For $8.0 Million", "THE ASK")
-for span, big, lab in zip(COL3,
-                          ("Rule library", "Certification", "The known gaps"),
-                          ("clinical staff encoding each insurer's criteria",
-                           "no insurer signs without it",
-                           "provider registry, ceremony, rule library")):
-    card(p, span, *ROW1, big, lab)
-for span, big, lab in zip(COL2,
-                          ("$5.58M", "12 months"),
-                          ("deepest point, late 2027",
-                           "of cushion past breaking even")):
-    card(p, span, *ROW2, big, lab, label_w=394)
+# ---- the system running: the demo the guide requires, and the closing slide -
+# "You cannot just talk about the AI; you must show it." The two screenshots sit
+# in exactly the band slide 6's cards occupy, 192.65 to 443.27, and carry the
+# same 0.5pt #BBC2DC edge the cards do.
+p = page_shell("The System Running", "LIVE SOFTWARE")
+SHOTS = (("assets/demo_complete_print.jpg", 950 / 609),
+         ("assets/dashboard_print.jpg", 950 / 671))
+GAP, LEFT, RIGHT = 14.4, 50.04, 910.44
+avail = RIGHT - LEFT - GAP
+h = avail / (SHOTS[0][1] + SHOTS[1][1])
+x = LEFT
+for src, aspect in SHOTS:
+    w = h * aspect
+    r = pymupdf.Rect(x, 192.65, x + w, 192.65 + h)
+    p.insert_image(r, filename=os.path.join(HERE, src))
+    p.draw_rect(r, color=CARD_EDGE, fill=None, width=0.5)
+    x += w + GAP
+cap_y = 192.65 + h + 24
+put(p, "Left: six steps, order through price, unattended, in 11.0 seconds. "
+       "Right: every row carries the rule that produced it.",
+    LEFT, cap_y, 13.7, REG_F, INK)
+put(p, "Every number in this deck came off this build.",
+    LEFT, cap_y + 23.5, 13.7, HEAVY_F, HEAD)
 
 doc.save(OUT, garbage=3, deflate=True)
 print(f"wrote {OUT} ({doc.page_count} slides, {os.path.getsize(OUT)//1024} KB)")
