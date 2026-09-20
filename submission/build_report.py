@@ -59,7 +59,7 @@ CSS = """
   figure img { width: 74%; display: block; border: 1px solid #bbb; }
   .fcap { font-style: italic; font-size: 9.5pt; margin: 3px 0 6px; text-align: left; line-height: 1.24;
           page-break-inside: avoid; page-break-before: avoid; }
-  .figrow { display: grid; width: 92%; grid-template-columns: 47.6fr 52.4fr; gap: 5px 14px;
+  .figrow { display: grid; width: 92%; grid-template-columns: 52.4fr 47.6fr; gap: 5px 14px;
             grid-template-rows: auto auto; align-items: start;
             page-break-inside: avoid; margin: 5px auto 3px; }
   .figrow img { width: 100%; display: block; border: 1px solid #bbb; min-width: 0; }
@@ -102,20 +102,20 @@ BODY = f"""
   <tr><td>Phase 2</td><td>Insure: shows a patient what a procedure will actually cost them</td><td>Complete</td></tr>
   <tr><td>Phase 3</td><td>Identity and appeals: agents prove who they are, and denials are appealed automatically</td><td>Complete</td></tr>
   <tr><td>Phase 4</td><td>Privacy proofs: show a patient qualifies without sending their medical details</td><td>Complete</td></tr>
-  <tr><td>Since</td><td>A public website, a deployable build, a second AI provider, and a deployment health check</td><td>Complete</td></tr>
+  <tr><td>Since</td><td>A public website, a deployable build, a second AI provider, and an interface pass for public release</td><td>Complete</td></tr>
 </table>
 
 <h3>2.2 What the System Does, Measured</h3>
-<p>Round 1 promised a decision in under five minutes. The software turned out to be a lot faster, because the slow part was never the thinking: it was the paperwork around it. Almost all of the time that remains is cryptography rather than deciding: each authorization signs two messages, the request and the response, and one signature costs about 38 milliseconds. Checking a signature costs a twentieth of a millisecond. A more modern signature scheme would cut the decision into single figures. We have not switched, because 82 milliseconds is already far below anything a person notices.</p>
+<p>Round 1 promised a decision in under five minutes. The software turned out to be a lot faster, because the slow part was never the thinking: it was the paperwork around it. Almost all of the time that remains is cryptography rather than deciding: each authorization signs two messages, the request and the response, and one signature costs about 42 milliseconds. Checking a signature costs a twentieth of a millisecond. A more modern signature scheme would cut the decision into single figures. We have not switched, because 89 milliseconds is already far below anything a person notices.</p>
 
 <p class="cap">Table 2. Measured results.</p>
 <table>
   <tr><th>What was measured</th><th class="n" style="width:26%">Result</th></tr>
-  <tr><td>A complete authorization decision, start to finish</td><td class="n">81.8 milliseconds</td></tr>
-  <tr><td>One signature, of the two every decision needs</td><td class="n">37.9 milliseconds</td></tr>
+  <tr><td>A complete authorization decision, start to finish</td><td class="n">89.2 milliseconds</td></tr>
+  <tr><td>One signature, of the two every decision needs</td><td class="n">42.1 milliseconds</td></tr>
   <tr><td>Checking a signature</td><td class="n">0.05 milliseconds</td></tr>
-  <tr><td>Creating a privacy proof about a patient</td><td class="n">365 milliseconds</td></tr>
-  <tr><td>The full six-step demonstration, front to back</td><td class="n">11.1 seconds</td></tr>
+  <tr><td>Creating a privacy proof about a patient</td><td class="n">402 milliseconds</td></tr>
+  <tr><td>The full six-step demonstration, front to back</td><td class="n">11.0 seconds</td></tr>
   <tr><td>Automated tests passing, out of 148</td><td class="n">148</td></tr>
 </table>
 
@@ -173,14 +173,16 @@ BODY = f"""
 <h2>4. The Build Log</h2>
 
 <h3>4.1 What Was Committed, and When</h3>
-<p>The code lives in a repository called <em>hwangus922/AI2O-Pavo-Cloud</em>. Work was done in nine batches: one per phase, a round of fixes, and four more since Round 2 opened. Each was reviewed before being merged. Together they come to 22,459 lines of code across 238 file changes.</p>
+<p>The code lives in a repository called <em>hwangus922/AI2O-Pavo-Cloud</em>. Work was done in eleven batches: one per phase, a round of fixes, and six more since Round 2 opened. Each was reviewed before being merged. Together they come to 22,739 lines added across 260 file changes, 15,871 of them hand-written and the rest a dependency lockfile.</p>
 
-<pre>$ git log --first-parent --date=short --pretty="%h %ad  %s" cd0891a
+<pre>$ git log --first-parent --date=short --pretty="%h %ad  %s" 0a24def
 
+  0a24def 2026-09-19  Document the setting that keeps the site private (#11)
+  bb02bc4 2026-09-19  Give the site a real mark and take every error surface off it (#12)
   cd0891a 2026-09-19  Make a broken or stale deployment say so (#10)
-  ee9ed87 2026-09-18  Fix the broken request detail page (#9)
+  ee9ed87 2026-09-18  Fix the broken request detail page, and make every outcome reachable (#9)
   84c4ca5 2026-09-18  Turn the demo app into a full website (#8)
-  8b23760 2026-09-18  Make the demo deployable to a public URL (#6)
+  8b23760 2026-09-18  Make the demo deployable to a public URL, and support DeepSeek (#6)
   a13f6cb 2026-09-12  Fix the three failures that break a deployed demo (#5)
   abc1b5c 2026-09-09  Phase 4: demo flow, audit UI, and a real ZK proof (#4)
   99bbb96 2026-09-08  Phase 3: autonomous appeals and cryptographic identity (#3)
@@ -188,26 +190,24 @@ BODY = f"""
   e48ec54 2026-09-07  Phase 1: autonomous prior authorization core loop (#1)
   d5ea3a7 2026-09-07  Initial commit
 
-$ git log --shortstat cd0891a
+$ git log --shortstat 0a24def
 
-  16 commits  ·  238 file changes  ·  +22,459 insertions  ·  -646 deletions</pre>
-<p class="fcap">Figure 2. The commit history. Each line is a batch of work that was reviewed and merged. Phase 1 was the largest at 9,429 lines.</p>
+  18 commits  ·  260 file changes  ·  +22,739 insertions  ·  -1,215 deletions</pre>
+<p class="fcap">Figure 2. The commit history. Each line is a batch of work that was reviewed and merged. The largest single batch is Phase 1 at 9,896 lines, though two thirds of that is a dependency lockfile rather than code anyone wrote; by hand-written lines the largest is Phase 4.</p>
 
 <h3>4.2 The Tests</h3>
 <p>An automated test is a small program that checks the main program still behaves correctly. There are 148 of them and they all pass. They matter more than the line count, because they are what turns a claim in this report into something a judge can verify with one command.</p>
 
 <pre>$ .venv/bin/python -m pytest
 
-tests/test_appeals.py .............................. [ 20%]
-.............                                        [ 29%]
-tests/test_flow.py ...................               [ 41%]
-tests/test_insure.py ............................... [ 62%]
-...........                                          [ 70%]
-tests/test_persistence.py .......                    [ 75%]
-tests/test_rules.py ...............                  [ 85%]
-tests/test_zk.py ......................              [100%]
+tests/test_appeals.py ...........................................        [ 29%]
+tests/test_flow.py ...................                                   [ 41%]
+tests/test_insure.py ..........................................          [ 70%]
+tests/test_persistence.py .......                                        [ 75%]
+tests/test_rules.py ...............                                      [ 85%]
+tests/test_zk.py ......................                                  [100%]
 
-148 passed, 1 warning in 20.79s</pre>
+148 passed, 1 warning in 23.28s</pre>
 <p class="fcap">Figure 3. The full test suite; each dot is one passing test. Among the things they prove: every decision records the rule that produced it, an unmatched request goes to a human rather than being guessed at, a tampered message is refused, and a real patient identifier never reaches storage.</p>
 
 <h3>4.3 The System Running</h3>
@@ -215,12 +215,12 @@ tests/test_zk.py ......................              [100%]
 
 <p>Both are served by the same build that would go to a customer. The interface is a Next.js application, which is a standard framework for building websites in JavaScript, and it talks to the Python backend over exactly the interface an insurer's software would use. Nothing in either screen is a special demonstration mode.</p>
 
-<p>Two additions merged in the last week are visible here. The first is a deployment health check: if the backend is unreachable or the build is misconfigured, the site says so on screen instead of showing empty counters, because a silent failure in a hospital otherwise looks like an ordinary quiet day. The second is a fallback to a second AI provider behind the assistive summaries, so an outage at one vendor cannot take those features down with it. Neither changes how a decision is made. Both exist so that a failure is visible rather than silent.</p>
+<p>One addition merged in the last week is visible here: a fallback to a second AI provider behind the assistive summaries, so an outage at one vendor cannot take those features down with it. It does not change how a decision is made. A third change is not visible: the operator-facing diagnostics added in #10 were taken back out of the public build before release, leaving a deploy-time guard that fails the build outright if it is configured without its backend address.</p>
 
 <div class="figrow">
   <img src="assets/demo_complete_print.jpg" alt="The six-step demonstration, completed">
   <img src="assets/dashboard_print.jpg" alt="The authorization dashboard">
-  <p class="fcap wide">Figures 4 and 5. <em>Left:</em> the guided demonstration after a single click; all six steps (order, identity, privacy proof, rules, decision, price) run with no further input and finish in 11.1 seconds, and the last of them prices the same operation at five facilities, a spread of $2,475 for identical care. <em>Right:</em> the dashboard, with the request form that sits between the counters and the table left out here. Every row carries the rule that produced it, and the two amber rows are knee replacements whose diagnosis did not match the covered condition; both wait for a human reviewer with the file already assembled.</p>
+  <p class="fcap wide">Figures 4 and 5. <em>Left:</em> the guided demonstration after a single click; all six steps (order, identity, privacy proof, rules, decision, price) run with no further input and finish in 11.0 seconds, and the last of them prices the same operation at all five facilities in the price file, showing the three cheapest; across all five the spread is $2,475 for identical care. <em>Right:</em> the dashboard, with the request form that sits between the counters and the table left out here. Every row carries the rule that produced it, and the two amber rows are knee replacements whose diagnosis did not match the covered condition; both wait for a human reviewer with the file already assembled.</p>
 </div>
 
 <h2>5. Risk Mitigation Protocol</h2>
@@ -340,7 +340,7 @@ tests/test_zk.py ......................              [100%]
 <p>The assumption most likely to be wrong is the number of practices, not the price. If all four of our main assumptions are wrong at once, 2028 revenue is $13.8 million rather than $36.1 million: a smaller company, but still a real one.</p>
 
 <h2>7. How to Check Any of This</h2>
-<p><code>git log --shortstat cd0891a</code> reproduces the build figures in section 4.1, and <code>.venv/bin/python -m pytest</code> reproduces the 148 passing tests in 4.2. Starting the backend and posting one request, with the command in the repository's README, returns the decision, the rule behind it and the confidence: the whole of section 3 in one response. The demonstration at <code>/demo</code> runs the entire path end to end in about eleven seconds, and <code>/audit</code> shows every message the two agents exchanged along the way.</p>
+<p><code>git log --shortstat 0a24def</code> reproduces the build figures in section 4.1, and <code>.venv/bin/python -m pytest</code> reproduces the 148 passing tests in 4.2. Starting the backend and posting one request, with the command in the repository's README, returns the decision, the rule behind it and the confidence: the whole of section 3 in one response. The demonstration at <code>/demo</code> runs the entire path end to end in about eleven seconds, and <code>/audit</code> shows every message the two agents exchanged along the way.</p>
 """
 
 doc = (

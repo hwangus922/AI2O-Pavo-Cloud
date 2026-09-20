@@ -189,7 +189,7 @@ def parse(html_text: str) -> list[Block]:
         out.append(b)
     # splice the figure row back in, in place of the marker paragraph
     idx = next(i for i, b in enumerate(out)
-               if b.kind == "p" and b.runs and "Two additions merged" in b.runs[0][0])
+               if b.kind == "p" and b.runs and "One addition merged" in b.runs[0][0])
     out.insert(idx + 1, Block("figrow", srcs=srcs, cap=widecap))
     return out
 
