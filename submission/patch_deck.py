@@ -26,7 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = "/root/.claude/uploads/c69d7a86-da65-5509-8c7d-5f88c08530e0/f0c4880e-Pavo_Cloud_Updated_Pitch_Deck__1.pdf"
 OUT = os.path.join(HERE, "Pavo_Cloud_Pitch_Deck_corrected.pdf")
 
-BG = (1.0, 0xF9 / 255, 0xF9 / 255)          # #FFF9F9, sampled off the slides
+BG = (1.0, 0xFA / 255, 0xFA / 255)          # #FFFAFA, the deck's own page fill
 INK = (0x3B / 255, 0x35 / 255, 0x35 / 255)  # #3B3535, the deck's body colour
 HEAD = (0x1F / 255, 0x1E / 255, 0x1E / 255)
 BLUE = (0x12 / 255, 0x74 / 255, 0xC4 / 255)
@@ -134,188 +134,109 @@ blank(p, 494, 326, 930, 350)
 write(p, [("Speed:", BOLD), (" Step 1 to step 7 in 88.6ms (median, n=200)", REG)],
       496.35, 341.95, 12.24)
 
-# ============================================== appended financial slides ====
-def new_slide():
+# =================================================== appended slides =========
+# Everything below copies the geometry of the deck's own slides 2 and 6, down
+# to the card rectangles and baselines, so the added slides are the same
+# template rather than a lookalike. Two rules follow from reading the original:
+#
+#   * The deck uses no blue type anywhere. Every number on slide 2, however
+#     large, is #3B3535. The accent is the pale card fill, not the text.
+#   * The deck's own embedded fonts are subsets and are missing "$", "9", "6",
+#     "(" and ")", which is most of what a financials slide is made of. Work
+#     Sans matches the deck's metrics (exactly, at 18.7pt) and has the full
+#     character set, so the added slides are set in it throughout rather than
+#     falling back mid-word to whatever glyph happens to exist.
+
+FONTS = "/mnt/skills/examples/canvas-design/canvas-fonts"
+HEAVY_F = pymupdf.Font(fontfile=f"{FONTS}/WorkSans-Bold.ttf")     # deck "font 1"
+REG_F = pymupdf.Font(fontfile=f"{FONTS}/WorkSans-Regular.ttf")    # deck "font 3"
+
+CARD_FILL = (0xD5 / 255, 0xDC / 255, 0xF6 / 255)   # #D5DCF6
+CARD_EDGE = (0xBB / 255, 0xC2 / 255, 0xDC / 255)   # #BBC2DC
+
+# the deck's own card grid, lifted off slide 6
+COL3 = ((50.0, 327.2), (341.6, 618.8), (633.2, 910.4))
+COL2 = ((50.0, 473.4), (487.1, 910.4))
+
+
+def put(page, text, x, baseline, size, f, colour):
+    tw = pymupdf.TextWriter(page.rect)
+    tw.append((x, baseline), text, font=f, fontsize=size)
+    tw.write_text(page, color=colour)
+
+
+def centred(page, text, cx, baseline, size, f, colour):
+    put(page, text, cx - f.text_length(text, size) / 2, baseline, size, f, colour)
+
+
+def lines(page, text, x, baseline, size, f, colour, width, leading):
+    line, y = "", baseline
+    for w in text.split():
+        trial = (line + " " + w).strip()
+        if f.text_length(trial, size) > width and line:
+            put(page, line, x, y, size, f, colour)
+            line, y = w, y + leading
+        else:
+            line = trial
+    if line:
+        put(page, line, x, y, size, f, colour)
+
+
+def page_shell(title_text, chip_text):
     page = doc.new_page(width=W, height=H)
     page.draw_rect(page.rect, color=None, fill=BG)
+    w = REG_F.text_length(chip_text, 10.8)
+    page.draw_rect(pymupdf.Rect(49.7, 97.2, 49.7 + w + 17.1, 118.8),
+                   color=None, fill=CARD_FILL)
+    put(page, chip_text, 58.3, 110.8, 10.8, REG_F, INK)
+    put(page, title_text, 49.8, 159.1, 36.8, HEAVY_F, HEAD)
     return page
 
 
-def chip(page, text, x=49.8, y=154.4):
-    f = font(BOLD)
-    w = f.text_length(text, 10.8)
-    page.draw_rect(pymupdf.Rect(x, y - 13.6, x + w + 17, y + 4.4),
-                   color=None, fill=CHIP, radius=0.18)
-    tw = pymupdf.TextWriter(page.rect)
-    tw.append((x + 8.5, y), text, font=f, fontsize=10.8)
-    tw.write_text(page, color=INK)
+def card(page, span, y0, y1, big, label, label_w=248):
+    page.draw_rect(pymupdf.Rect(span[0], y0, span[1], y1),
+                   color=CARD_EDGE, fill=CARD_FILL, width=0.5)
+    put(page, big, span[0] + 14.5, y0 + 32.1, 18.7, HEAVY_F, INK)
+    lines(page, label, span[0] + 14.5, y0 + 63.4, 13.7, REG_F, INK, label_w, 22.3)
 
 
-def title(page, text, y=119.8):
-    tw = pymupdf.TextWriter(page.rect)
-    tw.append((49.8, y), text, font=font(HEAVY), fontsize=36.8)
-    tw.write_text(page, color=HEAD)
+# ---- how Pavo makes money: slide 6's card grid, three over two -------------
+p = page_shell("How Pavo Makes Money", "BUSINESS MODEL")
+for span, big, lab in zip(COL3,
+                          ("$3.00", "$400", "$20,000"),
+                          ("per request, to the insurer",
+                           "per practice, per month",
+                           "per insurer, per year")):
+    card(p, span, 192.6, 292.6, big, lab)
+for span, big, lab in zip(COL2,
+                          ("$36.1M", "87%"),
+                          ("2028 revenue, from $1.0M in 2026",
+                           "gross margin by 2028, 31% in year one")):
+    card(p, span, 336.7, 443.3, big, lab, label_w=394)
 
+# ---- what a customer is worth: slide 2's centred stat grid ------------------
+p = page_shell("What a Customer Is Worth", "UNIT ECONOMICS")
+for cx, base, big, lab in (
+        (260.6, 244.9, "$6,699", "to win one customer"),
+        (700.0, 244.9, "$57,533", "back over three years"),
+        (260.6, 368.6, "$8.60", "returned per $1 spent"),
+        (700.0, 368.6, "4 months", "to earn it back")):
+    centred(p, big, cx, base, 46.9, HEAVY_F, INK)
+    centred(p, lab, cx, base + 47.4, 18.7, HEAVY_F, INK)
 
-def heading(page, text, x, y, size=18.7):
-    tw = pymupdf.TextWriter(page.rect)
-    tw.append((x, y), text, font=font(HEAVY), fontsize=size)
-    tw.write_text(page, color=HEAD)
-
-
-def stat(page, num, label, x, y, size=34, lw=190):
-    tw = pymupdf.TextWriter(page.rect)
-    tw.append((x, y), num, font=font(HEAVY), fontsize=size)
-    tw.write_text(page, color=BLUE)
-    wrap(page, label, x, y + 19, 11.5, width=lw, leading=14.5)
-
-
-def row(page, cells, y, size=13.7, bold=False, line=True):
-    fx = BOLD if bold else REG
-    for text, x, align in cells:
-        f = font(fx)
-        cx = x - f.text_length(text, size) if align == "r" else x
-        tw = pymupdf.TextWriter(page.rect)
-        tw.append((cx, y), text, font=f, fontsize=size)
-        tw.write_text(page, color=HEAD if bold else INK)
-    if line:
-        page.draw_line(pymupdf.Point(49.8, y + 8.5), pymupdf.Point(910, y + 8.5),
-                       color=RULE, width=0.5, stroke_opacity=0.35)
-
-
-# ---- slide 11: how Pavo makes money ----------------------------------------
-p = new_slide()
-title(p, "How Pavo Makes Money")
-chip(p, "BUSINESS MODEL")
-for i, (price, what) in enumerate([
-        ("$3.00", "per request, charged to the insurer"),
-        ("$400", "per month, per medical practice"),
-        ("$20,000", "per year, per insurer connection")]):
-    x = 49.8 + i * 293
-    p.draw_rect(pymupdf.Rect(x, 196, x + 264, 262), color=RULE, width=0.5,
-                stroke_opacity=0.5, radius=0.03)
-    tw = pymupdf.TextWriter(p.rect)
-    tw.append((x + 18, 228), price, font=font(HEAVY), fontsize=25)
-    tw.write_text(p, color=BLUE)
-    wrap(p, what, x + 18, 249, 11.5, width=230, leading=14)
-
-COLS = (600, 730, 880)
-row(p, [("Source", 49.8, "l"), ("2026", COLS[0], "r"), ("2027", COLS[1], "r"),
-        ("2028", COLS[2], "r")], 288, size=12.3, bold=True)
-DATA = [("Medical practices served (average)", "55", "330", "1,400"),
-        ("Requests processed", "171,600", "1,647,360", "8,736,000"),
-        ("Fees per request, at $3.00", "$514,800", "$4,942,080", "$26,208,000"),
-        ("Practice subscriptions, at $400/month", "$264,000", "$1,584,000", "$6,720,000"),
-        ("Insurer connection fees, at $20,000/year", "$220,000", "$1,680,000", "$3,200,000")]
-y = 288
-for label, a, b, c in DATA:
-    y += 31
-    row(p, [(label, 49.8, "l"), (a, COLS[0], "r"), (b, COLS[1], "r"),
-            (c, COLS[2], "r")], y, size=12.3)
-y += 31
-p.draw_line(pymupdf.Point(49.8, y - 21), pymupdf.Point(910, y - 21),
-            color=RULE, width=0.7)
-row(p, [("Total revenue", 49.8, "l"), ("$998,800", COLS[0], "r"),
-        ("$8,206,080", COLS[1], "r"), ("$36,128,000", COLS[2], "r")],
-    y, size=12.3, bold=True, line=False)
-wrap(p, "The $3.00 fee is 85-92% below the $15-$40 an insurer spends handling a "
-        "request by hand today, which is what makes the switch easy to justify.",
-     49.8, 508, 11.5, width=860, leading=14)
-
-# ---- slide 12: margin -------------------------------------------------------
-p = new_slide()
-title(p, "What It Costs, and What Is Left")
-chip(p, "MARGIN")
-for i, (n, l) in enumerate([("31%", "gross margin, 2026"),
-                            ("82%", "gross margin, 2027"),
-                            ("87%", "gross margin, 2028")]):
-    stat(p, n, l, 49.8 + i * 293, 250, size=46, lw=240)
-p.draw_line(pymupdf.Point(49.8, 300), pymupdf.Point(910, 300),
-            color=RULE, width=0.5, stroke_opacity=0.5)
-heading(p, "Servers are not the expense", 49.8, 345)
-wrap(p, "Processing one request costs about six hundredths of a cent, because "
-        "the deciding path uses no AI models at all.",
-     49.8, 372, 13.7, width=400, leading=20)
-heading(p, "Clinical staff are", 489.1, 345)
-wrap(p, "Translating each insurer's published rules into the fixed rules the "
-        "software applies is the largest line in every year, and the reason "
-        "margins improve with scale rather than with technology.",
-     489.1, 372, 13.7, width=420, leading=20)
-wrap(p, "Year 1 is 31%, not break-even. Early customers need a great deal of "
-        "hand-holding, and we would rather say so.",
-     49.8, 500, 11.5, width=860, leading=14)
-
-# ---- slide 13: unit economics ----------------------------------------------
-p = new_slide()
-title(p, "Cost to Win a Customer, and What One Is Worth")
-chip(p, "UNIT ECONOMICS")
-wrap(p, "Acquisition cost is what it costs in sales and marketing to sign one "
-        "customer. Lifetime value is the profit that customer produces before "
-        "they leave, stated here over three years, which is deliberately "
-        "conservative.",
-     49.8, 208, 13.7, width=860, leading=20)
-UC = (640, 780, 905)
-row(p, [("Measure", 49.8, "l"), ("Practice", UC[0], "r"), ("Insurer", UC[1], "r"),
-        ("Blended", UC[2], "r")], 272, bold=True)
-for i, (label, a, b, c) in enumerate([
-        ("Cost to acquire one customer", "$6,000", "$22,000", "$6,699"),
-        ("Value over three years", "$58,248", "$51,057", "$57,533"),
-        ("Value per $1 spent acquiring", "$9.70", "$2.30", "$8.60"),
-        ("Months to earn the cost back", "3.5", "15.2", "4.0")]):
-    row(p, [(label, 49.8, "l"), (a, UC[0], "r"), (b, UC[1], "r"), (c, UC[2], "r")],
-        306 + i * 34, line=(i < 3))
-p.draw_rect(pymupdf.Rect(49.8, 452, 910, 520), color=None, fill=CHIP, radius=0.02)
-wrap(p, "Read the insurer column honestly. At $2.30 back per $1 spent and fifteen "
-        "months to recover it, insurer contracts do not pay for themselves as a "
-        "product. We fund them anyway, because signing one insurer makes Pavo "
-        "available to every practice that already submits to it. It is a "
-        "distribution channel, not a profit centre.",
-     66, 476, 12.3, width=828, leading=16)
-
-# ---- slide 14: the ask ------------------------------------------------------
-p = new_slide()
-title(p, "We Are Asking For $8.0 Million")
-chip(p, "THE ASK")
-# cumulative cash: 0, -2.37M end 2026, -5.58M end 2027, +5.65M end 2028
-ax, ay, aw = 70, 330, 380
-p.draw_line(pymupdf.Point(ax - 14, ay), pymupdf.Point(ax + aw + 10, ay),
-            color=RULE, width=0.6)
-pts = [(ax, ay), (ax + aw * 0.31, ay + 52), (ax + aw * 0.64, ay + 96),
-       (ax + aw, ay - 96)]
-for i in range(len(pts) - 1):
-    p.draw_line(pymupdf.Point(*pts[i]), pymupdf.Point(*pts[i + 1]),
-                color=BLUE, width=2.4)
-p.draw_circle(pymupdf.Point(*pts[2]), 4, color=None, fill=BLUE)
-tw = pymupdf.TextWriter(p.rect)
-tw.append((ax - 30, ay + 4), "$0", font=font(REG), fontsize=10)
-for lbl, px in [("2026", pts[1][0] - 14), ("2027", pts[2][0] - 14), ("2028", pts[3][0] - 26)]:
-    tw.append((px, ay + 16), lbl, font=font(REG), fontsize=10)
-tw.write_text(p, color=RULE)
-write(p, [("-$5.58M, late 2027", BOLD)], pts[2][0] - 56, pts[2][1] + 24, 11.5)
-write(p, [("+$5.65M", BOLD)], pts[3][0] - 60, pts[3][1] - 10, 11.5)
-wrap(p, "Cumulative cash. The raise covers the trough with roughly twelve months "
-        "of cushion past breaking even.",
-     49.8, 470, 11.5, width=410, leading=14)
-
-for i, (h, s) in enumerate([
-        ("The clinical rule library", "Our largest cost and the real barrier to a competitor."),
-        ("Security certification", "No insurer signs without it."),
-        ("Closing the gaps we listed", "Provider registry, multi-party ceremony, rule library.")]):
-    yy = 224 + i * 62
-    p.draw_line(pymupdf.Point(500, yy - 15), pymupdf.Point(500, yy + 28),
-                color=BLUE, width=2.6)
-    heading(p, h, 514, yy, size=14.5)
-    wrap(p, s, 514, yy + 20, 11.5, width=396, leading=14)
-wrap(p, "It is not a shopping list. The three largest spending lines across the "
-        "plan, $7.46M of engineering, $5.67M of insurer business development and "
-        "$1.72M of clinical staff encoding coverage rules, come to more than the "
-        "raise on their own, and most of that is paid for out of revenue as it "
-        "arrives.",
-     500, 432, 11.5, width=410, leading=14)
-wrap(p, "If all four of our main assumptions are wrong at once, 2028 revenue is "
-        "$13.8 million rather than $36.1 million: a smaller company, but still a "
-        "real one.",
-     49.8, 516, 11.5, width=860, leading=14)
+# ---- the ask: card grid again, three over two ------------------------------
+p = page_shell("We Are Asking For $8.0 Million", "THE ASK")
+for span, big, lab in zip(COL3,
+                          ("Rule library", "Certification", "The known gaps"),
+                          ("clinical staff encoding each insurer's criteria",
+                           "no insurer signs without it",
+                           "provider registry, ceremony, rule library")):
+    card(p, span, 192.6, 292.6, big, lab)
+for span, big, lab in zip(COL2,
+                          ("$5.58M", "12 months"),
+                          ("deepest point, late 2027",
+                           "of cushion past breaking even")):
+    card(p, span, 336.7, 443.3, big, lab, label_w=394)
 
 doc.save(OUT, garbage=3, deflate=True)
 print(f"wrote {OUT} ({doc.page_count} slides, {os.path.getsize(OUT)//1024} KB)")
