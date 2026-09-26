@@ -42,17 +42,57 @@ export const EMPTY_DEMO_STATE: DemoState = {
   bestFacility: null,
 };
 
+/**
+ * The six steps, and how long each one lingers before the next begins.
+ *
+ * `dwellMs` is pacing, not work. Measured against a warm backend, the actual
+ * work is 139ms for the order, 2.1s for the proof, and under 60ms for each of
+ * the rest — so a flat two-second dwell made more than eighty per cent of the
+ * run an artificial wait.
+ *
+ * It is now set per step, by how much there is to look at. Identity and the
+ * rule engine make no call at all: their panels render from what earlier steps
+ * already fetched, so they only need long enough to register. The proof gets
+ * the longest hold because it is the one panel worth reading. The last step
+ * has no dwell — nothing follows it.
+ */
 export const DEMO_STEPS = [
-  { id: "ehr", title: "EHR trigger", blurb: "A physician places an order." },
+  {
+    id: "ehr",
+    title: "EHR trigger",
+    blurb: "A physician places an order.",
+    dwellMs: 900,
+  },
   {
     id: "identity",
     title: "Identity",
     blurb: "Both agents prove who they are.",
+    dwellMs: 500,
   },
-  { id: "zk", title: "Zero-knowledge", blurb: "Criteria proven, PHI withheld." },
-  { id: "rules", title: "Rule engine", blurb: "A deterministic rule decides." },
-  { id: "decision", title: "Decision", blurb: "The outcome and its audit trail." },
-  { id: "insure", title: "Insure", blurb: "What the patient would actually pay." },
+  {
+    id: "zk",
+    title: "Zero-knowledge",
+    blurb: "Criteria proven, PHI withheld.",
+    dwellMs: 1400,
+  },
+  {
+    id: "rules",
+    title: "Rule engine",
+    blurb: "A deterministic rule decides.",
+    dwellMs: 500,
+  },
+  {
+    id: "decision",
+    title: "Decision",
+    blurb: "The outcome and its audit trail.",
+    dwellMs: 900,
+  },
+  {
+    id: "insure",
+    title: "Insure",
+    blurb: "What the patient would actually pay.",
+    dwellMs: 0,
+  },
 ] as const;
 
 export type DemoStepId = (typeof DEMO_STEPS)[number]["id"];

@@ -23,10 +23,6 @@ import { Container } from "@/components/site/Container";
 import { SCENARIOS } from "@/lib/scenarios";
 import type { Scenario } from "@/lib/scenarios";
 
-// Auto-advance pacing. Six steps at 2s of dwell plus the work itself keeps
-// the whole run comfortably inside the 30-second budget.
-const AUTO_ADVANCE_MS = 2000;
-
 const DEFAULT_PROCEDURE = "27447";
 const DEFAULT_DIAGNOSIS = "M17.11";
 const DEFAULT_PATIENT_AGE = 42;
@@ -145,8 +141,12 @@ export default function DemoPage() {
       if (!result || !mounted.current) return;
       current = result;
 
-      if (index < DEMO_STEPS.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, AUTO_ADVANCE_MS));
+      // Pacing lives with each step in lib/demo.ts, so a panel that renders
+      // from data already fetched does not sit there for as long as one the
+      // viewer is meant to read.
+      const dwell = DEMO_STEPS[index].dwellMs;
+      if (index < DEMO_STEPS.length - 1 && dwell > 0) {
+        await new Promise((resolve) => setTimeout(resolve, dwell));
         if (!mounted.current) return;
       }
     }
