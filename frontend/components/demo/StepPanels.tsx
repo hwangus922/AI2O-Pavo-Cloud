@@ -141,6 +141,34 @@ export function IdentityStep({ state }: { state: DemoState }) {
 }
 
 /** Step 3 — the zero-knowledge proof, explained for a non-cryptographer. */
+/**
+ * What the zero-knowledge step shows while the proof is still being computed.
+ *
+ * ZkStep cannot stand in here: with no proof yet, `zkAvailable` is still false
+ * and it would render "circuit artifacts are not built" — an error message,
+ * and a wrong one. This says what is actually happening, which on a small
+ * instance is the longest single thing the demo does and the one most worth
+ * waiting for.
+ */
+export function ZkProving() {
+  return (
+    <div className="pavo-card p-8 text-center">
+      <p className="text-sm font-medium">Generating the proof</p>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-navy-600">
+        A groth16 proof over bn128, computed against the committed circuit.
+        The age, the diagnosis code and the deductible go into it; none of
+        them come out.
+      </p>
+      <div
+        aria-hidden
+        className="mx-auto mt-5 h-1 w-40 overflow-hidden rounded-full bg-slate-200"
+      >
+        <div className="h-full w-1/3 animate-pulse rounded-full bg-electric-500" />
+      </div>
+    </div>
+  );
+}
+
 export function ZkStep({ state }: { state: DemoState }) {
   if (!state.zkAvailable) {
     return (
