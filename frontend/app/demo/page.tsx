@@ -18,6 +18,7 @@ import {
   runEhrStep,
   runInsureStep,
   runZkStep,
+  runZkVerification,
   type DemoState,
 } from "@/lib/demo";
 import { Container } from "@/components/site/Container";
@@ -75,6 +76,34 @@ export default function DemoPage() {
    * promise that is usually already settled.
    */
   const zkProof = useRef<Promise<Partial<DemoState>> | null>(null);
+
+  /**
+   * Check the proof once it is on screen, not before.
+   *
+   * Keyed on the proof rather than fired inside the step, so it cannot race
+   * the step's own state commit and get overwritten by it. Nothing later in
+   * the run reads the result — it only turns the badge on the panel that is
+   * already showing.
+   */
+  useEffect(() => {
+    const proof = state.zk;
+    if (!proof || state.zkVerification) return;
+
+    let cancelled = false;
+    runZkVerification(proof)
+      .then((patch) => {
+        if (!cancelled && mounted.current) {
+          setState((previous) => ({ ...previous, ...patch }));
+        }
+      })
+      .catch(() => {
+        // The badge stays off. The proof itself is already shown.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.zk, state.zkVerification]);
 
   useEffect(() => {
     mounted.current = true;

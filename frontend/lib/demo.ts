@@ -73,7 +73,7 @@ export const DEMO_STEPS = [
     id: "zk",
     title: "Zero-knowledge",
     blurb: "Criteria proven, PHI withheld.",
-    dwellMs: 1400,
+    dwellMs: 1100,
   },
   {
     id: "rules",
@@ -133,7 +133,14 @@ export async function runEhrStep(
   };
 }
 
-/** Step 3: prove the patient criteria, then verify the proof. */
+/**
+ * Step 3: prove the patient criteria.
+ *
+ * Verification is deliberately not part of this. The backend shells out to
+ * node once per call, so proving and verifying are two process spawns — and
+ * on a small instance a spawn is not cheap. Nothing after this step reads the
+ * verification, so holding the panel for it bought nothing.
+ */
 export async function runZkStep(
   state: DemoState,
   patientAge: number
@@ -150,13 +157,26 @@ export async function runZkStep(
     deductible_met: true,
   });
 
-  const verification = await verifyZkProof({
-    proof: proof.proof,
-    public_signals: proof.public_signals,
-    proof_id: proof.proof_id,
-  });
+  return { zk: proof, zkAvailable: true };
+}
 
-  return { zk: proof, zkVerification: verification, zkAvailable: true };
+/**
+ * Check the proof the payer just received.
+ *
+ * Runs once the proof is already on screen, so the "verified" badge appears a
+ * beat after the proof rather than the whole panel waiting on it. That is
+ * also the truer order: the payer receives a proof, then checks it.
+ */
+export async function runZkVerification(
+  proof: ZkProofResult
+): Promise<Partial<DemoState>> {
+  return {
+    zkVerification: await verifyZkProof({
+      proof: proof.proof,
+      public_signals: proof.public_signals,
+      proof_id: proof.proof_id,
+    }),
+  };
 }
 
 /** Step 6: price the same procedure through Insure. */
