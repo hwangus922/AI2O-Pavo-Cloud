@@ -8,6 +8,7 @@ import {
   IdentityStep,
   InsureStep,
   RulesStep,
+  ZkProving,
   ZkStep,
 } from "@/components/demo/StepPanels";
 import {
@@ -38,6 +39,8 @@ export default function DemoPage() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [busy, setBusy] = useState(false);
   const [autoRun, setAutoRun] = useState(false);
+  // True only while step 3 is waiting on a proof that has not landed yet.
+  const [proving, setProving] = useState(false);
   const [elapsed, setElapsed] = useState<number | null>(null);
 
   // Which preset the current codes correspond to, if any. Typing a code by
@@ -56,6 +59,23 @@ export default function DemoPage() {
   const mounted = useRef(true);
   const startedAt = useRef<number>(0);
 
+  /**
+   * The zero-knowledge proof, started early.
+   *
+   * Every step does its work and only then reveals its panel, which means a
+   * step's latency is spent with the *previous* step on screen. For five of
+   * the six that is invisible — they cost milliseconds. The proof does not:
+   * it is a groth16 prove over bn128, around a second on a developer machine
+   * and far longer on a small shared instance. All of it was being spent
+   * looking at the identity panel.
+   *
+   * Nothing about the proof depends on steps 2 or 3 having run: it needs only
+   * the request that step 1 returns. So it starts the moment step 1 lands and
+   * computes while identity and its dwell play out, and step 3 awaits a
+   * promise that is usually already settled.
+   */
+  const zkProof = useRef<Promise<Partial<DemoState>> | null>(null);
+
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -71,6 +91,7 @@ export default function DemoPage() {
    * that was asleep is usually awake by the second press.
    */
   const stop = useCallback(() => {
+    setProving(false);
     setPhase("idle");
     setAutoRun(false);
     setBusy(false);
@@ -85,12 +106,36 @@ export default function DemoPage() {
         let patch: Partial<DemoState> = {};
 
         switch (DEMO_STEPS[index].id) {
-          case "ehr":
+          case "ehr": {
             patch = await runEhrStep(procedureCode.trim(), diagnosisCode.trim());
+            const afterEhr = { ...current, ...patch };
+            const pending = runZkStep(afterEhr, DEFAULT_PATIENT_AGE);
+            // Keep a rejection from going unhandled in the gap before step 3
+            // awaits it. The awaited promise still rejects, so a real failure
+            // stops the run exactly as it did before.
+            pending.catch(() => {});
+            zkProof.current = pending;
             break;
-          case "zk":
-            patch = await runZkStep(current, DEFAULT_PATIENT_AGE);
+          }
+          case "zk": {
+            // Stepping through by hand can reach this without step 1 having
+            // started one.
+            const pending =
+              zkProof.current ?? runZkStep(current, DEFAULT_PATIENT_AGE);
+            zkProof.current = null;
+            // Reveal this step before awaiting, so a proof that outlasts its
+            // head start is waited for on the zero-knowledge panel rather
+            // than behind the identity one. When it has already landed the
+            // await settles in a microtask and nothing flashes.
+            setStepIndex(index);
+            setProving(true);
+            try {
+              patch = await pending;
+            } finally {
+              if (mounted.current) setProving(false);
+            }
             break;
+          }
           case "decision":
             patch = await refreshTrail(current);
             break;
@@ -130,6 +175,8 @@ export default function DemoPage() {
     setState(EMPTY_DEMO_STATE);
     setStepIndex(-1);
     setElapsed(null);
+    setProving(false);
+    zkProof.current = null;
     setPhase("running");
     setAutoRun(true);
     startedAt.current = Date.now();
@@ -317,7 +364,9 @@ export default function DemoPage() {
 
           {activeStep.id === "ehr" ? <EhrStep state={state} /> : null}
           {activeStep.id === "identity" ? <IdentityStep state={state} /> : null}
-          {activeStep.id === "zk" ? <ZkStep state={state} /> : null}
+          {activeStep.id === "zk" ? (
+            proving ? <ZkProving /> : <ZkStep state={state} />
+          ) : null}
           {activeStep.id === "rules" ? <RulesStep state={state} /> : null}
           {activeStep.id === "decision" ? <DecisionStep state={state} /> : null}
           {activeStep.id === "insure" ? <InsureStep state={state} /> : null}
